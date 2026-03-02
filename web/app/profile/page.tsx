@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -111,6 +111,8 @@ const INITIAL_STATE: UserProfile = {
   publications: [{ title: "", journal: "", date: "", link: "", description: "" }]
 };
 
+const DRAFT_KEY = "profileDraft";
+
 export default function ProfilePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -118,6 +120,44 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [formData, setFormData] = useState<UserProfile>(INITIAL_STATE);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const initialLoadDone = useRef(false);
+  const autoSaveTimer = useRef<NodeJS.Timeout | null>(null);
+
+  // ── Auto-save draft to localStorage on every change (debounced 1s) ──────
+  const saveDraft = useCallback((data: UserProfile) => {
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+    } catch { /* localStorage full — ignore silently */ }
+  }, []);
+
+  useEffect(() => {
+    // Don't auto-save during initial load
+    if (!initialLoadDone.current) return;
+
+    setHasUnsavedChanges(true);
+
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    autoSaveTimer.current = setTimeout(() => {
+      saveDraft(formData);
+    }, 1000); // 1 second debounce
+
+    return () => {
+      if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    };
+  }, [formData, saveDraft]);
+
+  // ── Warn before leaving with unsaved changes ──────────────────────────────
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [hasUnsavedChanges]);
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
@@ -126,16 +166,24 @@ export default function ProfilePage() {
           .then(res => res.json())
           .then(data => {
               let profile = data.profile;
+              
+              // Check for local draft (user may have unsaved work)
+              const draft = localStorage.getItem(DRAFT_KEY);
+              const savedProfile = localStorage.getItem("userProfile");
+              
               if (!profile) {
-                  const local = localStorage.getItem("userProfile");
-                  if (local) profile = JSON.parse(local);
+                  if (draft) {
+                      try { profile = JSON.parse(draft); } catch { /* ignore */ }
+                  } else if (savedProfile) {
+                      try { profile = JSON.parse(savedProfile); } catch { /* ignore */ }
+                  }
               }
 
               if (profile) {
                    const formattedSkills = {
-                       technical: Array.isArray(profile.skills?.technical) ? profile.skills.technical.join(", ") : "",
-                       tools: Array.isArray(profile.skills?.tools) ? profile.skills.tools.join(", ") : "",
-                       soft: Array.isArray(profile.skills?.soft) ? profile.skills.soft.join(", ") : "",
+                       technical: Array.isArray(profile.skills?.technical) ? profile.skills.technical.join(", ") : (profile.skills?.technical || ""),
+                       tools: Array.isArray(profile.skills?.tools) ? profile.skills.tools.join(", ") : (profile.skills?.tools || ""),
+                       soft: Array.isArray(profile.skills?.soft) ? profile.skills.soft.join(", ") : (profile.skills?.soft || ""),
                    };
                    
                    const formattedEducation = profile.education?.map((e: Education) => ({
@@ -163,6 +211,9 @@ export default function ProfilePage() {
                        personalInfo: { ...prev.personalInfo, email: session?.user?.email || "", fullName: session?.user?.name || "" }
                    }));
               }
+              
+              // Mark initial load as done AFTER setting form data
+              setTimeout(() => { initialLoadDone.current = true; }, 100);
               setLoading(false);
           })
           .catch(console.error);
@@ -197,10 +248,14 @@ export default function ProfilePage() {
           });
           
           if (res.ok) {
+            // Clear draft — server now has the latest data
+            localStorage.removeItem(DRAFT_KEY);
+            setHasUnsavedChanges(false);
             setSaved(true);
             setTimeout(() => setSaved(false), 3000);
           } else {
               console.warn("API Failed, used Local Storage");
+              setHasUnsavedChanges(false);
               setSaved(true);
               setTimeout(() => setSaved(false), 3000);
           }
@@ -280,7 +335,11 @@ export default function ProfilePage() {
                           </span>
                         )}
                         <span className="text-slate-700">•</span>
-                        <span>Auto-saved locally</span>
+                        {hasUnsavedChanges ? (
+                          <span className="text-amber-400/80 animate-pulse">Unsaved changes (draft saved)</span>
+                        ) : (
+                          <span>All changes saved</span>
+                        )}
                     </div>
                   </div>
                 </div>

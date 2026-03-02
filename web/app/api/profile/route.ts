@@ -56,12 +56,14 @@ export async function POST(req: Request) {
         
         const profileData = {
            email: cleanEmail,
+           isLocked: data.isLocked || false,
            personalInfo: data.personalInfo,
            experience: data.experience,
            education: data.education,
            skills: data.skills,
            projects: data.projects,
-           certifications: data.certifications || [], // handle new fields
+           achievements: data.achievements || [],
+           certifications: data.certifications || [],
            publications: data.publications || [],
            updatedAt: new Date().toISOString()
         };
