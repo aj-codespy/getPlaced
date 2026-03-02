@@ -1,0 +1,141 @@
+%-------------------------
+% Resume in Latex
+% Tech Template - Modern, Tech-Focused, Two-Tone Header, Clean Grid
+%------------------------
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{geometry}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+% Margins
+\geometry{left=0.6in, right=0.6in, top=0.6in, bottom=0.6in}
+
+\pagestyle{empty}
+
+% Colors
+\definecolor{primary}{RGB}{30, 64, 175} % Blue
+\definecolor{headertext}{RGB}{20, 20, 20}
+\definecolor{PRIMARY}{RGB}{30, 64, 175}
+
+% Section Titles
+\titleformat{\section}
+  {\Large\bfseries\color{primary}\uppercase} 
+  {} 
+  {0em} 
+  {} 
+  [\titlerule]
+
+\titlespacing{\section}{0pt}{12pt}{8pt}
+
+\begin{document}
+
+% --- HEADER ---
+\begin{center}
+    {\Huge \bfseries \VAR{data.personalInfo.fullName}} \\ \vspace{4pt}
+    \BLOCK{if data.personalInfo.summary}
+    {\large \color{gray} \VAR{data.personalInfo.summary}} \\ \vspace{6pt}
+    \BLOCK{endif}
+    
+    \small
+    \href{mailto:\VAR{data.personalInfo.email}}{\VAR{data.personalInfo.email}} \quad | \quad 
+    \VAR{data.personalInfo.phone} \quad | \quad 
+    \VAR{data.personalInfo.location} \\
+    \BLOCK{if data.personalInfo.github} \href{\VAR{data.personalInfo.github}}{GitHub: \VAR{data.personalInfo.github}} \quad | \quad \BLOCK{endif}
+    \BLOCK{if data.personalInfo.linkedin} \href{\VAR{data.personalInfo.linkedin}}{LinkedIn: \VAR{data.personalInfo.linkedin}} \BLOCK{endif}
+\end{center}
+
+\vspace{10pt}
+
+% --- SKILLS (Top for Tech) ---
+\BLOCK{if data.skills}
+\section{Technical Skills}
+\noindent
+\textbf{Skills:} \VAR{data.skills|join(', ')}
+\BLOCK{endif}
+
+% --- PROJECTS (High Priority for Freshers) ---
+\BLOCK{if data.projects}
+\section{Projects}
+\BLOCK{for proj in data.projects}
+    \noindent
+    \textbf{\large \VAR{proj.title}} \hfill \BLOCK{if proj.link} \href{\VAR{proj.link}}{[Source Code]} \BLOCK{endif} \\
+    {\small \color{gray} \textit{\VAR{proj.techStack|join(', ')}}}
+    \begin{itemize}[leftmargin=15pt, itemsep=1pt]
+        \item \small \VAR{proj.description}
+    \end{itemize}
+    \BLOCK{if proj.bullets}
+    \begin{itemize}[leftmargin=1.5em]
+        \BLOCK{for bullet in proj.bullets}
+        \item \small \VAR{bullet}
+        \BLOCK{endfor}
+    \end{itemize}
+    \BLOCK{endif}
+    \vspace{6pt}
+\BLOCK{endfor}
+\BLOCK{endif}
+
+% --- EXPERIENCE ---
+\BLOCK{if data.experience}
+\section{Experience}
+\BLOCK{for exp in data.experience}
+    \noindent
+    \textbf{\VAR{exp.role}} \hfill \VAR{exp.startDate} -- \VAR{exp.endDate} \\
+    \textit{\VAR{exp.company}}\BLOCK{if exp.location}, \VAR{exp.location}\BLOCK{endif}
+    \begin{itemize}[leftmargin=15pt, itemsep=1pt]
+        \BLOCK{for bullet in exp.bullets}
+        \item \small \VAR{bullet}
+        \BLOCK{endfor}
+    \end{itemize}
+    \vspace{6pt}
+\BLOCK{endfor}
+\BLOCK{endif}
+
+% --- EDUCATION ---
+\BLOCK{if data.education}
+\section{Education}
+\BLOCK{for edu in data.education}
+    \noindent
+    \textbf{\VAR{edu.institution}} \hfill \VAR{edu.endDate} \\
+    \VAR{edu.degree} \hfill \BLOCK{if edu.score} GPA: \VAR{edu.score} \BLOCK{endif} \\
+    \BLOCK{if edu.coursework}
+    {\footnotesize \textit{CS Core: \VAR{edu.coursework}}}
+    \BLOCK{endif}
+    \vspace{6pt}
+\BLOCK{endfor}
+\BLOCK{endif}
+
+% --- ACHIEVEMENTS ---
+\BLOCK{if data.achievements}
+\section{Achievements}
+\begin{itemize}[leftmargin=15pt]
+\BLOCK{for ach in data.achievements}
+    \item \small \VAR{ach}
+\BLOCK{endfor}
+\end{itemize}
+\BLOCK{endif}
+
+% --- CERTIFICATIONS ---
+\BLOCK{if data.certifications}
+\section{Certifications}
+\begin{itemize}[leftmargin=15pt]
+\BLOCK{for cert in data.certifications}
+    \item \small \VAR{cert}
+\BLOCK{endfor}
+\end{itemize}
+\BLOCK{endif}
+
+% --- PUBLICATIONS ---
+\BLOCK{if data.publications}
+\section{Publications}
+\begin{enumerate}[leftmargin=*, label={[\arabic*]}]
+\BLOCK{for pub in data.publications}
+    \item \small \VAR{pub.title}. \textit{\VAR{pub.journal}}. \VAR{pub.date}.
+\BLOCK{endfor}
+\end{enumerate}
+\BLOCK{endif}
+
+\end{document}

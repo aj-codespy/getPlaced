@@ -1,0 +1,177 @@
+%-------------------------
+% Resume in Latex
+% Creative Template (Dark Sidebar)
+%------------------------
+
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[scaled]{helvet}
+\usepackage{geometry}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{eso-pic} % For background sidebar
+\usepackage[absolute,overlay]{textpos} % For absolute positioning of sidebar text
+
+% Colors
+\definecolor{darkbg}{RGB}{30,30,35} % Approximating Gray-900
+\definecolor{purple600}{RGB}{147,51,234}
+\definecolor{textgray}{RGB}{75,85,99}
+\definecolor{lightgray}{RGB}{209,213,219}
+
+% Font
+\renewcommand{\familydefault}{\sfdefault}
+
+% Margins for the MAIN CONTENT (Right 2/3)
+\geometry{left=8.5cm, right=1.5cm, top=1.5cm, bottom=1.5cm}
+
+% Remove page numbers
+\pagestyle{empty}
+
+% Section Commands (Main Content)
+\titleformat{\section}{
+  \color{black}\Large\bfseries
+}{}{0em}{}[\color{purple600}\titlerule \vspace{5pt}]
+
+\titlespacing{\section}{0pt}{12pt}{8pt}
+
+\begin{document}
+
+% --- SIDEBAR BACKGROUND ---
+\AddToShipoutPictureBG{
+    \color{darkbg}
+    \AtPageLowerLeft{\rule{7.5cm}{\paperheight}} % 1/3 width sidebar
+}
+
+% --- SIDEBAR CONTENT (Absolute Positioning) ---
+\begin{textblock*}{6.5cm}(0.5cm, 1.5cm) % Width 6.5cm, starting at 0.5cm, 1.5cm
+    \color{white}
+    \raggedright
+    
+    % Initials Circle (Simulated)
+    \begin{center}
+        \colorbox{gray}{\parbox[c][2cm][c]{2cm}{\centering \Huge \bfseries \VAR{data.personalInfo.fullName[:1]}}}
+    \end{center}
+    \vspace{0.5cm}
+    
+    % Name
+    {\Huge \bfseries \uppercase{\VAR{data.personalInfo.fullName}}}
+    \vspace{0.2cm}
+    
+    % Location
+    {\small \color{lightgray} \VAR{data.personalInfo.location}}
+    \vspace{1cm}
+    
+    % Contact
+    {\small
+        \textbf{\color{purple600} Contact} \\ \vspace{2pt}
+        \VAR{data.personalInfo.email} \\ \vspace{2pt}
+        \VAR{data.personalInfo.phone} \\ \vspace{2pt}
+        \VAR{data.personalInfo.linkedin}
+    }
+    \vspace{1cm}
+    
+    % Skills
+    \BLOCK{if data.skills}
+    {\small
+        \textbf{\color{purple600} Skills} \\ \vspace{4pt}
+        \BLOCK{for skill in data.skills}
+             \colorbox{black}{\textcolor{white}{\footnotesize \VAR{skill}}} \hspace{1pt}
+        \BLOCK{endfor}
+    }
+    \vspace{1cm}
+    \BLOCK{endif}
+    
+    % Education (Sidebar)
+    \BLOCK{if data.education}
+    {\small
+        \textbf{\color{purple600} Education} \\ \vspace{4pt}
+        \BLOCK{for edu in data.education}
+            \textbf{\VAR{edu.institution}} \\
+            {\footnotesize \color{lightgray} \VAR{edu.degree}} \\
+            {\scriptsize \textit{\VAR{edu.endDate}}} \\
+            \vspace{4pt}
+        \BLOCK{endfor}
+    }
+    \BLOCK{endif}
+
+\end{textblock*}
+
+
+% --- MAIN CONTENT (Right Side) ---
+
+% Summary
+\BLOCK{if data.personalInfo.summary}
+\section{Profile}
+\small \color{textgray} \VAR{data.personalInfo.summary}
+\vspace{0.6cm}
+\BLOCK{endif}
+
+% Experience
+\BLOCK{if data.experience}
+\section{Experience}
+\BLOCK{for exp in data.experience}
+    \noindent
+    \textbf{\large \color{black} \VAR{exp.company}} \hfill {\small \color{purple600} \textbf{\VAR{exp.startDate} -- \VAR{exp.endDate}}} \\
+    {\small \textit{\color{textgray} \VAR{exp.role}}}
+    
+    \begin{itemize}[leftmargin=1.2em, nosep, label={\color{purple600}\small\textbullet}]
+        \BLOCK{for bullet in exp.bullets}
+        \item \small \color{textgray} \VAR{bullet}
+        \BLOCK{endfor}
+    \end{itemize}
+    \vspace{0.5cm}
+\BLOCK{endfor}
+\BLOCK{endif}
+
+% Projects
+\BLOCK{if data.projects}
+\section{Projects}
+\BLOCK{for proj in data.projects}
+    \noindent
+    \textbf{\color{black} \VAR{proj.title}} \BLOCK{if proj.link} \href{\VAR{proj.link}}{\color{purple600} \footnotesize [Link]} \BLOCK{endif} \hfill {\small \color{purple600} \VAR{proj.role}} \\
+    {\small \color{textgray} \textit{\VAR{proj.techStack|join(', ')}}} \\
+    {\small \color{textgray} \VAR{proj.description}}
+    \BLOCK{if proj.bullets}
+    \begin{itemize}[leftmargin=1.5em]
+        \BLOCK{for bullet in proj.bullets}
+        \item \small \VAR{bullet}
+        \BLOCK{endfor}
+    \end{itemize}
+    \BLOCK{endif}
+    \vspace{0.4cm}
+\BLOCK{endfor}
+\BLOCK{endif}
+
+% Achievements
+\BLOCK{if data.achievements}
+\section{Achievements}
+\begin{itemize}[leftmargin=1.2em, nosep, label={\color{purple600}\small\textbullet}]
+    \BLOCK{for ach in data.achievements}
+    \item \small \color{textgray} \VAR{ach}
+    \BLOCK{endfor}
+\end{itemize}
+\BLOCK{endif}
+
+% Certifications
+\BLOCK{if data.certifications}
+\section{Certifications}
+\begin{itemize}[leftmargin=1.2em, nosep, label={\color{purple600}\small\textbullet}]
+    \BLOCK{for cert in data.certifications}
+    \item \small \color{textgray} \VAR{cert}
+    \BLOCK{endfor}
+\end{itemize}
+\BLOCK{endif}
+
+% Publications
+\BLOCK{if data.publications}
+\section{Publications}
+\BLOCK{for pub in data.publications}
+    \noindent
+    {\small \color{textgray} \textbf{\VAR{pub.title}}. \textit{\VAR{pub.journal}}. \VAR{pub.date}.}
+    \vspace{4pt}
+\BLOCK{endfor}
+\BLOCK{endif}
+
+\end{document}

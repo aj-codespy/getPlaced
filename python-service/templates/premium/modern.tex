@@ -1,0 +1,175 @@
+%-------------------------
+% Resume in Latex
+% Modern Template
+%------------------------
+
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[scaled]{helvet} 
+\usepackage{geometry}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{multicol}
+\usepackage{tabularx}
+
+% Colors
+\definecolor{blue600}{RGB}{37,99,235}
+\definecolor{blue900}{RGB}{30,58,138}
+\definecolor{gray600}{RGB}{75,85,99}
+\definecolor{gray100}{RGB}{209,213,219}
+
+% Uppercase aliases to prevent xcolor errors when using \uppercase
+\definecolor{BLUE600}{RGB}{37,99,235}
+\definecolor{BLUE900}{RGB}{30,58,138}
+\definecolor{GRAY600}{RGB}{75,85,99}
+\definecolor{GRAY100}{RGB}{209,213,219}
+
+% Font
+\renewcommand{\familydefault}{\sfdefault}
+
+% Margins
+\geometry{left=1.5cm, right=1.5cm, top=1.5cm, bottom=1.5cm}
+
+% Remove page numbers
+\pagestyle{empty}
+
+% Section Commands
+\titleformat{\section}{
+  \color{blue900}\Large\bfseries\uppercase
+}{}{0em}{}[\titleline{\color{blue900}\titlerule}]
+
+\titlespacing{\section}{0pt}{12pt}{8pt}
+
+\begin{document}
+
+% HEADER
+\begin{minipage}[b]{0.6\textwidth}
+    {\fontsize{30}{36}\selectfont \textbf{\color{blue900}\VAR{data.personalInfo.fullName}}} \\
+    \vspace{4pt}
+    {\Large \color{blue600} \VAR{data.personalInfo.location}}
+\end{minipage}
+\hfill
+\begin{minipage}[b]{0.35\textwidth}
+    \raggedleft
+    \small \color{gray600}
+    \VAR{data.personalInfo.email} \\
+    \VAR{data.personalInfo.phone} \\
+    \VAR{data.personalInfo.linkedin}
+\end{minipage}
+
+\vspace{0.5cm}
+{\color{blue600}\hrule height 2pt}
+\vspace{0.5cm}
+
+% SUMMARY
+\BLOCK{if data.personalInfo.summary}
+\colorbox{gray100!30}{
+    \begin{minipage}{\dimexpr\textwidth-2\fboxsep}
+        \small \color{gray600} \VAR{data.personalInfo.summary}
+    \end{minipage}
+}
+\vspace{0.5cm}
+\BLOCK{endif}
+
+% EXPERIENCE
+\BLOCK{if data.experience}
+\section{Experience}
+\BLOCK{for exp in data.experience}
+    \begin{minipage}{\textwidth}
+        % Simulating the left border with a vertical bar in a tabular or just indentation
+        \begin{tabular}{@{\color{blue600}\vrule width 2pt \hspace{6pt}}p{0.96\textwidth}}
+            \textbf{\large \color{gray600} \VAR{exp.role}} \hfill {\footnotesize \color{blue600} \textbf{\VAR{exp.startDate} -- \VAR{exp.endDate}}} \\
+            {\small \textbf{\VAR{exp.company}}} \\
+            \begin{itemize}[leftmargin=1.5em, nosep, label={\color{gray600}\small\textbullet}]
+                \BLOCK{for bullet in exp.bullets}
+                \item \small \color{gray600} \VAR{bullet}
+                \BLOCK{endfor}
+            \end{itemize}
+        \end{tabular}
+    \end{minipage}
+    \vspace{0.4cm}
+\BLOCK{endfor}
+\BLOCK{endif}
+
+% PROJECTS
+\BLOCK{if data.projects}
+\section{Projects}
+\BLOCK{for proj in data.projects}
+    \begin{minipage}{\textwidth}
+        \begin{tabular}{@{\color{blue600}\vrule width 2pt \hspace{6pt}}p{0.96\textwidth}}
+            \textbf{\large \color{gray600} \VAR{proj.title}} \BLOCK{if proj.link} \href{\VAR{proj.link}}{\footnotesize \color{blue600} [Link]} \BLOCK{endif} \hfill {\footnotesize \color{blue600} \textbf{\VAR{proj.role}}} \\
+            {\small \textit{\VAR{proj.techStack|join(', ')}}} \\
+            {\small \color{gray600} \VAR{proj.description}}
+        \end{tabular}
+    \end{minipage}
+    \BLOCK{if proj.bullets}
+    \begin{itemize}[leftmargin=1.5em]
+        \BLOCK{for bullet in proj.bullets}
+        \item \small \VAR{bullet}
+        \BLOCK{endfor}
+    \end{itemize}
+    \BLOCK{endif}
+    \vspace{0.4cm}
+\BLOCK{endfor}
+\BLOCK{endif}
+
+% EDUCATION & SKILLS (2 Columns)
+\vspace{0.2cm}
+\begin{minipage}[t]{0.48\textwidth}
+    \BLOCK{if data.education}
+    \section{Education}
+    \BLOCK{for edu in data.education}
+        \textbf{\color{gray600}\VAR{edu.institution}} \\
+        {\small \color{blue600} \VAR{edu.degree}} \\
+        {\footnotesize \color{gray600} \VAR{edu.startDate} -- \VAR{edu.endDate}} \\
+        \vspace{0.2cm}
+    \BLOCK{endfor}
+    \BLOCK{endif}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+    \BLOCK{if data.skills}
+    \section{Skills}
+    \raggedright
+    \BLOCK{for skill in data.skills}
+        \colorbox{blue600!10}{\textcolor{blue900}{\textbf{\small \VAR{skill}}}} \hspace{2pt}
+        % Allow new line
+    \BLOCK{endfor}
+    \BLOCK{endif}
+\end{minipage}
+
+\vspace{0.3cm}
+
+% ACHIEVEMENTS
+\BLOCK{if data.achievements}
+\section{Achievements}
+\begin{itemize}[leftmargin=1.5em, nosep, label={\color{blue600}\small\textbullet}]
+    \BLOCK{for ach in data.achievements}
+    \item \small \color{gray600} \VAR{ach}
+    \BLOCK{endfor}
+\end{itemize}
+\BLOCK{endif}
+
+% CERTIFICATIONS
+\BLOCK{if data.certifications}
+\section{Certifications}
+\begin{itemize}[leftmargin=1.5em, nosep, label={\color{blue600}\small\textbullet}]
+    \BLOCK{for cert in data.certifications}
+    \item \small \color{gray600} \VAR{cert}
+    \BLOCK{endfor}
+\end{itemize}
+\BLOCK{endif}
+
+% PUBLICATIONS
+\BLOCK{if data.publications}
+\section{Publications}
+\begin{enumerate}[leftmargin=*, label={[\arabic*]}]
+    \BLOCK{for pub in data.publications}
+    \item \small \color{gray600} \textbf{\VAR{pub.title}}. \textit{\VAR{pub.journal}}. \VAR{pub.date}.
+    \BLOCK{endfor}
+\end{enumerate}
+\BLOCK{endif}
+
+\end{document}

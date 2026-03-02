@@ -1,0 +1,164 @@
+%-------------------------
+% Resume in Latex
+% Classic Template
+%------------------------
+
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{enumitem}
+\usepackage[pdftex]{hyperref}
+\usepackage{fancyhdr}
+\usepackage{mathptmx} % Times New Roman
+
+\pagestyle{fancy}
+\fancyhf{} 
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Margins
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.5in}
+\addtolength{\textheight}{1.0in}
+
+\urlstyle{same}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Section Formatting
+\titleformat{\section}{
+  \vspace{-10pt}\scshape\raggedright\large\bfseries
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+\begin{document}
+
+% --- HEADER ---
+\begin{center}
+    {\Huge \bfseries \uppercase{\VAR{data.personalInfo.fullName}}} \\ \vspace{5pt}
+    \begin{tabular}{c c c c}
+        \VAR{data.personalInfo.email} & $|$ & \VAR{data.personalInfo.phone} & $|$ \VAR{data.personalInfo.location} \\
+        \multicolumn{4}{c}{\VAR{data.personalInfo.linkedin}}
+    \end{tabular}
+    \vspace{8pt}
+    \hrule
+\end{center}
+
+\vspace{0.3cm}
+
+% --- SUMMARY ---
+\BLOCK{if data.personalInfo.summary}
+\section{Summary}
+\small{\VAR{data.personalInfo.summary}}
+\vspace{0.4cm}
+\BLOCK{endif}
+
+% --- EXPERIENCE ---
+\BLOCK{if data.experience}
+\section{Experience}
+\begin{itemize}[leftmargin=0in, label={}]
+    \BLOCK{for exp in data.experience}
+    \item
+      \begin{tabular*}{0.98\textwidth}{l@{\extracolsep{\fill}}r}
+        \textbf{\VAR{exp.company}} & \VAR{exp.startDate} -- \VAR{exp.endDate} \\
+        \textit{\small \VAR{exp.role}} & 
+      \end{tabular*}
+      \begin{itemize}[leftmargin=1.5em]
+        \BLOCK{for bullet in exp.bullets}
+        \item \small \VAR{bullet}
+        \BLOCK{endfor}
+      \end{itemize}
+      \vspace{5pt}
+    \BLOCK{endfor}
+\end{itemize}
+\BLOCK{endif}
+
+% --- PROJECTS ---
+\BLOCK{if data.projects}
+\section{Projects}
+\begin{itemize}[leftmargin=0in, label={}]
+    \BLOCK{for proj in data.projects}
+    \item
+      \begin{tabular*}{0.98\textwidth}{l@{\extracolsep{\fill}}r}
+        \textbf{\VAR{proj.title}} & \textit{\VAR{proj.role}} \\
+      \end{tabular*}
+      \BLOCK{if proj.techStack}
+      \vspace{2pt}\small{\textbf{Technologies:} \BLOCK{for tech in proj.techStack}\VAR{tech}\BLOCK{if not loop.last}, \BLOCK{endif}\BLOCK{endfor}}
+      \BLOCK{endif}
+      \BLOCK{if proj.description}
+      \vspace{2pt}\small{\VAR{proj.description}}
+      \BLOCK{endif}
+      \BLOCK{if proj.bullets}
+      \begin{itemize}[leftmargin=1.5em]
+        \BLOCK{for bullet in proj.bullets}
+        \item \small \VAR{bullet}
+        \BLOCK{endfor}
+      \end{itemize}
+      \BLOCK{endif}
+      \vspace{5pt}
+    \BLOCK{endfor}
+\end{itemize}
+\BLOCK{endif}
+
+% --- EDUCATION ---
+\BLOCK{if data.education}
+\section{Education}
+\begin{itemize}[leftmargin=0in, label={}]
+    \BLOCK{for edu in data.education}
+    \item
+      \begin{tabular*}{0.98\textwidth}{l@{\extracolsep{\fill}}r}
+        \textbf{\VAR{edu.institution}} & \VAR{edu.startDate} -- \VAR{edu.endDate} \\
+        \textit{\small \VAR{edu.degree}} & \BLOCK{if edu.score} \small GPA: \VAR{edu.score} \BLOCK{endif}
+      \end{tabular*}
+      \vspace{2pt}
+    \BLOCK{endfor}
+\end{itemize}
+\BLOCK{endif}
+
+% --- SKILLS ---
+\BLOCK{if data.skills}
+\section{Skills}
+\begin{itemize}[leftmargin=0in, label={}]
+    \small{\item{
+     \BLOCK{for skill in data.skills} \VAR{skill}\BLOCK{if not loop.last} $\bullet$ \BLOCK{endif} \BLOCK{endfor}
+    }}
+\end{itemize}
+\BLOCK{endif}
+
+% --- ACHIEVEMENTS ---
+\BLOCK{if data.achievements}
+\section{Achievements}
+\begin{itemize}[leftmargin=1.5em]
+    \BLOCK{for ach in data.achievements}
+    \item \small \VAR{ach}
+    \BLOCK{endfor}
+\end{itemize}
+\BLOCK{endif}
+
+% --- CERTIFICATIONS ---
+\BLOCK{if data.certifications}
+\section{Certifications}
+\begin{itemize}[leftmargin=1.5em]
+    \BLOCK{for cert in data.certifications}
+    \item \small \VAR{cert}
+    \BLOCK{endfor}
+\end{itemize}
+\BLOCK{endif}
+
+% --- PUBLICATIONS ---
+\BLOCK{if data.publications}
+\section{Publications}
+\begin{itemize}[leftmargin=0in, label={}]
+    \BLOCK{for pub in data.publications}
+    \item \small \textbf{\VAR{pub.title}}. \textit{\VAR{pub.journal}}. \VAR{pub.date}.
+    \BLOCK{endfor}
+\end{itemize}
+\BLOCK{endif}
+
+\end{document}

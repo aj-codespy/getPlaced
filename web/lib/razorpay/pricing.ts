@@ -1,0 +1,36 @@
+
+export const PRICING_PLANS = {
+  STANDARD: {
+    id: "plan_standard",
+    name: "Standard Plan",
+    credits: 900, // 9 Resumes
+    features: [
+      "9 Resume Generations",
+      "1 LinkedIn Profile Audit",
+      "Standard Templates",
+      "ATS Keyword Optimization"
+    ],
+    price: {
+      INR: 129,
+      USD: 3.99
+    }
+  },
+  PRO: {
+    id: "plan_pro",
+    name: "Pro Plan",
+    credits: 2500, // 25 Resumes
+    features: [
+      "25 Resume Generations",
+      "3 LinkedIn Profile Audits",
+      "Premium Templates (Publication/Academic)",
+      "Priority AI Processing",
+      "Cover Letter Generator (Coming Soon)"
+    ],
+    price: {
+      INR: 299,
+      USD: 8.99
+    }
+  }
+};
+
+export const EXCHANGE_RATE_INR_USD = 84; // Fallback conversion if needed

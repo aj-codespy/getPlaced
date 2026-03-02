@@ -1,0 +1,194 @@
+%-------------------------
+% Resume in Latex
+% Experienced Template (Gray Sidebar + Cards)
+%------------------------
+
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[scaled]{helvet}
+\usepackage{geometry}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{eso-pic} 
+\usepackage[absolute,overlay]{textpos}
+\usepackage{mdframed} % For cards
+
+% Colors
+\definecolor{sidebarbg}{RGB}{229,231,235} % Slate-200
+\definecolor{slate900}{RGB}{15,23,42}
+\definecolor{slate600}{RGB}{71,85,105}
+\definecolor{slate400}{RGB}{148,163,184}
+\definecolor{blue900}{RGB}{30,58,138}
+
+% Uppercase aliases
+\definecolor{SIDEBARBG}{RGB}{229,231,235}
+\definecolor{SLATE900}{RGB}{15,23,42}
+\definecolor{SLATE600}{RGB}{71,85,105}
+\definecolor{SLATE400}{RGB}{148,163,184}
+\definecolor{BLUE900}{RGB}{30,58,138}
+
+% Font
+\renewcommand{\familydefault}{\sfdefault}
+
+% Margins (Right 2/3 roughly)
+\geometry{left=7cm, right=1.5cm, top=1.5cm, bottom=1.5cm}
+
+% Remove page numbers
+\pagestyle{empty}
+
+% Card Style
+\mdfdefinestyle{card}{
+    linecolor=sidebarbg,
+    linewidth=1pt,
+    backgroundcolor=white,
+    innerleftmargin=10pt,
+    innerrightmargin=10pt,
+    innertopmargin=10pt,
+    innerbottommargin=10pt,
+    skipabove=10pt
+}
+
+% Section Commands (Main Content)
+\titleformat{\section}{
+  \color{slate400}\small\bfseries\uppercase
+}{}{0em}{}
+
+\titlespacing{\section}{0pt}{10pt}{5pt}
+
+
+\begin{document}
+
+% --- SIDEBAR BACKGROUND ---
+\AddToShipoutPictureBG{
+    \color{sidebarbg}
+    \AtPageLowerLeft{\rule{6cm}{\paperheight}}
+}
+
+% --- SIDEBAR CONTENT ---
+\begin{textblock*}{5cm}(0.5cm, 1.5cm)
+    \raggedright
+    
+    % Name
+    {\Large \bfseries \color{slate900} \VAR{data.personalInfo.fullName}}
+    \vspace{0.4cm}
+    
+    % Contact
+    {\small \color{slate600}
+        \VAR{data.personalInfo.email} \\
+        \VAR{data.personalInfo.phone} \\
+        \VAR{data.personalInfo.location}
+    }
+    \vspace{1cm}
+    
+    % Skills
+    \BLOCK{if data.skills}
+    {\footnotesize \bfseries \color{slate900} \uppercase{Skills}} \\ \vspace{4pt}
+    \BLOCK{for skill in data.skills}
+        {\small \color{slate600} \VAR{skill}} \\ 
+        {\color{slate400}\rule{4cm}{0.5pt}} \\ \vspace{2pt}
+    \BLOCK{endfor}
+    \vspace{1cm}
+    \BLOCK{endif}
+    
+    % Education
+    \BLOCK{if data.education}
+    {\footnotesize \bfseries \color{slate900} \uppercase{Education}} \\ \vspace{4pt}
+    \BLOCK{for edu in data.education}
+        \textbf{\small \color{slate900} \VAR{edu.institution}} \\
+        {\footnotesize \color{slate600} \VAR{edu.degree}} \\
+        {\scriptsize \color{slate400} \VAR{edu.endDate}} \\
+        \vspace{6pt}
+    \BLOCK{endfor}
+    \BLOCK{endif}
+
+\end{textblock*}
+
+
+% --- MAIN CONTENT ---
+
+% Summary Card
+\BLOCK{if data.personalInfo.summary}
+\section{Professional Summary}
+\begin{mdframed}[style=card]
+    \small \color{slate600} \VAR{data.personalInfo.summary}
+\end{mdframed}
+\BLOCK{endif}
+
+% Experience Cards
+\BLOCK{if data.experience}
+\section{Professional Experience}
+\BLOCK{for exp in data.experience}
+    \begin{mdframed}[style=card]
+        \textbf{\large \color{blue900} \VAR{exp.company}} \hfill {\scriptsize \bfseries \colorbox{sidebarbg}{\color{slate600} \VAR{exp.startDate} -- \VAR{exp.endDate}}} \\
+        {\small \textbf{\color{slate600} \VAR{exp.role}}}
+        \vspace{4pt}
+        \begin{itemize}[leftmargin=1.2em, nosep, label={\color{slate600}\small\textbullet}]
+            \BLOCK{for bullet in exp.bullets}
+            \item \small \color{slate900} \VAR{bullet}
+            \BLOCK{endfor}
+        \end{itemize}
+    \end{mdframed}
+\BLOCK{endfor}
+\BLOCK{endif}
+
+% Projects Cards
+\BLOCK{if data.projects}
+\section{Projects}
+\BLOCK{for proj in data.projects}
+    \begin{mdframed}[style=card]
+        \textbf{\large \color{blue900} \VAR{proj.title}} \BLOCK{if proj.link} \href{\VAR{proj.link}}{[Link]} \BLOCK{endif} \hfill {\scriptsize \bfseries \colorbox{sidebarbg}{\color{slate600} \VAR{proj.role}}} \\
+        {\small \textit{\color{slate600} \VAR{proj.techStack|join(', ')}}}
+        \vspace{4pt}
+        \begin{itemize}[leftmargin=1.2em, nosep, label={\color{slate600}\small\textbullet}]
+            \item \small \color{slate900} \VAR{proj.description}
+        \end{itemize}
+    \end{mdframed}
+\BLOCK{endfor}
+\BLOCK{endif}
+\BLOCK{if proj.bullets}
+\begin{itemize}[leftmargin=1.5em]
+    \BLOCK{for bullet in proj.bullets}
+    \item \small \VAR{bullet}
+    \BLOCK{endfor}
+\end{itemize}
+\BLOCK{endif}
+
+% Achievements
+\BLOCK{if data.achievements}
+\section{Achievements}
+\begin{mdframed}[style=card]
+    \begin{itemize}[leftmargin=1.2em, nosep, label={\color{slate600}\small\textbullet}]
+        \BLOCK{for ach in data.achievements}
+        \item \small \color{slate900} \VAR{ach}
+        \BLOCK{endfor}
+    \end{itemize}
+\end{mdframed}
+\BLOCK{endif}
+
+% Certifications
+\BLOCK{if data.certifications}
+\section{Certifications}
+\begin{mdframed}[style=card]
+    \begin{itemize}[leftmargin=1.2em, nosep, label={\color{slate600}\small\textbullet}]
+        \BLOCK{for cert in data.certifications}
+        \item \small \color{slate900} \VAR{cert}
+        \BLOCK{endfor}
+    \end{itemize}
+\end{mdframed}
+\BLOCK{endif}
+
+% Publications
+\BLOCK{if data.publications}
+\section{Publications}
+\begin{mdframed}[style=card]
+    \begin{enumerate}[leftmargin=*, label={[\arabic*]}]
+        \BLOCK{for pub in data.publications}
+        \item \small \color{slate900} \textbf{\VAR{pub.title}}. \textit{\VAR{pub.journal}}. \VAR{pub.date}.
+        \BLOCK{endfor}
+    \end{enumerate}
+\end{mdframed}
+\BLOCK{endif}
+
+\end{document}

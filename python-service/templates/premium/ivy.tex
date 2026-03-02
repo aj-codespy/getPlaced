@@ -1,0 +1,140 @@
+%-------------------------
+% Resume in Latex
+% Ivy Template - Academic, Serif, Prestige, Research-Focused
+%------------------------
+
+\documentclass[11pt,letterpaper]{article}
+
+\usepackage{geometry}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+% Margins
+\geometry{left=1in, right=1in, top=1in, bottom=1in}
+
+\pagestyle{empty}
+
+% Section Titles: Small Caps, Centered, with Rule
+\titleformat{\section}
+  {\normalfont\Large\scshape\centering} 
+  {} 
+  {0em} 
+  {} 
+  [\vspace{-4pt}\hrule]
+
+\titlespacing{\section}{0pt}{16pt}{12pt}
+
+\begin{document}
+
+% --- HEADER ---
+\begin{center}
+    {\huge \textbf{\VAR{data.personalInfo.fullName}}} \\ \vspace{6pt}
+    \small 
+    \VAR{data.personalInfo.location} \\ 
+    \href{mailto:\VAR{data.personalInfo.email}}{\VAR{data.personalInfo.email}} \quad \textbullet \quad 
+    \VAR{data.personalInfo.phone} \\
+    \BLOCK{if data.personalInfo.portfolio} \href{\VAR{data.personalInfo.portfolio}}{Portfolio} \quad \textbullet \quad \BLOCK{endif}
+    \BLOCK{if data.personalInfo.linkedin} \href{\VAR{data.personalInfo.linkedin}}{LinkedIn} \quad \textbullet \quad \BLOCK{endif}
+    \BLOCK{if data.personalInfo.github} \href{\VAR{data.personalInfo.github}}{GitHub} \BLOCK{endif}
+\end{center}
+
+\vspace{10pt}
+
+% --- SUMMARY ---
+\BLOCK{if data.personalInfo.summary}
+\noindent {\small \VAR{data.personalInfo.summary}}
+\vspace{10pt}
+\BLOCK{endif}
+
+% --- EDUCATION (Top for Academic) ---
+\BLOCK{if data.education}
+\section{Education}
+\BLOCK{for edu in data.education}
+    \noindent
+    \textbf{\VAR{edu.institution}} \hfill \VAR{edu.endDate} \\
+    {\textit{\VAR{edu.degree}}} \\
+    \BLOCK{if edu.score} GPA: \VAR{edu.score} \\ \BLOCK{endif}
+    \BLOCK{if edu.coursework} {\small \textit{Relevant Coursework: \VAR{edu.coursework}}} \\ \BLOCK{endif}
+    \vspace{8pt}
+\BLOCK{endfor}
+\BLOCK{endif}
+
+% --- PUBLICATIONS (Priority for Research) ---
+\BLOCK{if data.publications}
+\section{Publications}
+\begin{enumerate}[leftmargin=*, label={[\arabic*]}]
+\BLOCK{for pub in data.publications}
+    \item \textbf{\VAR{pub.title}}. \textit{\VAR{pub.journal}}. \VAR{pub.date}.
+\BLOCK{endfor}
+\end{enumerate}
+\BLOCK{endif}
+
+% --- RESEARCH / EXPERIENCE ---
+\BLOCK{if data.experience}
+\section{Experience}
+\BLOCK{for exp in data.experience}
+    \noindent
+    \textbf{\VAR{exp.company}} \hfill \VAR{exp.startDate} -- \VAR{exp.endDate} \\
+    \textit{\VAR{exp.role}}
+    \begin{itemize}[leftmargin=24pt, itemsep=2pt]
+        \BLOCK{for bullet in exp.bullets}
+        \item \small \VAR{bullet}
+        \BLOCK{endfor}
+    \end{itemize}
+    \vspace{8pt}
+\BLOCK{endfor}
+\BLOCK{endif}
+
+% --- PROJECTS ---
+\BLOCK{if data.projects}
+\section{Projects}
+\BLOCK{for proj in data.projects}
+    \noindent
+    \textbf{\VAR{proj.title}} \BLOCK{if proj.link} \href{\VAR{proj.link}}{[Link]} \BLOCK{endif} \\
+    {\small \textit{\VAR{proj.techStack|join(', ')}}}
+    \begin{itemize}[leftmargin=24pt, itemsep=1pt]
+        \item \small \VAR{proj.description}
+    \end{itemize}
+    \BLOCK{if proj.bullets}
+    \begin{itemize}[leftmargin=1.5em]
+        \BLOCK{for bullet in proj.bullets}
+        \item \small \VAR{bullet}
+        \BLOCK{endfor}
+    \end{itemize}
+    \BLOCK{endif}
+    \vspace{6pt}
+\BLOCK{endfor}
+\BLOCK{endif}
+
+% --- SKILLS ---
+\BLOCK{if data.skills}
+\section{Skills}
+\begin{center}
+    \small
+    \VAR{data.skills|join(' \textbullet{} ')}
+\end{center}
+\BLOCK{endif}
+
+% --- ACHIEVEMENTS ---
+\BLOCK{if data.achievements}
+\section{Honors \& Awards}
+\begin{itemize}[leftmargin=24pt]
+\BLOCK{for ach in data.achievements}
+    \item \small \VAR{ach}
+\BLOCK{endfor}
+\end{itemize}
+\BLOCK{endif}
+
+% --- CERTIFICATIONS ---
+\BLOCK{if data.certifications}
+\section{Certifications}
+\begin{itemize}[leftmargin=24pt]
+\BLOCK{for cert in data.certifications}
+    \item \small \VAR{cert}
+\BLOCK{endfor}
+\end{itemize}
+\BLOCK{endif}
+
+\end{document}
