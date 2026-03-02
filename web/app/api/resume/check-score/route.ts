@@ -115,15 +115,23 @@ function calculateResumeScore(text: string) {
         }
     }
 
-    const sectionScore  = Math.min((foundCore.length / 3) * 6 + Math.min(foundBonus.length, 2) * 2, 10);
+    // For freshers: Projects is a valid substitute for Experience
+    // If "experience" is missing but "projects" is found, count it as a core section
+    const hasProjects = foundBonus.includes('projects');
+    const hasExperience = foundCore.includes('experience');
+    if (!hasExperience && hasProjects) {
+        foundCore.push('experience'); // Projects substitutes for Experience
+    }
+
+    const sectionScore  = Math.min((foundCore.length / 3) * 6 + Math.min(foundBonus.length, 3) * 1.34, 10);
     const missingSections = Object.keys(sectionAliases).filter(s => !foundCore.includes(s));
 
     let sectionFeedback: string;
-    if (sectionScore >= 10) {
+    if (sectionScore >= 9) {
         sectionFeedback = pick([
             "All key sections present — great structure.",
             "Well-structured resume. All core and bonus sections detected.",
-            "Solid layout — Experience, Education, Skills, and more are all present.",
+            "Solid layout — Experience/Projects, Education, Skills, and more are all present.",
             "Perfect section coverage. ATS parsers will have no trouble reading this.",
         ]);
     } else if (missingSections.length > 0) {

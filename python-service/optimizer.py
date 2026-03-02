@@ -204,8 +204,14 @@ async def optimize_projects(state: ResumeState):
     snapshot = _candidate_snapshot(state["profile"])
     verb_list = ", ".join(ACTION_VERBS[:20])
     
+    # For freshers: projects are the primary section, so generate more bullets
+    has_experience = bool(state["profile"].get("experience"))
+    bullets_per_project = 3 if has_experience else 4
+    
     llm = get_llm().with_structured_output(ProjectOutputList)
-    prompt = f"""You are an expert ATS Resume Writer. For each project, generate a polished description AND exactly 3 bullet points that maximize ATS score.
+    prompt = f"""You are an expert ATS Resume Writer. For each project, generate a polished description AND exactly {bullets_per_project} bullet points that maximize ATS score.
+
+{"NOTE: This candidate has NO work experience. Projects are their PRIMARY section. Generate rich, detailed, impactful bullets." if not has_experience else ""}
 
 CANDIDATE'S VERIFIED BACKGROUND:
 {snapshot}
@@ -218,10 +224,10 @@ MANDATORY REQUIREMENTS:
 1. PRESERVE EXACTLY: title, role, link, techStack — copy character-for-character. Do NOT add or remove.
 2. Return EXACTLY the same number of projects as the input.
 3. 'description': Rewrite as 1-2 sentences (20-35 words). MUST mention the core tech stack and project goal.
-4. 'bullets': Generate EXACTLY 3 bullet points per project:
+4. 'bullets': Generate EXACTLY {bullets_per_project} bullet points per project:
    - Each bullet MUST start with a DIFFERENT action verb from: {verb_list}
-   - Each bullet MUST be 12-22 words
-   - At least 1 bullet MUST have a quantifiable metric (users, endpoints, features, performance %)
+   - Each bullet MUST be 15-25 words (not shorter!)
+   - At least {"2" if not has_experience else "1"} bullet(s) MUST have a quantifiable metric (users, endpoints, features, performance %)
    - Include ATS keywords: scalable, performance, architecture, api, data, end-to-end, agile, etc.
 5. Do NOT change the project's fundamental nature.
 6. Do NOT add technologies not in techStack.
@@ -230,7 +236,8 @@ MANDATORY REQUIREMENTS:
 EXAMPLE BULLETS:
 "Built a responsive dashboard using React and Chart.js, visualizing real-time data for 50+ metrics across 3 categories."
 "Implemented RESTful API with Node.js and MongoDB, supporting CRUD operations for 500+ user records with authentication."
-"Deployed application on AWS EC2 with CI/CD pipeline, achieving 99.5% uptime and automated testing coverage."
+"Deployed application on cloud infrastructure with CI/CD pipeline, achieving 99.5% uptime and automated testing coverage."
+"Optimized front-end performance by implementing lazy loading and code splitting, reducing initial page load time by 40%."
 
 Return JSON with 'projects' array.
 """
@@ -240,9 +247,9 @@ Return JSON with 'projects' array.
         for x in res.projects:
             d = x.dict()
             bullets = d.get("bullets", [])
-            while len(bullets) < 3:
+            while len(bullets) < bullets_per_project:
                 bullets.append(f"Delivered key project features leveraging modern development practices and collaborative workflows.")
-            d["bullets"] = bullets[:3]
+            d["bullets"] = bullets[:bullets_per_project]
             entries.append(d)
         return {"projects": entries}
     except Exception as e:
