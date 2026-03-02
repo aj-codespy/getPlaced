@@ -68,7 +68,7 @@
         \item \small \VAR{proj.description}
     \end{itemize}
     \BLOCK{if proj.bullets}
-    \begin{itemize}[leftmargin=1.5em, label={\textbullet}]
+    \begin{itemize}[leftmargin=1.5em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
         \BLOCK{for bullet in proj.bullets}
         \item \small \VAR{bullet}
         \BLOCK{endfor}
@@ -111,7 +111,7 @@
 % --- ACHIEVEMENTS ---
 \BLOCK{if data.achievements}
 \section{Achievements}
-\begin{itemize}[leftmargin=15pt]
+\begin{itemize}[leftmargin=15pt, itemsep=1pt, parsep=0pt, topsep=2pt]
 \BLOCK{for ach in data.achievements}
     \item \small \VAR{ach}
 \BLOCK{endfor}
@@ -121,7 +121,7 @@
 % --- CERTIFICATIONS ---
 \BLOCK{if data.certifications}
 \section{Certifications}
-\begin{itemize}[leftmargin=15pt]
+\begin{itemize}[leftmargin=15pt, itemsep=1pt, parsep=0pt, topsep=2pt]
 \BLOCK{for cert in data.certifications}
     \item \small \VAR{cert}
 \BLOCK{endfor}

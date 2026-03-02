@@ -156,29 +156,21 @@ INPUT EXPERIENCE: {state['profile']['experience']}
 
 MANDATORY REQUIREMENTS FOR EVERY BULLET:
 1. PRESERVE EXACTLY: company, role, startDate, endDate, location. Copy character-for-character.
-2. Generate EXACTLY 5 bullet points per experience entry — no fewer, no more.
+2. Generate EXACTLY 4 bullet points per experience entry — no fewer, no more.
 3. EVERY bullet MUST start with a DIFFERENT strong action verb from this list: {verb_list}
    - NEVER start with "Responsible for", "Worked on", "Helped with", or "Assisted in"
    - NEVER repeat the same verb across bullets within one entry
-4. EVERY bullet MUST be 20-30 words long (not shorter, not longer). This is critical for resume word count.
-5. At least 3 out of 5 bullets MUST contain a quantifiable metric:
-   - Use actual numbers from the input if available
-   - If no exact numbers exist, use reasonable conservative estimates based on context:
-     * Team size: "team of 3-5 engineers"
-     * Users: "100+ users", "50+ daily active users"  
-     * Performance: "reduced load time by 30%", "improved efficiency by 25%"
-     * Scale: "5+ microservices", "10+ API endpoints", "3+ production deployments"
-   - Format: "X%", "X+", "$X", "X users/clients/projects"
-6. Include relevant ATS keywords naturally: api, cloud, agile, scalable, performance, architecture, data, analytics, cross-functional, end-to-end, full-stack, etc.
-7. Each bullet should follow the pattern: [Action Verb] + [What you did] + [Technology/Method] + [Impact/Result]
+4. EVERY bullet MUST be 15-20 words long. Each bullet MUST fit on ONE line — do NOT exceed 20 words.
+5. At least 2 out of 4 bullets MUST contain a quantifiable metric (X%, X+, $X, X users).
+6. Include ATS keywords naturally: api, cloud, agile, scalable, performance, data, end-to-end, etc.
+7. Pattern: [Action Verb] + [What you did] + [Technology] + [Impact/Result]
 8. Do NOT fabricate experiences or technologies not in the candidate's profile.
 
-EXAMPLE OUTPUT FORMAT:
-"Developed and deployed 3 RESTful APIs using Node.js and Express, serving 500+ daily active users with 99.9% uptime and zero downtime."
-"Optimized database query performance by 40% through indexing and query refactoring, reducing average response time from 800ms to 480ms across 10+ endpoints."
-"Led cross-functional collaboration with design, backend, and QA teams using agile methodology, delivering 5 sprint milestones ahead of schedule."
-"Architected scalable microservices architecture handling 1000+ concurrent requests using Docker containers and cloud-native infrastructure for production deployment."
-"Automated end-to-end CI/CD pipeline integrating unit tests and deployment scripts, reducing deployment time by 60% and improving release reliability."
+EXAMPLE OUTPUT FORMAT (notice: each is 15-20 words, fits ONE line):
+"Developed 3 RESTful APIs using Node.js and Express, serving 500+ daily active users."
+"Optimized database queries by 40%, reducing response time from 800ms to 480ms."
+"Led agile sprints with cross-functional team of 5, delivering milestones ahead of schedule."
+"Automated CI/CD pipeline with Docker, reducing deployment time by 60% across 3 environments."
 
 Return JSON with 'experience' array with EXACTLY the same number of entries as input.
 """
@@ -187,11 +179,11 @@ Return JSON with 'experience' array with EXACTLY the same number of entries as i
         entries = []
         for x in res.experience:
             d = x.dict()
-            # Enforce exactly 5 bullets — pad if needed
+            # Enforce exactly 4 bullets — pad if needed
             bullets = d.get("bullets", [])
-            while len(bullets) < 5:
-                bullets.append(f"Contributed to cross-functional project development and agile team deliverables using modern technologies and engineering best practices.")
-            d["bullets"] = bullets[:5]
+            while len(bullets) < 4:
+                bullets.append(f"Contributed to project development using modern technologies and best practices.")
+            d["bullets"] = bullets[:4]
             entries.append(d)
         return {"experience": entries}
     except Exception as e:
@@ -225,21 +217,21 @@ INPUT PROJECTS: {state['profile']['projects']}
 MANDATORY REQUIREMENTS:
 1. PRESERVE EXACTLY: title, role, link, techStack — copy character-for-character. Do NOT add or remove.
 2. Return EXACTLY the same number of projects as the input.
-3. 'description': Rewrite as 2-3 sentences (25-40 words). MUST mention the core tech stack, project goal, and a key outcome.
+3. 'description': Rewrite as 1 sentence (15-25 words). Mention the core tech stack and project goal.
 4. 'bullets': Generate EXACTLY {bullets_per_project} bullet points per project:
    - Each bullet MUST start with a DIFFERENT action verb from: {verb_list}
-   - Each bullet MUST be 20-30 words (not shorter! This is critical for word count)
+   - Each bullet MUST be 15-20 words. MUST fit on ONE single line — do NOT exceed 20 words.
    - At least 2 bullets MUST have a quantifiable metric (users, endpoints, features, performance %)
-   - Include ATS keywords: scalable, performance, architecture, api, data, end-to-end, agile, etc.
+   - Include ATS keywords: scalable, performance, api, data, end-to-end, agile, etc.
 5. Do NOT change the project's fundamental nature.
 6. Do NOT add technologies not in techStack.
-7. Follow the pattern: [Action Verb] + [What] + [Technology] + [Impact]
+7. Pattern: [Action Verb] + [What] + [Technology] + [Impact]
 
-EXAMPLE BULLETS:
-"Built a responsive dashboard using React and Chart.js, visualizing real-time data for 50+ metrics across 3 categories."
-"Implemented RESTful API with Node.js and MongoDB, supporting CRUD operations for 500+ user records with authentication."
-"Deployed application on cloud infrastructure with CI/CD pipeline, achieving 99.5% uptime and automated testing coverage."
-"Optimized front-end performance by implementing lazy loading and code splitting, reducing initial page load time by 40%."
+EXAMPLE BULLETS (15-20 words each, ONE line):
+"Built responsive dashboard using React and Chart.js, visualizing 50+ real-time metrics."
+"Implemented RESTful API with Node.js and MongoDB, supporting 500+ user records."
+"Deployed on cloud with CI/CD pipeline, achieving 99.5% uptime across environments."
+"Optimized front-end performance with lazy loading, reducing page load time by 40%."
 
 Return JSON with 'projects' array.
 """
@@ -250,7 +242,7 @@ Return JSON with 'projects' array.
             d = x.dict()
             bullets = d.get("bullets", [])
             while len(bullets) < bullets_per_project:
-                bullets.append(f"Delivered key project features leveraging modern development practices and collaborative workflows.")
+                bullets.append(f"Delivered key features using modern development practices and workflows.")
             d["bullets"] = bullets[:bullets_per_project]
             entries.append(d)
         return {"projects": entries}

@@ -105,7 +105,7 @@
         {\small \color{darkblue} \textit{\VAR{proj.techStack|join(', ')}}} \\
         {\small \VAR{proj.description}}
         \BLOCK{if proj.bullets}
-        \begin{itemize}[leftmargin=1.5em, label={\textbullet}]
+        \begin{itemize}[leftmargin=1.5em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
             \BLOCK{for bullet in proj.bullets}
             \item \small \VAR{bullet}
             \BLOCK{endfor}
@@ -140,7 +140,7 @@
     % SKILLS
     \BLOCK{if data.skills}
     \section{Expertise}
-    \begin{itemize}[leftmargin=1.2em, label={$\bullet$}]
+    \begin{itemize}[leftmargin=1.2em, label={$\bullet$}, itemsep=1pt, parsep=0pt, topsep=2pt]
        \BLOCK{for skill in data.skills}
        \item \small \VAR{skill}
        \BLOCK{endfor}
@@ -165,7 +165,7 @@
 % --- ACHIEVEMENTS (Full width below columns) ---
 \BLOCK{if data.achievements}
 \section{Achievements}
-\begin{itemize}[leftmargin=1.2em, label={$\bullet$}]
+\begin{itemize}[leftmargin=1.2em, label={$\bullet$}, itemsep=1pt, parsep=0pt, topsep=2pt]
     \BLOCK{for ach in data.achievements}
     \item \small \VAR{ach}
     \BLOCK{endfor}
@@ -175,7 +175,7 @@
 % --- PUBLICATIONS ---
 \BLOCK{if data.publications}
 \section{Publications}
-\begin{itemize}[leftmargin=1.2em, label={--}]
+\begin{itemize}[leftmargin=1.2em, label={--}, itemsep=1pt, parsep=0pt, topsep=2pt]
     \BLOCK{for pub in data.publications}
     \item \small \textbf{\VAR{pub.title}}. \textit{\VAR{pub.journal}}. \VAR{pub.date}.
     \BLOCK{endfor}

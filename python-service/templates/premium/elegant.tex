@@ -78,7 +78,7 @@
     \textbf{\large \VAR{exp.role}} \hfill {\small \VAR{exp.startDate} -- \VAR{exp.endDate}} \\
     {\small \color{accent} \uppercase{\VAR{exp.company}}} \hfill {\small \color{textgray} \VAR{exp.location}}
     \vspace{4pt}
-    \begin{itemize}[leftmargin=*, label={\color{accent}\tiny$\blacksquare$}, itemsep=2pt]
+    \begin{itemize}[leftmargin=*, label={\color{accent}\tiny$\blacksquare$}, itemsep=1pt, parsep=0pt, topsep=2pt]
         \BLOCK{for bullet in exp.bullets}
         \item \small \VAR{bullet}
         \BLOCK{endfor}
@@ -102,14 +102,14 @@
 % --- PROJECTS ---
 \BLOCK{if data.projects}
 \section{Key Projects}
-\begin{itemize}[leftmargin=*, label={}, itemsep=8pt]
+\begin{itemize}[leftmargin=*, label={}, itemsep=3pt, parsep=0pt, topsep=2pt]
 \BLOCK{for proj in data.projects}
     \item 
     \textbf{\VAR{proj.title}} \BLOCK{if proj.link} \href{\VAR{proj.link}}{\footnotesize [Link]} \BLOCK{endif}
     \quad \textemdash \quad {\small \color{textgray} \textit{\VAR{proj.techStack|join(', ')}}} \\
     {\small \VAR{proj.description}}
     \BLOCK{if proj.bullets}
-    \begin{itemize}[leftmargin=1.5em, label={\color{accent}\tiny$\blacksquare$}]
+    \begin{itemize}[leftmargin=1.5em, label={\color{accent}\tiny$\blacksquare$}, itemsep=1pt, parsep=0pt, topsep=2pt]
         \BLOCK{for bullet in proj.bullets}
         \item \small \VAR{bullet}
         \BLOCK{endfor}
@@ -131,7 +131,7 @@
 % --- ACHIEVEMENTS ---
 \BLOCK{if data.achievements}
 \section{Achievements}
-\begin{itemize}[leftmargin=*, label={\color{accent}\tiny$\blacksquare$}, itemsep=2pt]
+\begin{itemize}[leftmargin=*, label={\color{accent}\tiny$\blacksquare$}, itemsep=1pt, parsep=0pt, topsep=2pt]
     \BLOCK{for ach in data.achievements}
     \item \small \VAR{ach}
     \BLOCK{endfor}
@@ -141,7 +141,7 @@
 % --- CERTIFICATIONS ---
 \BLOCK{if data.certifications}
 \section{Certifications}
-\begin{itemize}[leftmargin=*, label={\color{accent}\tiny$\blacksquare$}, itemsep=2pt]
+\begin{itemize}[leftmargin=*, label={\color{accent}\tiny$\blacksquare$}, itemsep=1pt, parsep=0pt, topsep=2pt]
     \BLOCK{for cert in data.certifications}
     \item \small \VAR{cert}
     \BLOCK{endfor}

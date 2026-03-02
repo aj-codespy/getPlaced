@@ -86,7 +86,7 @@
     \noindent
     \textbf{\VAR{exp.role}} \hfill \VAR{exp.startDate} -- \VAR{exp.endDate} \\
     {\VAR{exp.company}}
-    \begin{itemize}[leftmargin=20pt, itemsep=2pt]
+    \begin{itemize}[leftmargin=20pt, itemsep=1pt, parsep=0pt, topsep=2pt]
         \BLOCK{for bullet in exp.bullets}
         \item \small \VAR{bullet}
         \BLOCK{endfor}
@@ -103,7 +103,7 @@
     \textbf{\VAR{proj.title}} \hfill \textit{\VAR{proj.techStack|join(', ')}} \\
     \small \VAR{proj.description}
     \BLOCK{if proj.bullets}
-    \begin{itemize}[leftmargin=1.5em, label={\textbullet}]
+    \begin{itemize}[leftmargin=1.5em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
         \BLOCK{for bullet in proj.bullets}
         \item \small \VAR{bullet}
         \BLOCK{endfor}
@@ -116,7 +116,7 @@
 % --- ACHIEVEMENTS ---
 \BLOCK{if data.achievements}
 \section{Awards \& Honors}
-\begin{itemize}[leftmargin=20pt, itemsep=2pt]
+\begin{itemize}[leftmargin=20pt, itemsep=1pt, parsep=0pt, topsep=2pt]
     \BLOCK{for ach in data.achievements}
     \item \small \VAR{ach}
     \BLOCK{endfor}
@@ -126,7 +126,7 @@
 % --- CERTIFICATIONS ---
 \BLOCK{if data.certifications}
 \section{Certifications}
-\begin{itemize}[leftmargin=20pt, itemsep=2pt]
+\begin{itemize}[leftmargin=20pt, itemsep=1pt, parsep=0pt, topsep=2pt]
     \BLOCK{for cert in data.certifications}
     \item \small \VAR{cert}
     \BLOCK{endfor}

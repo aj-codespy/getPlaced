@@ -89,7 +89,7 @@
     \textbf{\VAR{proj.title}} \BLOCK{if proj.link} \href{\VAR{proj.link}}{[Link]} \BLOCK{endif} \hfill \textit{\VAR{proj.techStack|join(', ')}} \\
     \small \VAR{proj.description}
     \BLOCK{if proj.bullets}
-    \begin{itemize}[leftmargin=1.5em, label={\textbullet}]
+    \begin{itemize}[leftmargin=1.5em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
         \BLOCK{for bullet in proj.bullets}
         \item \small \VAR{bullet}
         \BLOCK{endfor}

@@ -77,7 +77,7 @@
     \textbf{\VAR{proj.title}} \BLOCK{if proj.link} \href{\VAR{proj.link}}{[Link]} \BLOCK{endif} \hfill \textit{\VAR{proj.techStack|join(', ')}} \\
     \small \VAR{proj.description}
     \BLOCK{if proj.bullets}
-    \begin{itemize}[leftmargin=1.5em, label={\textbullet}]
+    \begin{itemize}[leftmargin=1.5em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
         \BLOCK{for bullet in proj.bullets}
         \item \small \VAR{bullet}
         \BLOCK{endfor}
@@ -101,7 +101,7 @@
 % --- PUBLICATIONS ---
 \BLOCK{if data.publications}
 \section{Selected Publications}
-\begin{itemize}[leftmargin=*, label={--}]
+\begin{itemize}[leftmargin=*, label={--}, itemsep=1pt, parsep=0pt, topsep=2pt]
 \BLOCK{for pub in data.publications}
     \item \VAR{pub.title}, \textit{\VAR{pub.journal}} (\VAR{pub.date})
 \BLOCK{endfor}
