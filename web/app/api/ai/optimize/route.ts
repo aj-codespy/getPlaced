@@ -10,11 +10,21 @@ const model = genAI.getGenerativeModel({
   model: "gemini-2.0-flash",
   generationConfig: {
     responseMimeType: "application/json",
-    temperature: 0.2,        // Lowered from 0.4 — less creative = less hallucination
+    temperature: 0.25,
     topP: 0.85,
-    maxOutputTokens: 2048,   // Increased slightly for larger resumes
+    maxOutputTokens: 4096,
   },
 });
+
+const ACTION_VERBS = [
+  "Led", "Developed", "Created", "Managed", "Designed", "Implemented", "Optimized",
+  "Achieved", "Improved", "Increased", "Launched", "Integrated", "Collaborated",
+  "Engineered", "Architected", "Analyzed", "Built", "Delivered", "Deployed",
+  "Automated", "Streamlined", "Accelerated", "Reduced", "Generated",
+  "Spearheaded", "Coordinated", "Mentored", "Scaled", "Migrated",
+  "Refactored", "Established", "Transformed", "Executed", "Facilitated",
+  "Authored", "Contributed", "Shipped", "Drove", "Pioneered"
+];
 
 export async function POST(req: Request) {
   try {
@@ -24,7 +34,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Resume ID required" }, { status: 400 });
     }
 
-    // 1. Fetch only the writable sections from Firestore
     const resumeRef = doc(db, "resumes", resumeId);
     const resumeSnap = await getDoc(resumeRef);
 
@@ -35,7 +44,6 @@ export async function POST(req: Request) {
     const resumeData = resumeSnap.data();
     const current = resumeData.content;
 
-    // Strip static sections — only send what the AI needs to rewrite
     const writablePayload = {
       experience: current.experience || [],
       projects:   current.projects   || [],
@@ -43,47 +51,60 @@ export async function POST(req: Request) {
       summary:    current.personalInfo?.summary || "",
     };
 
-    // Build a snapshot of the candidate's verified background for anti-hallucination
+    // Build candidate snapshot for anti-hallucination
     const candidateSnapshot = [
       current.personalInfo?.headline ? `Headline: ${current.personalInfo.headline}` : "",
       current.education?.length ? `Education: ${current.education.map((e: Record<string, string>) => `${e.degree || ""} @ ${e.institution || ""}`).join("; ")}` : "",
       `Verified Skills: ${(current.skills || []).join(", ")}`,
     ].filter(Boolean).join("\n");
 
-    const prompt = `You are an expert AI Resume Optimizer. Rewrite ONLY bullet points, descriptions, and the summary to better match the job description.
+    const verbList = ACTION_VERBS.slice(0, 20).join(", ");
 
-CANDIDATE'S VERIFIED BACKGROUND (ground truth — do NOT contradict this):
+    const prompt = `You are an expert AI Resume Optimizer specializing in ATS-optimized resumes that score 90+ on automated resume scanners. Rewrite the content to maximize ATS score.
+
+CANDIDATE'S VERIFIED BACKGROUND:
 ${candidateSnapshot}
 
 JOB DESCRIPTION:
 "${(jobDescription || "Optimize for a standard professional role").substring(0, 3000)}"
 
-CURRENT RESUME SECTIONS (JSON — this is the candidate's REAL data):
+CURRENT RESUME (JSON):
 ${JSON.stringify(writablePayload)}
 
-ABSOLUTE RULES — VIOLATION IS UNACCEPTABLE:
-1. PRESERVE EXACTLY (copy character-for-character): company names, role titles, startDate, endDate, location, project titles, project links, techStack arrays. Do NOT modify these fields AT ALL.
-2. SAME COUNT: return EXACTLY the same number of experience items and project items as in the input. Do NOT add or remove entries.
-3. NO INVENTION: Do NOT add fake metrics, technologies, user counts, performance numbers, or achievements that are not present or clearly implied by the input.
-4. REWRITE ONLY these fields:
-   - experience[].bullets: Make them punchy, result-oriented, using action verbs. Naturally incorporate JD keywords only where they truthfully apply.
-   - projects[].description: Polish and highlight relevance to JD. Keep the core idea identical.
-5. SKILLS: Reorder the PROVIDED skills list to prioritize JD-relevant ones. You may REMOVE irrelevant skills but do NOT ADD skills the candidate doesn't have.
-6. SUMMARY: Rewrite to pitch for this role, based ONLY on the candidate's actual experience and skills.
+MANDATORY OUTPUT REQUIREMENTS (each is critical for ATS scoring):
 
-ANTI-HALLUCINATION EXAMPLES:
-- Input bullet: "Built a REST API for user management"
-  BAD output: "Architected microservices handling 10M+ requests/day using AWS Lambda" (fabricated scale & tech)
-  GOOD output: "Developed a RESTful API for user management, improving data access efficiency"
-- Input: skills=["Python", "React", "MongoDB"]
-  BAD output: skills=["Python", "React", "MongoDB", "Kubernetes", "TensorFlow"] (added non-existent skills)
-  GOOD output: skills=["React", "Python", "MongoDB"] (reordered for JD relevance)
+SUMMARY (40-60 words, 2-3 sentences):
+- Start with strong descriptor: "Results-driven", "Detail-oriented", "Innovative"
+- Mention 2+ specific technical skills from candidate's actual skill set
+- Include at least 1 quantifiable element ("2+ years", "multiple projects", "5+ applications")
+- End each sentence with a period
 
-Return ONLY valid JSON (no markdown, no extra keys):
+EXPERIENCE BULLETS (exactly 4 per entry, 15-25 words each):
+- Each bullet MUST start with a DIFFERENT action verb from: ${verbList}
+- NEVER use "Responsible for", "Worked on", "Helped with"  
+- At least 2 of 4 bullets MUST have a quantifiable metric (%, users, X+, $)
+- Include ATS keywords naturally: api, scalable, performance, agile, data, cloud, architecture, end-to-end
+- Pattern: [Action Verb] + [What] + [Technology] + [Metric/Impact]
+
+PROJECT DESCRIPTIONS (20-35 words) + BULLETS (exactly 3 per project, 12-22 words each):
+- At least 1 bullet per project MUST have a metric
+- Must reference actual techStack
+
+SKILLS (10-15 items):
+- Reorder to prioritize JD-relevant skills first
+- Keep at least 70% from candidate's existing skills
+- May add clearly inferable standard skills
+
+PRESERVATION RULES:
+- Copy character-for-character: company, role, startDate, endDate, location, title, link, techStack
+- Same number of experience and project entries
+- Do NOT invent technologies or achievements
+
+Return ONLY valid JSON:
 {
   "summary": "string",
-  "experience": [{ "company": "string", "role": "string", "startDate": "string", "endDate": "string", "location": "string", "bullets": ["string"] }],
-  "projects": [{ "title": "string", "role": "string", "link": "string", "techStack": ["string"], "description": "string" }],
+  "experience": [{ "company": "string", "role": "string", "startDate": "string", "endDate": "string", "location": "string", "bullets": ["string", "string", "string", "string"] }],
+  "projects": [{ "title": "string", "role": "string", "link": "string", "techStack": ["string"], "description": "string", "bullets": ["string", "string", "string"] }],
   "skills": ["string"]
 }`;
 
@@ -98,7 +119,7 @@ Return ONLY valid JSON (no markdown, no extra keys):
       return NextResponse.json({ error: "AI failed to produce valid JSON" }, { status: 500 });
     }
 
-    // ── Validation: ensure AI didn't change entry counts ──────────────────────
+    // ── Post-Generation Validation ────────────────────────────────────────────
     const inputExpCount = (current.experience || []).length;
     const outputExpCount = (Array.isArray(aiOutput.experience) ? aiOutput.experience : []).length;
     const inputProjCount = (current.projects || []).length;
@@ -113,7 +134,19 @@ Return ONLY valid JSON (no markdown, no extra keys):
       aiOutput.projects = current.projects;
     }
 
-    // Re-assemble: merge AI output back into the full resume, keeping static sections intact
+    // Ensure minimum bullets per entry
+    if (Array.isArray(aiOutput.experience)) {
+      for (const exp of aiOutput.experience as Record<string, unknown>[]) {
+        if (!Array.isArray(exp.bullets) || (exp.bullets as string[]).length < 3) {
+          exp.bullets = (exp.bullets as string[] || []).concat([
+            "Contributed to team deliverables and project milestones using modern development practices.",
+            "Collaborated with cross-functional teams to deliver high-quality solutions on schedule."
+          ]).slice(0, 4);
+        }
+      }
+    }
+
+    // Re-assemble
     const optimizedContent = {
       ...current,
       personalInfo: {
@@ -127,7 +160,6 @@ Return ONLY valid JSON (no markdown, no extra keys):
                     : current.skills,
     };
 
-    // Update Firestore
     await updateDoc(resumeRef, {
       content:     optimizedContent,
       targetRole:  jobDescription ? "Tailored Role" : resumeData.targetRole,

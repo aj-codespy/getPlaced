@@ -69,7 +69,7 @@
         \textbf{\VAR{exp.company}} & \VAR{exp.startDate} -- \VAR{exp.endDate} \\
         \textit{\small \VAR{exp.role}} & 
       \end{tabular*}
-      \begin{itemize}[leftmargin=1.5em]
+      \begin{itemize}[leftmargin=1.5em, label={\textbullet}]
         \BLOCK{for bullet in exp.bullets}
         \item \small \VAR{bullet}
         \BLOCK{endfor}
@@ -95,7 +95,7 @@
       \vspace{2pt}\small{\VAR{proj.description}}
       \BLOCK{endif}
       \BLOCK{if proj.bullets}
-      \begin{itemize}[leftmargin=1.5em]
+      \begin{itemize}[leftmargin=1.5em, label={\textbullet}]
         \BLOCK{for bullet in proj.bullets}
         \item \small \VAR{bullet}
         \BLOCK{endfor}
@@ -134,7 +134,7 @@
 % --- ACHIEVEMENTS ---
 \BLOCK{if data.achievements}
 \section{Achievements}
-\begin{itemize}[leftmargin=1.5em]
+\begin{itemize}[leftmargin=1.5em, label={\textbullet}]
     \BLOCK{for ach in data.achievements}
     \item \small \VAR{ach}
     \BLOCK{endfor}
@@ -144,7 +144,7 @@
 % --- CERTIFICATIONS ---
 \BLOCK{if data.certifications}
 \section{Certifications}
-\begin{itemize}[leftmargin=1.5em]
+\begin{itemize}[leftmargin=1.5em, label={\textbullet}]
     \BLOCK{for cert in data.certifications}
     \item \small \VAR{cert}
     \BLOCK{endfor}

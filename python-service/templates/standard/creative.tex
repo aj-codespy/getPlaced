@@ -134,7 +134,7 @@
     {\small \color{textgray} \textit{\VAR{proj.techStack|join(', ')}}} \\
     {\small \color{textgray} \VAR{proj.description}}
     \BLOCK{if proj.bullets}
-    \begin{itemize}[leftmargin=1.5em]
+    \begin{itemize}[leftmargin=1.5em, label={\textbullet}]
         \BLOCK{for bullet in proj.bullets}
         \item \small \VAR{bullet}
         \BLOCK{endfor}

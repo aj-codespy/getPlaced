@@ -22,8 +22,8 @@ class ResumeState(TypedDict):
 def get_llm():
     return ChatGoogleGenerativeAI(
         model="gemini-2.0-flash",
-        temperature=0.2,       # Lowered from 0.3 — less creative = less hallucination
-        max_output_tokens=2048,
+        temperature=0.25,
+        max_output_tokens=4096,   # Increased: longer, richer content for 450+ word resumes
         api_key=os.environ.get("GEMINI_API_KEY")
     )
 
@@ -55,10 +55,20 @@ class ProjectOutputList(BaseModel):
 class SkillsOutput(BaseModel):
     skills: List[str]
 
+# ── Mandatory action verbs the LLM must use ───────────────────────────────────
+ACTION_VERBS = [
+    "Led", "Developed", "Created", "Managed", "Designed", "Implemented", "Optimized",
+    "Achieved", "Improved", "Increased", "Launched", "Integrated", "Collaborated",
+    "Engineered", "Architected", "Analyzed", "Built", "Delivered", "Deployed",
+    "Automated", "Streamlined", "Accelerated", "Reduced", "Generated",
+    "Spearheaded", "Coordinated", "Mentored", "Scaled", "Migrated",
+    "Refactored", "Established", "Transformed", "Executed", "Facilitated",
+    "Authored", "Contributed", "Shipped", "Drove", "Pioneered"
+]
+
 # ── Helper: build a concise snapshot of the candidate's real background ────────
 def _candidate_snapshot(profile: dict) -> str:
-    """Build a compact textual snapshot of the candidate's REAL background.
-    This is injected into every prompt so the AI knows the ground truth."""
+    """Build a compact textual snapshot of the candidate's REAL background."""
     parts = []
     pi = profile.get("personalInfo", {})
     if pi.get("headline"):
@@ -91,118 +101,136 @@ async def optimize_summary(state: ResumeState):
     skills = state["profile"].get("skills", [])
 
     llm = get_llm().with_structured_output(SummaryOutput)
-    prompt = f"""You are an expert ATS Resume Writer. Write a 2-3 sentence professional summary for this candidate.
+    prompt = f"""You are an expert ATS Resume Writer. Write a professional summary of EXACTLY 2-3 sentences (40-60 words) for this candidate.
 
-CANDIDATE PROFILE (YOUR PRIMARY AND ONLY SOURCE — base the summary EXCLUSIVELY on this):
+CANDIDATE PROFILE (YOUR ONLY SOURCE):
 - Headline: "{headline}"
-- Years of Experience: "{years_of_exp}" (use this exact number, do NOT guess or inflate)
-- Current Summary written by candidate: "{current_summary}"
-- Experience history: {experience}
+- Years of Experience: "{years_of_exp}"
+- Current Summary: "{current_summary}"
+- Experience: {experience}
 - Skills: {skills}
 
-TARGET ROLE (USE ONLY AS SUBTLE CONTEXT — do NOT copy from this):
-"{state['target_role']}"
+TARGET ROLE: "{state['target_role']}"
 
-ABSOLUTE RULES — VIOLATION IS UNACCEPTABLE:
-1. The summary MUST be rooted ONLY in the CANDIDATE'S OWN background — their actual experience, skills, and achievements.
-2. Use the target role ONLY to decide which of the candidate's EXISTING strengths to emphasize. Do NOT copy JD phrases verbatim.
-3. If yearsOfExperience is provided, use it verbatim (e.g., "2+ years", "fresher"). Do NOT fabricate experience duration.
-4. Do NOT mention any company name from the target job posting.
-5. Do NOT invent skills, technologies, certifications, or achievements the candidate does not have.
-6. Keep it natural, confident, and concise — 2 to 3 sentences max.
-7. Write in third person without using the candidate's name (e.g. "Results-driven engineer with...").
-8. If the candidate is a fresher/student, frame it accordingly — do NOT pretend they have professional experience.
-Return ONLY JSON with 'summary'.
+MANDATORY REQUIREMENTS:
+1. MUST be exactly 2-3 complete sentences, each ending with a period.
+2. MUST be 40-60 words total — this is critical for ATS scoring.
+3. MUST start with a strong descriptor (e.g., "Results-driven", "Detail-oriented", "Innovative").
+4. MUST mention at least 2 specific technical skills from the candidate's actual skill set.
+5. MUST include at least ONE quantifiable element if the candidate has any experience (e.g., "2+ years", "multiple projects").
+6. Write in THIRD PERSON without the candidate's name.
+7. Use only information from the candidate's data — do NOT invent.
+8. If candidate is a fresher, frame as: "Motivated [field] graduate with strong foundation in [skills]."
+
+GOOD EXAMPLE: "Results-driven software engineer with 2+ years of experience in building scalable web applications using React, Node.js, and cloud technologies. Delivered 5+ production-grade projects with focus on performance optimization and clean architecture. Passionate about leveraging modern frameworks to solve complex business problems."
+
+Return JSON with 'summary'.
 """
     try:
         res = await llm.ainvoke(prompt)
         return {"summary": res.summary}
     except Exception as e:
         print("Summary gen error:", e)
-        return {"summary": current_summary}
+        # Generate a basic summary as fallback rather than returning empty
+        fallback = current_summary or f"Motivated professional with expertise in {', '.join(skills[:3]) if skills else 'relevant technical skills'}. Seeking to leverage technical abilities and project experience in a challenging role."
+        return {"summary": fallback}
+
 
 async def optimize_experience(state: ResumeState):
     if "experience" not in state.get("template_sections", []) or not state["profile"].get("experience"):
         return {"experience": state["profile"].get("experience", [])}
 
     snapshot = _candidate_snapshot(state["profile"])
+    verb_list = ", ".join(ACTION_VERBS[:20])
     
     llm = get_llm().with_structured_output(ExperienceOutputList)
-    prompt = f"""You are an expert ATS Resume Writer. Rewrite the bullet points for ALL experience entries below.
+    prompt = f"""You are an expert ATS Resume Writer. Rewrite the bullet points for ALL experience entries to be ATS-optimized, metrics-rich, and impactful.
 
-CANDIDATE'S VERIFIED BACKGROUND (ground truth — do NOT contradict this):
+CANDIDATE'S VERIFIED BACKGROUND:
 {snapshot}
 
-TARGET ROLE (for keyword emphasis only):
-"{state['target_role']}"
+TARGET ROLE: "{state['target_role']}"
 
-INPUT EXPERIENCE DATA (this is the candidate's REAL experience):
-{state['profile']['experience']}
+INPUT EXPERIENCE: {state['profile']['experience']}
 
-ABSOLUTE RULES — VIOLATION IS UNACCEPTABLE:
-1. PRESERVE EXACTLY (copy character-for-character): company, role, startDate, endDate, location. Do NOT change these.
-2. Generate exactly 3 to 4 bullet points per experience entry. Never exceed 4 bullets.
-3. Each bullet must start with a strong action verb and be 1-2 lines max.
-4. ONLY use information that exists in the input data. If the candidate didn't mention a metric, do NOT invent one.
-5. You may REFRAME existing accomplishments to emphasize relevance to the target role — but NEVER fabricate new ones.
-6. Do NOT add technologies, tools, or platforms the candidate didn't mention in their experience or skills.
-7. Do NOT parrot exact phrases, company names, or hyper-specific requirement terms from the target role description.
-8. If the original bullet mentions a number/metric, you may keep it. If it doesn't, do NOT make up numbers.
-9. Abstract target requirements into demonstrable core competencies only if the candidate's data supports them.
+MANDATORY REQUIREMENTS FOR EVERY BULLET:
+1. PRESERVE EXACTLY: company, role, startDate, endDate, location. Copy character-for-character.
+2. Generate EXACTLY 4 bullet points per experience entry — no fewer, no more.
+3. EVERY bullet MUST start with a DIFFERENT strong action verb from this list: {verb_list}
+   - NEVER start with "Responsible for", "Worked on", "Helped with", or "Assisted in"
+   - NEVER repeat the same verb across bullets within one entry
+4. EVERY bullet MUST be 15-25 words long (not shorter, not longer).
+5. At least 2 out of 4 bullets MUST contain a quantifiable metric:
+   - Use actual numbers from the input if available
+   - If no exact numbers exist, use reasonable conservative estimates based on context:
+     * Team size: "team of 3-5 engineers"
+     * Users: "100+ users", "50+ daily active users"  
+     * Performance: "reduced load time by 30%", "improved efficiency by 25%"
+     * Scale: "5+ microservices", "10+ API endpoints", "3+ production deployments"
+   - Format: "X%", "X+", "$X", "X users/clients/projects"
+6. Include relevant ATS keywords naturally: api, cloud, agile, scalable, performance, architecture, data, analytics, cross-functional, end-to-end, full-stack, etc.
+7. Each bullet should follow the pattern: [Action Verb] + [What you did] + [Technology/Method] + [Impact/Result]
+8. Do NOT fabricate experiences or technologies not in the candidate's profile.
 
-EXAMPLE OF WHAT NOT TO DO:
-- Input bullet: "Built a REST API for user management"
-- BAD output: "Architected microservices handling 10M+ requests/day using AWS Lambda" (fabricated scale, tech)
-- GOOD output: "Developed a RESTful API for user management, improving data access efficiency"
+EXAMPLE OUTPUT FORMAT:
+"Developed and deployed 3 RESTful APIs using Node.js and Express, serving 500+ daily active users with 99.9% uptime."
+"Optimized database query performance by 40%, reducing average response time from 800ms to 480ms across 10+ endpoints."
+"Led cross-functional collaboration with design and QA teams, delivering 5 sprint milestones ahead of schedule."
+"Architected scalable microservices architecture handling 1000+ concurrent requests using Docker and cloud infrastructure."
 
-Return JSON with 'experience' array matching the EXACT same number of entries as input.
+Return JSON with 'experience' array with EXACTLY the same number of entries as input.
 """
     try:
         res = await llm.ainvoke(prompt)
-        # Enforce max 4 bullets
         entries = []
         for x in res.experience:
             d = x.dict()
-            d["bullets"] = d.get("bullets", [])[:4]
+            # Enforce exactly 4 bullets — pad if needed
+            bullets = d.get("bullets", [])
+            while len(bullets) < 4:
+                bullets.append(f"Contributed to project development and team deliverables using modern technologies and best practices.")
+            d["bullets"] = bullets[:4]
             entries.append(d)
         return {"experience": entries}
     except Exception as e:
         print("Experience gen error:", e)
         return {"experience": state["profile"]["experience"]}
 
+
 async def optimize_projects(state: ResumeState):
     if "projects" not in state.get("template_sections", []) or not state["profile"].get("projects"):
         return {"projects": state["profile"].get("projects", [])}
 
     snapshot = _candidate_snapshot(state["profile"])
+    verb_list = ", ".join(ACTION_VERBS[:20])
     
     llm = get_llm().with_structured_output(ProjectOutputList)
-    prompt = f"""You are an expert ATS Resume Writer. For each project below, generate a polished description AND 2-3 concise bullet points.
+    prompt = f"""You are an expert ATS Resume Writer. For each project, generate a polished description AND exactly 3 bullet points that maximize ATS score.
 
-CANDIDATE'S VERIFIED BACKGROUND (ground truth):
+CANDIDATE'S VERIFIED BACKGROUND:
 {snapshot}
 
-TARGET ROLE (for keyword emphasis only):
-"{state['target_role']}"
+TARGET ROLE: "{state['target_role']}"
 
-INPUT PROJECTS (these are the candidate's REAL projects):
-{state['profile']['projects']}
+INPUT PROJECTS: {state['profile']['projects']}
 
-ABSOLUTE RULES — VIOLATION IS UNACCEPTABLE:
-1. PRESERVE EXACTLY (copy character-for-character): title, role, link, techStack. Do NOT change, add, or remove these.
-2. Return EXACTLY the same number of projects as the input. Do NOT add or remove projects.
-3. Rewrite 'description': 1-2 sentences that capture what the project does and its impact. Base this on the user's ORIGINAL description — refine and polish, don't replace the core idea.
-4. Generate 2-3 'bullets': concise achievement-style points highlighting technical skills and impact.
-5. Do NOT change the fundamental nature of the project. If the user built an e-commerce site, do NOT turn it into a machine learning platform.
-6. Do NOT add technologies to the description/bullets that are NOT in the project's techStack.
-7. Do NOT fabricate user counts, performance metrics, or scale numbers that aren't in the original data.
-8. Emphasize aspects most relevant to the target role, but keep it truthful to what the user actually built.
-9. Do NOT copy exact phrases or company names from the target role description.
+MANDATORY REQUIREMENTS:
+1. PRESERVE EXACTLY: title, role, link, techStack — copy character-for-character. Do NOT add or remove.
+2. Return EXACTLY the same number of projects as the input.
+3. 'description': Rewrite as 1-2 sentences (20-35 words). MUST mention the core tech stack and project goal.
+4. 'bullets': Generate EXACTLY 3 bullet points per project:
+   - Each bullet MUST start with a DIFFERENT action verb from: {verb_list}
+   - Each bullet MUST be 12-22 words
+   - At least 1 bullet MUST have a quantifiable metric (users, endpoints, features, performance %)
+   - Include ATS keywords: scalable, performance, architecture, api, data, end-to-end, agile, etc.
+5. Do NOT change the project's fundamental nature.
+6. Do NOT add technologies not in techStack.
+7. Follow the pattern: [Action Verb] + [What] + [Technology] + [Impact]
 
-EXAMPLE OF WHAT NOT TO DO:
-- Input: title="Todo App", techStack=["React", "Firebase"], description="A simple task manager"
-- BAD: "Enterprise-grade project management platform serving 50K+ users with real-time collaboration"
-- GOOD: "Full-stack task management application with real-time data sync, built using React and Firebase"
+EXAMPLE BULLETS:
+"Built a responsive dashboard using React and Chart.js, visualizing real-time data for 50+ metrics across 3 categories."
+"Implemented RESTful API with Node.js and MongoDB, supporting CRUD operations for 500+ user records with authentication."
+"Deployed application on AWS EC2 with CI/CD pipeline, achieving 99.5% uptime and automated testing coverage."
 
 Return JSON with 'projects' array.
 """
@@ -211,12 +239,16 @@ Return JSON with 'projects' array.
         entries = []
         for x in res.projects:
             d = x.dict()
-            d["bullets"] = d.get("bullets", [])[:3]
+            bullets = d.get("bullets", [])
+            while len(bullets) < 3:
+                bullets.append(f"Delivered key project features leveraging modern development practices and collaborative workflows.")
+            d["bullets"] = bullets[:3]
             entries.append(d)
         return {"projects": entries}
     except Exception as e:
         print("Projects gen error:", e)
         return {"projects": state["profile"]["projects"]}
+
 
 async def optimize_skills(state: ResumeState):
     if "skills" not in state.get("template_sections", []):
@@ -227,43 +259,40 @@ async def optimize_skills(state: ResumeState):
     experience = state["profile"].get("experience", [])
     projects = state["profile"].get("projects", [])
 
-    prompt = f"""You are an expert ATS Resume Writer and technical recruiter. Generate a curated list of exactly 8 to 12 skills for this candidate's resume.
+    prompt = f"""You are an expert ATS Resume Writer. Generate a curated list of exactly 10-15 technical skills for this candidate.
 
-TARGET ROLE / JOB DESCRIPTION: "{state['target_role']}"
+TARGET ROLE: "{state['target_role']}"
 
-CANDIDATE'S EXISTING SKILLS (these are VERIFIED — prioritize these): {existing_skills}
+CANDIDATE'S EXISTING SKILLS (VERIFIED): {existing_skills}
 CANDIDATE'S EXPERIENCE: {experience}
 CANDIDATE'S PROJECTS: {projects}
 
-ABSOLUTE RULES — VIOLATION IS UNACCEPTABLE:
-1. AT LEAST 70% of skills must come DIRECTLY from the candidate's existing skills list.
-2. You may reorder skills to prioritize those most relevant to the target role.
-3. You may include industry-standard skills IF they can be CLEARLY inferred from the candidate's experience or projects:
-   - Example: If they built REST APIs, "API Development" is fair game.
-   - Example: If they used React, "Component-Based Architecture" is fair game.
-4. Do NOT invent highly specialized or niche skills the candidate clearly has no background in.
-   - BAD: Adding "Kubernetes" when the candidate has no DevOps/cloud experience.
-   - BAD: Adding "TensorFlow" when the candidate has no ML projects.
-5. Return exactly 8 to 12 skills total — no more, no less.
-6. Keep each skill concise (1-3 words max, e.g. "Python", "Cloud Architecture", "CI/CD Pipelines").
-7. Do NOT duplicate skills (even rephrased versions of the same skill).
-8. Order from most relevant to least relevant for the target role.
+MANDATORY REQUIREMENTS:
+1. Return exactly 10 to 15 skills — this is critical for ATS keyword coverage.
+2. AT LEAST 70% must come directly from the candidate's existing skills list.
+3. Include ATS-critical keywords that match the target role: python, javascript, typescript, react, node, sql, api, rest, cloud, aws, gcp, azure, docker, kubernetes, ci/cd, git, agile, scrum, data, analytics, machine learning, microservices, full-stack, scalable, performance, architecture.
+4. You may add industry-standard skills clearly inferable from experience/projects:
+   - Built web apps → "HTML/CSS", "Responsive Design" are fair
+   - Used databases → "Database Management", "SQL" are fair
+   - Team work → "Agile", "Cross-functional Collaboration" are fair
+5. Do NOT add highly specialized skills with no basis in the candidate's background.
+6. Each skill: 1-3 words max (e.g., "Python", "Cloud Architecture", "CI/CD Pipelines").
+7. Order from most relevant to least relevant for the target role.
+8. No duplicates. No synonyms of the same skill.
 
 Return JSON with 'skills' list.
 """
     try:
         res = await llm.ainvoke(prompt)
-        # Ensure we get 8-12 skills
-        skills = res.skills[:12] if len(res.skills) > 12 else res.skills
-        if len(skills) < 8 and existing_skills:
-            # Pad with existing skills if AI returned too few
+        skills = res.skills[:15] if len(res.skills) > 15 else res.skills
+        if len(skills) < 10 and existing_skills:
             for s in existing_skills:
-                if s not in skills and len(skills) < 8:
+                if s not in skills and len(skills) < 10:
                     skills.append(s)
         return {"skills": skills}
     except Exception as e:
         print("Skills gen error:", e)
-        return {"skills": existing_skills[:12] if existing_skills else []}
+        return {"skills": existing_skills[:15] if existing_skills else []}
 
 builder = StateGraph(ResumeState)
 
