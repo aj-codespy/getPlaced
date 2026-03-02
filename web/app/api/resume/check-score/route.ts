@@ -123,7 +123,7 @@ function calculateResumeScore(text: string) {
         foundCore.push('experience'); // Projects substitutes for Experience
     }
 
-    const sectionScore  = Math.min((foundCore.length / 3) * 6 + Math.min(foundBonus.length, 3) * 1.34, 10);
+    const sectionScore  = Math.min((foundCore.length / 3) * 6 + Math.min(foundBonus.length, 2) * 2, 10);
     const missingSections = Object.keys(sectionAliases).filter(s => !foundCore.includes(s));
 
     let sectionFeedback: string;
@@ -152,7 +152,7 @@ function calculateResumeScore(text: string) {
     // ── 3. Resume Length & Density (8 pts) ────────────────────────────────────
     let lengthScore = 0;
     let lengthFeedback = "";
-    if (wordCount >= 450 && wordCount <= 800) {
+    if (wordCount >= 350 && wordCount <= 800) {
         lengthScore = 8;
         lengthFeedback = pick([
             `Ideal length (${wordCount} words). Concise and complete.`,
@@ -168,13 +168,13 @@ function calculateResumeScore(text: string) {
             `${wordCount} words — consider trimming older or less relevant bullets to tighten it up.`,
             `Just over the ideal range at ${wordCount} words. Remove filler phrases to get under 800.`,
         ]);
-    } else if (wordCount >= 300 && wordCount < 450) {
-        lengthScore = 4;
+    } else if (wordCount >= 250 && wordCount < 350) {
+        lengthScore = 5;
         lengthFeedback = pick([
-            `Too brief (${wordCount} words). Expand your experience bullets and project descriptions.`,
-            `At ${wordCount} words, there's not enough detail. Add 2-3 bullets per role.`,
-            `${wordCount} words is thin. Recruiters want substance — expand your experience section.`,
-            `Your resume feels sparse at ${wordCount} words. Flesh out your projects and achievements.`,
+            `Slightly brief (${wordCount} words). Add 1-2 more bullets per role to hit 350+.`,
+            `At ${wordCount} words, add more detail. Expand your project descriptions and experience bullets.`,
+            `${wordCount} words is a bit thin. Aim for 350+ to give recruiters enough to evaluate.`,
+            `Your resume is close at ${wordCount} words. Flesh out your achievements to push it higher.`,
         ]);
     } else if (wordCount > 1100) {
         lengthScore = 3;
@@ -185,11 +185,11 @@ function calculateResumeScore(text: string) {
             `At ${wordCount} words, this will likely be skimmed. Trim ruthlessly to under 800 words.`,
         ]);
     } else {
-        lengthScore = 1;
+        lengthScore = 2;
         lengthFeedback = pick([
             `Very short (${wordCount} words). Add more detail to your experience and projects.`,
-            `Only ${wordCount} words — this is too brief to make an impression. Add more context.`,
-            `${wordCount} words won't cut it. Expand every section with specific responsibilities and outcomes.`,
+            `Only ${wordCount} words — expand your bullet points and descriptions for more substance.`,
+            `${wordCount} words is brief. Add more context to your achievements — aim for 350+ words.`,
         ]);
     }
 
