@@ -40,7 +40,50 @@ export default function CheckScorePage() {
             for (let i = 1; i <= pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
                 const textContent = await page.getTextContent();
-                fullText += textContent.items.map((item) => ('str' in item ? item.str : "")).join(" ") + "\n";
+                
+                // ── Reconstruct lines using Y-coordinate positions ──────────
+                // pdfjs-dist text items each have a 'transform' with [a,b,c,d,tx,ty]
+                // where ty = Y position. Group items by Y to form proper lines.
+                interface TextItem {
+                    str: string;
+                    x: number;
+                    y: number;
+                }
+                const items: TextItem[] = [];
+                for (const item of textContent.items) {
+                    if ('str' in item && item.str.trim()) {
+                        const tx = (item as { transform: number[] }).transform?.[4] ?? 0;
+                        const ty = (item as { transform: number[] }).transform?.[5] ?? 0;
+                        items.push({ str: item.str, x: tx, y: ty });
+                    }
+                }
+                
+                if (items.length === 0) continue;
+                
+                // Group by Y-coordinate (items within 3pt of each other = same line)
+                items.sort((a, b) => b.y - a.y || a.x - b.x); // top to bottom, left to right
+                
+                const lines: string[] = [];
+                let currentLineY = items[0].y;
+                let currentLine: TextItem[] = [];
+                
+                for (const item of items) {
+                    if (Math.abs(item.y - currentLineY) > 3) {
+                        // New line — flush current
+                        currentLine.sort((a, b) => a.x - b.x);
+                        lines.push(currentLine.map(t => t.str).join(" "));
+                        currentLine = [];
+                        currentLineY = item.y;
+                    }
+                    currentLine.push(item);
+                }
+                // Flush last line
+                if (currentLine.length > 0) {
+                    currentLine.sort((a, b) => a.x - b.x);
+                    lines.push(currentLine.map(t => t.str).join(" "));
+                }
+                
+                fullText += lines.join("\n") + "\n";
             }
 
             const res = await fetch("/api/resume/check-score", {

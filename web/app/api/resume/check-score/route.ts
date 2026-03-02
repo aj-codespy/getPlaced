@@ -19,7 +19,6 @@ export async function POST(req: Request) {
 }
 
 // ── Randomly pick one message from a pool ─────────────────────────────────────
-// Same meaning, different wording — so feedback never feels repetitive.
 function pick(options: string[]): string {
     return options[Math.floor(Math.random() * options.length)];
 }
@@ -31,13 +30,27 @@ function pick(options: string[]): string {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function calculateResumeScore(text: string) {
-    const lowerText = text.toLowerCase();
-    const lines = text.split(/\n/).map(l => l.trim()).filter(Boolean);
-    const wordCount = text.split(/\s+/).length;
+    // ── Pre-process text for robust matching ──────────────────────────────────
+    // LaTeX PDFs may have ligatures, special chars, or encoding artifacts.
+    // Normalize the text to handle these.
+    const normalizedText = text
+        .replace(/ﬁ/g, 'fi')
+        .replace(/ﬂ/g, 'fl')
+        .replace(/ﬀ/g, 'ff')
+        .replace(/ﬃ/g, 'ffi')
+        .replace(/ﬄ/g, 'ffl')
+        .replace(/[\u2018\u2019]/g, "'")
+        .replace(/[\u201C\u201D]/g, '"')
+        .replace(/[\u2013\u2014]/g, '-')
+        .replace(/\u2022/g, '•');     // Normalize Unicode bullets
+
+    const lowerText = normalizedText.toLowerCase();
+    const lines = normalizedText.split(/\n/).map(l => l.trim()).filter(Boolean);
+    const wordCount = normalizedText.split(/\s+/).filter(Boolean).length;
 
     // ── 1. Contact Info (10 pts) ──────────────────────────────────────────────
-    const hasEmail     = /@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(text);
-    const hasPhone     = /\d{10,}/.test(text.replace(/[\s\-().+]/g, ''));
+    const hasEmail     = /@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(normalizedText);
+    const hasPhone     = /\d{10,}/.test(normalizedText.replace(/[\s\-().+]/g, ''));
     const hasLinkedIn  = /linkedin/i.test(lowerText);
     const hasGithub    = /github/i.test(lowerText);
     const hasPortfolio = /(portfolio|\.io|\.dev|\.me|\.site)/i.test(lowerText) && !hasLinkedIn && !hasGithub;
@@ -75,12 +88,35 @@ function calculateResumeScore(text: string) {
     }
 
     // ── 2. Section Structure (10 pts) ─────────────────────────────────────────
-    const coreSections  = ['experience', 'education', 'skills'];
-    const bonusSections = ['projects', 'summary', 'objective', 'certifications', 'achievements', 'publications'];
-    const foundCore     = coreSections.filter(s => lowerText.includes(s));
-    const foundBonus    = bonusSections.filter(s => lowerText.includes(s));
+    // Check for core section keywords — including common variations used in resume templates
+    const sectionAliases: Record<string, string[]> = {
+        experience: ['experience', 'work history', 'employment', 'professional experience', 'work experience'],
+        education:  ['education', 'academic', 'university', 'degree', 'bachelor', 'master', 'b.tech', 'b.e.', 'b.sc', 'm.tech', 'gpa', 'cgpa'],
+        skills:     ['skills', 'expertise', 'competencies', 'technical skills', 'core competencies', 'proficiencies', 'technologies'],
+    };
+    const bonusAliases: Record<string, string[]> = {
+        projects:       ['project', 'projects', 'key projects', 'technical projects'],
+        summary:        ['summary', 'objective', 'profile', 'about me', 'professional summary'],
+        certifications: ['certification', 'certifications', 'certified'],
+        achievements:   ['achievement', 'achievements', 'awards', 'honors', 'accomplishments'],
+        publications:   ['publication', 'publications', 'research'],
+    };
+
+    const foundCore: string[] = [];
+    for (const [section, aliases] of Object.entries(sectionAliases)) {
+        if (aliases.some(alias => lowerText.includes(alias))) {
+            foundCore.push(section);
+        }
+    }
+    const foundBonus: string[] = [];
+    for (const [section, aliases] of Object.entries(bonusAliases)) {
+        if (aliases.some(alias => lowerText.includes(alias))) {
+            foundBonus.push(section);
+        }
+    }
+
     const sectionScore  = Math.min((foundCore.length / 3) * 6 + Math.min(foundBonus.length, 2) * 2, 10);
-    const missingSections = coreSections.filter(s => !lowerText.includes(s));
+    const missingSections = Object.keys(sectionAliases).filter(s => !foundCore.includes(s));
 
     let sectionFeedback: string;
     if (sectionScore >= 10) {
@@ -159,7 +195,7 @@ function calculateResumeScore(text: string) {
         "migrated", "refactored", "established", "transformed", "negotiated", "drove",
         "executed", "oversaw", "facilitated", "authored", "contributed", "shipped"
     ];
-    const foundVerbs = strongVerbs.filter(v => new RegExp(`\\b${v}\\b`, 'i').test(text));
+    const foundVerbs = strongVerbs.filter(v => new RegExp(`\\b${v}\\b`, 'i').test(normalizedText));
     const verbCount  = foundVerbs.length;
     const verbScore  = Math.min(Math.round((verbCount / 8) * 20), 20);
 
@@ -195,10 +231,15 @@ function calculateResumeScore(text: string) {
         /\d+\+\s/g,
         /\d[\d,]*\s*(users|customers|clients|engineers|teams?|members?|repos?|services?|endpoints?|requests?|transactions?|projects?)/gi,
         /\b(zero|one|two|three|four|five|six|seven|eight|nine|ten)\b.*\b(teams?|engineers?|clients?|projects?)\b/gi,
+        // Additional LaTeX-friendly metric patterns
+        /\d+\s*ms/gi,                    // 480ms, 200 ms
+        /\d+\s*(?:K|M|B)\b/g,           // 10K, 5M users
+        /\d+\s*(?:seconds?|minutes?|hours?|days?)/gi,  // time savings
+        /\b\d{2,}\b/g,                   // Any 2+ digit number (conservative metric detection)
     ];
     let metricCount = 0;
     metricPatterns.forEach(p => {
-        const matches = text.match(p);
+        const matches = normalizedText.match(p);
         if (matches) metricCount += matches.length;
     });
     metricCount = Math.min(metricCount, 20);
@@ -267,7 +308,26 @@ function calculateResumeScore(text: string) {
     }
 
     // ── 7. Bullet Point Quality (10 pts) ──────────────────────────────────────
-    const bulletLines = lines.filter(l => /^[•\-\*▸▹◦]/.test(l) || /^\d+\./.test(l));
+    // Detect bullets using multiple strategies:
+    // 1. Lines starting with bullet characters (•, -, *, ▸, etc.)
+    // 2. Lines starting with action verbs (common in LaTeX PDFs where bullet chars are lost)
+    // 3. Short-to-medium lines that follow a section header pattern
+    const bulletCharsRegex = /^[•\-\*▸▹◦·∙⁃‣►▪■□●○◆◇→⇒]/;
+    const numberBulletRegex = /^\d+\./;
+    const actionVerbStartRegex = new RegExp(
+        `^(${strongVerbs.join('|')})\\b`,
+        'i'
+    );
+    
+    const bulletLines = lines.filter(l => {
+        // Method 1: Traditional bullet character detection
+        if (bulletCharsRegex.test(l) || numberBulletRegex.test(l)) return true;
+        // Method 2: Lines starting with strong action verbs (15-40 words, typical bullet length)
+        const wc = l.split(/\s+/).length;
+        if (wc >= 8 && wc <= 40 && actionVerbStartRegex.test(l)) return true;
+        return false;
+    });
+
     const avgBulletLen = bulletLines.length > 0
         ? bulletLines.reduce((sum, b) => sum + b.split(/\s+/).length, 0) / bulletLines.length
         : 0;
@@ -317,35 +377,43 @@ function calculateResumeScore(text: string) {
     }
 
     // ── 8. Summary / Objective Quality (7 pts) ────────────────────────────────
-    const hasSummary = /(summary|objective|profile|about me)/i.test(lowerText);
-    const topText = text.slice(0, Math.min(text.length, 600));
-    const sentenceCount = (topText.match(/[.!?]+/g) || []).length;
-
+    const summaryAliases = ['summary', 'objective', 'profile', 'about me', 'professional summary', 'career summary'];
+    const hasSummary = summaryAliases.some(alias => lowerText.includes(alias));
+    
+    // Also check for summary-like content: 2-3 sentence paragraph near the top of the resume
+    // (some templates render summary without a labeled section header)
+    const topText = normalizedText.slice(0, Math.min(normalizedText.length, 800));
+    const topSentences = (topText.match(/[.!?]+/g) || []).length;
+    const hasImplicitSummary = !hasSummary && topSentences >= 2 && topText.split(/\s+/).length > 30;
+    
     let summaryScore = 0;
     let summaryFeedback = "";
-    if (!hasSummary) {
+    if (hasSummary || hasImplicitSummary) {
+        const sentenceCount = (topText.match(/[.!?]+/g) || []).length;
+        if (sentenceCount < 2 && !hasImplicitSummary) {
+            summaryScore = 3;
+            summaryFeedback = pick([
+                "Summary is too brief. Write 2-3 sentences pitching your value for the target role.",
+                "Your summary needs more substance. Expand it to 2-3 sentences that highlight your key strengths.",
+                "One-liner summaries don't cut it. Write 2-3 sentences that make a recruiter want to read on.",
+                "Summary detected but it's too short. Flesh it out — mention your role, years of experience, and top skill.",
+            ]);
+        } else {
+            summaryScore = 7;
+            summaryFeedback = pick([
+                "Professional summary present — good for ATS and recruiter first impressions.",
+                "Strong summary section detected. This is the first thing recruiters read — great that it's there.",
+                "Summary looks solid. A well-written opener significantly improves your callback rate.",
+                "Good — your summary sets the stage. Make sure it's tailored to the specific role you're applying for.",
+            ]);
+        }
+    } else {
         summaryScore = 0;
         summaryFeedback = pick([
             "No summary section found. A 2-3 sentence professional summary boosts ATS score significantly.",
             "Missing a summary. Add a 2-3 sentence pitch at the top — it's the first thing recruiters read.",
             "No professional summary detected. A strong opener sets the tone and hooks the recruiter immediately.",
             "Add a Summary section. 2-3 sentences at the top telling recruiters exactly who you are and what you offer.",
-        ]);
-    } else if (sentenceCount < 2) {
-        summaryScore = 3;
-        summaryFeedback = pick([
-            "Summary is too brief. Write 2-3 sentences pitching your value for the target role.",
-            "Your summary needs more substance. Expand it to 2-3 sentences that highlight your key strengths.",
-            "One-liner summaries don't cut it. Write 2-3 sentences that make a recruiter want to read on.",
-            "Summary detected but it's too short. Flesh it out — mention your role, years of experience, and top skill.",
-        ]);
-    } else {
-        summaryScore = 7;
-        summaryFeedback = pick([
-            "Professional summary present — good for ATS and recruiter first impressions.",
-            "Strong summary section detected. This is the first thing recruiters read — great that it's there.",
-            "Summary looks solid. A well-written opener significantly improves your callback rate.",
-            "Good — your summary sets the stage. Make sure it's tailored to the specific role you're applying for.",
         ]);
     }
 
