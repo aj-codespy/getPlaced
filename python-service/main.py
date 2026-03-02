@@ -126,12 +126,18 @@ def normalize_projects(proj_list: list) -> list:
         tech = proj.get("techStack") or proj.get("technologies") or proj.get("tech") or []
         if isinstance(tech, str):
             tech = [t.strip() for t in tech.split(",") if t.strip()]
+        # Ensure bullets is always a list
+        bullets = proj.get("bullets") or []
+        if isinstance(bullets, str):
+            import re
+            bullets = [b.strip().lstrip("•-* ") for b in re.split(r'[\n•\-*]+', bullets) if b.strip()]
         normalized.append({
             "title":       proj.get("title") or proj.get("name") or "",
             "role":        proj.get("role") or "",
             "link":        proj.get("link") or proj.get("url") or "",
             "techStack":   tech,
             "description": proj.get("description") or "",
+            "bullets":     bullets,
         })
     return normalized
 

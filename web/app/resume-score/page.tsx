@@ -60,6 +60,37 @@ export default function CheckScorePage() {
                 
                 if (items.length === 0) continue;
                 
+                // Smart join: merge text items that are part of the same word
+                // (handles LaTeX small-caps where "Experience" becomes ["E", "XPERIENCE"])
+                function smartJoinLine(lineItems: TextItem[]): string {
+                    lineItems.sort((a, b) => a.x - b.x);
+                    if (lineItems.length === 0) return "";
+                    if (lineItems.length === 1) return lineItems[0].str;
+                    
+                    let result = lineItems[0].str;
+                    for (let i = 1; i < lineItems.length; i++) {
+                        const prev = lineItems[i - 1];
+                        const curr = lineItems[i];
+                        // Estimate the end position of prev item
+                        // Avg char width ≈ 5-7pt for 11pt font. Use a generous threshold.
+                        const prevEndX = prev.x + prev.str.length * 5;
+                        const gap = curr.x - prevEndX;
+                        
+                        // If gap is small (< 4pt), items are part of the same word  
+                        if (gap < 4) {
+                            result += curr.str;
+                        } else {
+                            result += " " + curr.str;
+                        }
+                    }
+                    
+                    // Post-process: collapse single-letter + space + word patterns
+                    // e.g., "E XPERIENCE" → "EXPERIENCE", "S KILLS" → "SKILLS"
+                    result = result.replace(/\b([A-Z])\s([A-Z]{2,})\b/g, '$1$2');
+                    
+                    return result;
+                }
+                
                 // Group by Y-coordinate (items within 3pt of each other = same line)
                 items.sort((a, b) => b.y - a.y || a.x - b.x); // top to bottom, left to right
                 
@@ -70,8 +101,7 @@ export default function CheckScorePage() {
                 for (const item of items) {
                     if (Math.abs(item.y - currentLineY) > 3) {
                         // New line — flush current
-                        currentLine.sort((a, b) => a.x - b.x);
-                        lines.push(currentLine.map(t => t.str).join(" "));
+                        lines.push(smartJoinLine(currentLine));
                         currentLine = [];
                         currentLineY = item.y;
                     }
@@ -79,8 +109,7 @@ export default function CheckScorePage() {
                 }
                 // Flush last line
                 if (currentLine.length > 0) {
-                    currentLine.sort((a, b) => a.x - b.x);
-                    lines.push(currentLine.map(t => t.str).join(" "));
+                    lines.push(smartJoinLine(currentLine));
                 }
                 
                 fullText += lines.join("\n") + "\n";
