@@ -20,7 +20,7 @@
 \definecolor{darkgray}{RGB}{60,60,60}
 
 % Margins
-\geometry{left=2cm, right=2cm, top=2cm, bottom=2cm}
+\geometry{left=1.5cm, right=1.5cm, top=1.5cm, bottom=1.5cm}
 
 % Remove page numbers
 \pagestyle{empty}
@@ -64,12 +64,7 @@
 \BLOCK{if data.personalInfo.portfolio} \quad \textbullet \quad \href{\VAR{data.personalInfo.portfolio}}{Portfolio} \BLOCK{endif}
 \vspace{24pt}
 
-% --- SUMMARY ---
-\BLOCK{if data.personalInfo.summary}
-\noindent
-{\large \color{darkgray} \VAR{data.personalInfo.summary}}
-\vspace{24pt}
-\BLOCK{endif}
+% --- SUMMARY (rendered in header above) ---
 
 % --- EXPERIENCE ---
 \BLOCK{if data.experience}

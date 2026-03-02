@@ -14,15 +14,18 @@ export async function POST(req: Request) {
     const resolvedTemplateId = templateId || "classic";
     const templateSections = getTemplateSections(resolvedTemplateId);
 
-    const { personalInfo, education, achievements, certifications, publications, ...writableProfile } = profile;
+    const { personalInfo, education, achievements, certifications, publications } = profile;
     const targetRole = targetJob || personalInfo?.headline || "General Professional";
 
+    // Send the FULL profile to the optimizer so it has complete candidate context
+    // for anti-hallucination. The optimizer only rewrites writable sections (summary,
+    // experience, projects, skills) but needs the full profile for context.
     const pythonApiUrl = process.env.PYTHON_SERVICE_URL || "http://127.0.0.1:8000";
     const res = await fetch(`${pythonApiUrl}/optimize-resume`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        profile: writableProfile,
+        profile: profile,
         target_role: targetRole,
         template_sections: templateSections,
       }),

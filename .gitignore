@@ -83,3 +83,5 @@ yarn-error.log*
 # IDE
 .vscode/
 .idea/
+# Root-level .next build cache
+.next/

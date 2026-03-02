@@ -18,7 +18,7 @@
 \definecolor{TEXTGRAY}{RGB}{60, 60, 60}
 
 % Margins
-\geometry{left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm}
+\geometry{left=1.8cm, right=1.8cm, top=2cm, bottom=2cm}
 
 % Font (Default Serif is good for Elegant)
 
@@ -108,14 +108,14 @@
     \textbf{\VAR{proj.title}} \BLOCK{if proj.link} \href{\VAR{proj.link}}{\footnotesize [Link]} \BLOCK{endif}
     \quad \textemdash \quad {\small \color{textgray} \textit{\VAR{proj.techStack|join(', ')}}} \\
     {\small \VAR{proj.description}}
+    \BLOCK{if proj.bullets}
+    \begin{itemize}[leftmargin=1.5em, label={\color{accent}\tiny$\blacksquare$}]
+        \BLOCK{for bullet in proj.bullets}
+        \item \small \VAR{bullet}
+        \BLOCK{endfor}
+    \end{itemize}
+    \BLOCK{endif}
 \BLOCK{endfor}
-\end{itemize}
-\BLOCK{endif}
-\BLOCK{if proj.bullets}
-\begin{itemize}[leftmargin=1.5em]
-    \BLOCK{for bullet in proj.bullets}
-    \item \small \VAR{bullet}
-    \BLOCK{endfor}
 \end{itemize}
 \BLOCK{endif}
 

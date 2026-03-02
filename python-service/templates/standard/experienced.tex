@@ -144,15 +144,15 @@
         \begin{itemize}[leftmargin=1.2em, nosep, label={\color{slate600}\small\textbullet}]
             \item \small \color{slate900} \VAR{proj.description}
         \end{itemize}
+        \BLOCK{if proj.bullets}
+        \begin{itemize}[leftmargin=1.5em, nosep, label={\color{slate600}\small\textbullet}]
+            \BLOCK{for bullet in proj.bullets}
+            \item \small \color{slate900} \VAR{bullet}
+            \BLOCK{endfor}
+        \end{itemize}
+        \BLOCK{endif}
     \end{mdframed}
 \BLOCK{endfor}
-\BLOCK{endif}
-\BLOCK{if proj.bullets}
-\begin{itemize}[leftmargin=1.5em]
-    \BLOCK{for bullet in proj.bullets}
-    \item \small \VAR{bullet}
-    \BLOCK{endfor}
-\end{itemize}
 \BLOCK{endif}
 
 % Achievements
