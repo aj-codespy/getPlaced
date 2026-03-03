@@ -5,9 +5,9 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 // Parse is a pure extraction task — no creativity needed.
-// gemini-2.0-flash-lite is the cheapest model and perfectly capable of structured extraction.
+// gemini-2.5-flash is used for extraction.
 const model = genAI.getGenerativeModel({
-  model: "gemini-2.0-flash-lite",
+  model: "gemini-2.5-flash",
   generationConfig: {
     responseMimeType: "application/json",
     temperature: 0.1,   // Near-zero: extraction should be deterministic

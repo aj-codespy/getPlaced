@@ -18,7 +18,7 @@
 \definecolor{TEXTGRAY}{RGB}{60, 60, 60}
 
 % Margins
-\geometry{left=1.8cm, right=1.8cm, top=2cm, bottom=2cm}
+\geometry{left=1.2cm, right=1.2cm, top=1.2cm, bottom=1.2cm}
 
 % Font (Default Serif is good for Elegant)
 
@@ -38,13 +38,13 @@
   {}
   [\vspace{-4pt}\hrule]
 
-\titlespacing{\section}{0pt}{18pt}{12pt}
+\titlespacing{\section}{0pt}{10pt}{6pt}
 
 \begin{document}
 
 % --- HEADER ---
 \begin{center}
-    {\Huge \scshape \color{accent} \VAR{data.personalInfo.fullName}} \\ \vspace{8pt}
+    {\Huge \scshape \color{accent} \VAR{data.personalInfo.fullName}} \\ \vspace{4pt}
     {\small \color{textgray}
         \VAR{data.personalInfo.location} \quad \textbullet \quad 
         \VAR{data.personalInfo.phone} \quad \textbullet \quad 
@@ -58,7 +58,7 @@
     }
 \end{center}
 
-\vspace{8pt}
+\vspace{4pt}
 
 % --- SUMMARY ---
 \BLOCK{if data.personalInfo.summary}
@@ -67,7 +67,7 @@
         \centering \small \color{textgray} \textit{\VAR{data.personalInfo.summary}}
     }
 \end{center}
-\vspace{12pt}
+\vspace{6pt}
 \BLOCK{endif}
 
 % --- EXPERIENCE ---
@@ -83,7 +83,7 @@
         \item \small \VAR{bullet}
         \BLOCK{endfor}
     \end{itemize}
-    \vspace{12pt}
+    \vspace{4pt}
 \BLOCK{endfor}
 \BLOCK{endif}
 
@@ -95,7 +95,7 @@
     \textbf{\VAR{edu.institution}} \hfill \VAR{edu.startDate} -- \VAR{edu.endDate} \\
     {\small \textit{\VAR{edu.degree}}}
     \BLOCK{if edu.score} \hfill {\small GPA: \VAR{edu.score}} \BLOCK{endif}
-    \vspace{6pt}
+    \vspace{3pt}
 \BLOCK{endfor}
 \BLOCK{endif}
 

@@ -30,7 +30,7 @@
 \renewcommand{\familydefault}{\sfdefault}
 
 % Margins
-\geometry{left=1.5cm, right=1.5cm, top=1.5cm, bottom=1.5cm}
+\geometry{left=1cm, right=1cm, top=1cm, bottom=1cm}
 
 % Remove page numbers
 \pagestyle{empty}
@@ -40,7 +40,7 @@
   \color{blue900}\Large\bfseries\uppercase
 }{}{0em}{}[\titleline{\color{blue900}\titlerule}]
 
-\titlespacing{\section}{0pt}{12pt}{8pt}
+\titlespacing{\section}{0pt}{8pt}{4pt}
 
 \begin{document}
 
@@ -59,9 +59,9 @@
     \VAR{data.personalInfo.linkedin}
 \end{minipage}
 
-\vspace{0.5cm}
+\vspace{0.2cm}
 {\color{blue600}\hrule height 2pt}
-\vspace{0.5cm}
+\vspace{0.2cm}
 
 % SUMMARY
 \BLOCK{if data.personalInfo.summary}
@@ -70,7 +70,7 @@
         \small \color{gray600} \VAR{data.personalInfo.summary}
     \end{minipage}
 }
-\vspace{0.5cm}
+\vspace{0.2cm}
 \BLOCK{endif}
 
 % EXPERIENCE
@@ -89,7 +89,7 @@
             \end{itemize}
         \end{tabular}
     \end{minipage}
-    \vspace{0.4cm}
+    \vspace{0.15cm}
 \BLOCK{endfor}
 \BLOCK{endif}
 
@@ -111,12 +111,12 @@
         \BLOCK{endfor}
     \end{itemize}
     \BLOCK{endif}
-    \vspace{0.4cm}
+    \vspace{0.15cm}
 \BLOCK{endfor}
 \BLOCK{endif}
 
 % EDUCATION & SKILLS (2 Columns)
-\vspace{0.2cm}
+\vspace{0.1cm}
 \begin{minipage}[t]{0.48\textwidth}
     \BLOCK{if data.education}
     \section{Education}
@@ -140,7 +140,7 @@
     \BLOCK{endif}
 \end{minipage}
 
-\vspace{0.3cm}
+\vspace{0.15cm}
 
 % ACHIEVEMENTS
 \BLOCK{if data.achievements}

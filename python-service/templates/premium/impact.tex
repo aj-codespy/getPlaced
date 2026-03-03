@@ -12,7 +12,7 @@
 \usepackage{xcolor}
 
 % Margins (Std Consulting margins)
-\geometry{left=0.75in, right=0.75in, top=0.75in, bottom=0.75in}
+\geometry{left=0.5in, right=0.5in, top=0.5in, bottom=0.5in}
 
 \pagestyle{empty}
 
@@ -28,7 +28,7 @@
   {} 
   [\titlerule]
 
-\titlespacing{\section}{0pt}{14pt}{8pt}
+\titlespacing{\section}{0pt}{8pt}{4pt}
 
 \begin{document}
 
@@ -45,12 +45,12 @@
     \BLOCK{if data.personalInfo.portfolio} \quad \textbullet \quad \href{\VAR{data.personalInfo.portfolio}}{Portfolio} \BLOCK{endif}
 \end{center}
 
-\vspace{10pt}
+\vspace{4pt}
 
 % --- SUMMARY ---
 \BLOCK{if data.personalInfo.summary}
 \noindent {\small \VAR{data.personalInfo.summary}}
-\vspace{10pt}
+\vspace{4pt}
 \BLOCK{endif}
 
 % --- EXPERIENCE (Consulting prioritizes Experience/Leadership) ---
@@ -65,7 +65,7 @@
         \item \VAR{bullet}
         \BLOCK{endfor}
     \end{itemize}
-    \vspace{10pt}
+    \vspace{4pt}
 \BLOCK{endfor}
 \BLOCK{endif}
 
@@ -83,7 +83,7 @@
         \BLOCK{endfor}
     \end{itemize}
     \BLOCK{endif}
-    \vspace{6pt}
+    \vspace{3pt}
 \BLOCK{endfor}
 \BLOCK{endif}
 
@@ -94,7 +94,7 @@
     \noindent
     \textbf{\VAR{edu.institution}} \hfill \VAR{edu.startDate} -- \VAR{edu.endDate} \\
     \VAR{edu.degree} \hfill \BLOCK{if edu.score} GPA: \VAR{edu.score} \BLOCK{endif}
-    \vspace{6pt}
+    \vspace{3pt}
 \BLOCK{endfor}
 \BLOCK{endif}
 

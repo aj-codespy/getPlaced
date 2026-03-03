@@ -147,6 +147,8 @@ export default function ProfilePage() {
     };
   }, [formData, saveDraft]);
 
+  const dataFetchedRef = useRef(false);
+
   // ── Warn before leaving with unsaved changes ──────────────────────────────
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
@@ -161,7 +163,8 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/login");
-    if (status === "authenticated") {
+    if (status === "authenticated" && !dataFetchedRef.current) {
+        dataFetchedRef.current = true;
         fetch("/api/profile")
           .then(res => res.json())
           .then(data => {
@@ -171,12 +174,11 @@ export default function ProfilePage() {
               const draft = localStorage.getItem(DRAFT_KEY);
               const savedProfile = localStorage.getItem("userProfile");
               
-              if (!profile) {
-                  if (draft) {
-                      try { profile = JSON.parse(draft); } catch { /* ignore */ }
-                  } else if (savedProfile) {
-                      try { profile = JSON.parse(savedProfile); } catch { /* ignore */ }
-                  }
+              // Priority: 1. Unsaved Draft, 2. Database Profile, 3. Saved Local Profile
+              if (draft) {
+                  try { profile = JSON.parse(draft); } catch { /* ignore */ }
+              } else if (!profile && savedProfile) {
+                  try { profile = JSON.parse(savedProfile); } catch { /* ignore */ }
               }
 
               if (profile) {
@@ -211,14 +213,17 @@ export default function ProfilePage() {
                        personalInfo: { ...prev.personalInfo, email: session?.user?.email || "", fullName: session?.user?.name || "" }
                    }));
               }
-              
               // Mark initial load as done AFTER setting form data
               setTimeout(() => { initialLoadDone.current = true; }, 100);
               setLoading(false);
           })
-          .catch(console.error);
+          .catch(err => {
+              console.error(err);
+              setLoading(false);
+              dataFetchedRef.current = false;
+          });
     }
-  }, [status, session, router]);
+  }, [status, session?.user?.name, session?.user?.email, router]);
 
   const handleSave = async () => {
       setSaving(true);
@@ -275,10 +280,10 @@ export default function ProfilePage() {
            setFormData(prev => ({ ...prev, skills: { ...prev.skills, [field]: value } }));
       } else if (index !== null && Array.isArray(formData[section])) {
            setFormData(prev => {
-                const sectionData = prev[section] as Array<any>;
+                const sectionData = prev[section] as unknown as Array<Record<string, unknown>>;
                 const newArr = [...sectionData];
                 newArr[index] = { ...newArr[index], [field]: value };
-                return { ...prev, [section]: newArr };
+                return { ...prev, [section]: newArr } as unknown as UserProfile;
            });
       }
   };

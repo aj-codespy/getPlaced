@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/firebase/config";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
@@ -14,11 +15,11 @@ export async function POST(req: Request) {
       );
     }
 
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
+    const emailLower = email.toLowerCase();
+    const userRef = doc(db, "users", emailLower);
+    const existingUser = await getDoc(userRef);
 
-    if (existingUser) {
+    if (existingUser.exists()) {
       return NextResponse.json(
         { message: "User already exists" },
         { status: 400 }
@@ -27,34 +28,24 @@ export async function POST(req: Request) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     
-    // Check referral
-    let referrerId = null;
-    let initialCredits = 1;
+    // Check referral (Simplified for Firebase)
+    const referrerId = null;
+    const initialCredits = 100; // 100 free credits at start
 
-    if (referralCode) {
-       const referrer = await prisma.user.findUnique({
-         where: { referralCode }
-       });
-       if (referrer) {
-         referrerId = referrer.id;
-         // Logic for referrer reward could go here or in a separate event
-       }
-    }
-
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        contact,
-        credits: initialCredits,
-        referredBy: referrerId,
-        referralCode: Math.random().toString(36).substring(7),
-      },
+    await setDoc(userRef, {
+      name,
+      email: emailLower,
+      password: hashedPassword,
+      contact: contact || null,
+      credits: initialCredits,
+      referredBy: referrerId,
+      referralCode: referralCode || Math.random().toString(36).substring(7),
+      createdAt: serverTimestamp(),
+      provider: "credentials"
     });
 
     return NextResponse.json(
-      { message: "User created successfully", user: { id: user.id, email: user.email } },
+      { message: "User created successfully", user: { id: emailLower, email: emailLower } },
       { status: 201 }
     );
   } catch (error) {

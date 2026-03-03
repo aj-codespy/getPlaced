@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/firebase/config";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { filterResumeDataForTemplate, getTemplateSections } from "@/lib/templates";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { doc, getDoc, updateDoc, increment } from "firebase/firestore";
 
 export async function POST(req: Request) {
   try {
@@ -9,6 +12,26 @@ export async function POST(req: Request) {
 
     if (!profile) {
       return NextResponse.json({ error: "Profile data missing" }, { status: 400 });
+    }
+
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userEmail = session.user.email.toLowerCase();
+    const userRef = doc(db, "users", userEmail);
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) {
+      return NextResponse.json({ error: "User not found" }, { status: 403 });
+    }
+
+    const userData = userSnap.data();
+    const currentCredits: number = userData.credits || 0;
+
+    if (currentCredits < 100) {
+      return NextResponse.json({ error: "Insufficient credits for AI generation. Please recharge." }, { status: 402 });
     }
 
     const resolvedTemplateId = templateId || "classic";
@@ -43,6 +66,9 @@ export async function POST(req: Request) {
     }
 
     const aiOutput = resJson.data;
+    const inputTokens = aiOutput.input_tokens || 0;
+    const outputTokens = aiOutput.output_tokens || 0;
+    const totalTokens = inputTokens + outputTokens;
 
 
     // ── Re-assemble full resume — inject static sections back ───────────────
@@ -87,8 +113,18 @@ export async function POST(req: Request) {
         content:    sanitize(optimizedContent),
         templateId: resolvedTemplateId,
         createdAt:  serverTimestamp(),
+        tokens: {
+            input: inputTokens,
+            output: outputTokens,
+            total: totalTokens
+        }
       });
       resumeId = docRef.id;
+
+      // Deduct credits after a successful generation
+      await updateDoc(userRef, {
+        credits: increment(-100)
+      });
     } catch (dbError) {
       console.error("Firebase Save Failed (continuing):", dbError);
     }

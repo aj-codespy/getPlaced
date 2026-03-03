@@ -10,7 +10,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 // Text-only path: use flash-lite (cheapest)
 const textModel = genAI.getGenerativeModel({
-  model: "gemini-2.0-flash-lite",
+  model: "gemini-2.5-flash",
   generationConfig: {
     responseMimeType: "application/json",
     temperature: 0.3,
@@ -20,7 +20,7 @@ const textModel = genAI.getGenerativeModel({
 
 // Vision path (images attached): needs a multimodal model
 const visionModel = genAI.getGenerativeModel({
-  model: "gemini-2.0-flash",
+  model: "gemini-2.5-flash",
   generationConfig: {
     responseMimeType: "application/json",
     temperature: 0.3,
@@ -89,11 +89,11 @@ export async function POST(req: Request) {
     }
 
     // 3. AI Analysis — choose model based on whether images are present
-    let analysisData: any;
+    let analysisData: Record<string, unknown> | null = null;
 
     if (hasImages) {
       // Vision path — cap to 2 images, cap text to 3000 chars
-      const parts: any[] = [
+      const parts: Array<{ text: string } | { inlineData: { data: string; mimeType: string } }> = [
         { text: buildPrompt(hasText ? profileText.substring(0, 3000) : "[See attached screenshots]") },
       ];
       images.slice(0, 2).forEach((img: string) => {
@@ -118,7 +118,7 @@ export async function POST(req: Request) {
     }
 
     // 4. Deduct credits / increment audit count
-    const updates: any = { auditsUsed: increment(1) };
+    const updates: Record<string, ReturnType<typeof increment> | number> = { auditsUsed: increment(1) };
     if (cost > 0) updates.credits = increment(-cost);
     await updateDoc(userRef, updates);
 

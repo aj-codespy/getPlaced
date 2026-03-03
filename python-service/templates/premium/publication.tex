@@ -21,11 +21,11 @@
 \renewcommand{\footrulewidth}{0pt}
 
 % Margins
-\addtolength{\oddsidemargin}{-0.5in}
-\addtolength{\evensidemargin}{-0.5in}
-\addtolength{\textwidth}{1in}
-\addtolength{\topmargin}{-.5in}
-\addtolength{\textheight}{1.0in}
+\addtolength{\oddsidemargin}{-0.75in}
+\addtolength{\evensidemargin}{-0.75in}
+\addtolength{\textwidth}{1.5in}
+\addtolength{\topmargin}{-.75in}
+\addtolength{\textheight}{1.5in}
 
 \urlstyle{same}
 \raggedbottom
@@ -34,8 +34,8 @@
 
 % Section Formatting
 \titleformat{\section}{
-  \vspace{-10pt}\scshape\raggedright\large\bfseries
-}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+  \vspace{-12pt}\scshape\raggedright\large\bfseries
+}{}{0em}{}[\color{black}\titlerule \vspace{-6pt}]
 
 \begin{document}
 
@@ -46,17 +46,17 @@
         \VAR{data.personalInfo.email} & $|$ & \VAR{data.personalInfo.phone} & $|$ \VAR{data.personalInfo.location} \\
         \multicolumn{4}{c}{\VAR{data.personalInfo.linkedin}}
     \end{tabular}
-    \vspace{8pt}
+    \vspace{4pt}
     \hrule
 \end{center}
 
-\vspace{0.3cm}
+\vspace{0.1cm}
 
 % --- SUMMARY ---
 \BLOCK{if data.personalInfo.summary}
 \section{Summary}
 \small{\VAR{data.personalInfo.summary}}
-\vspace{0.4cm}
+\vspace{0.15cm}
 \BLOCK{endif}
 
 % --- EXPERIENCE ---
@@ -74,7 +74,7 @@
         \item \small \VAR{bullet}
         \BLOCK{endfor}
       \end{itemize}
-      \vspace{5pt}
+      \vspace{2pt}
     \BLOCK{endfor}
 \end{itemize}
 \BLOCK{endif}
@@ -128,7 +128,7 @@
       \BLOCK{if proj.techStack}
       \vspace{2pt}\small{\textbf{Technologies:} \BLOCK{for tech in proj.techStack}\VAR{tech}\BLOCK{if not loop.last}, \BLOCK{endif}\BLOCK{endfor}}
       \BLOCK{endif}
-      \vspace{5pt}
+      \vspace{2pt}
     \BLOCK{endfor}
 \end{itemize}
 \BLOCK{endif}

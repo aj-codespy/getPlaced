@@ -12,7 +12,7 @@
 \usepackage{xcolor}
 
 % Margins
-\geometry{left=1in, right=1in, top=0.8in, bottom=0.8in}
+\geometry{left=0.5in, right=0.5in, top=0.5in, bottom=0.5in}
 
 \pagestyle{empty}
 
@@ -24,7 +24,7 @@
   {} 
   [\vspace{-2pt}\hrule height 1pt]
 
-\titlespacing{\section}{0pt}{18pt}{10pt}
+\titlespacing{\section}{0pt}{10pt}{5pt}
 
 \begin{document}
 
@@ -39,12 +39,12 @@
 \BLOCK{if data.personalInfo.linkedin} \href{\VAR{data.personalInfo.linkedin}}{LinkedIn} \quad | \quad \BLOCK{endif}
 \BLOCK{if data.personalInfo.portfolio} \href{\VAR{data.personalInfo.portfolio}}{Portfolio} \BLOCK{endif}
 
-\vspace{16pt}
+\vspace{8pt}
 
 % --- SUMMARY ---
 \BLOCK{if data.personalInfo.summary}
 \noindent {\small \VAR{data.personalInfo.summary}}
-\vspace{12pt}
+\vspace{6pt}
 \BLOCK{endif}
 
 % --- EDUCATION ---
@@ -58,7 +58,7 @@
     \BLOCK{if edu.coursework}
     \\ \small \textit{Relevant Coursework:} \VAR{edu.coursework}
     \BLOCK{endif}
-    \vspace{8pt}
+    \vspace{4pt}
 \BLOCK{endfor}
 \BLOCK{endif}
 
@@ -91,7 +91,7 @@
         \item \small \VAR{bullet}
         \BLOCK{endfor}
     \end{itemize}
-    \vspace{8pt}
+    \vspace{4pt}
 \BLOCK{endfor}
 \BLOCK{endif}
 
@@ -109,7 +109,7 @@
         \BLOCK{endfor}
     \end{itemize}
     \BLOCK{endif}
-    \vspace{6pt}
+    \vspace{3pt}
 \BLOCK{endfor}
 \BLOCK{endif}
 

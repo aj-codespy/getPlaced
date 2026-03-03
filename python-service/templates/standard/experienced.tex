@@ -33,7 +33,7 @@
 \renewcommand{\familydefault}{\sfdefault}
 
 % Margins (Right 2/3 roughly)
-\geometry{left=7cm, right=1.5cm, top=1.5cm, bottom=1.5cm}
+\geometry{left=7cm, right=1cm, top=1cm, bottom=1cm}
 
 % Remove page numbers
 \pagestyle{empty}
@@ -43,11 +43,11 @@
     linecolor=sidebarbg,
     linewidth=1pt,
     backgroundcolor=white,
-    innerleftmargin=10pt,
-    innerrightmargin=10pt,
-    innertopmargin=10pt,
-    innerbottommargin=10pt,
-    skipabove=10pt
+    innerleftmargin=8pt,
+    innerrightmargin=8pt,
+    innertopmargin=6pt,
+    innerbottommargin=6pt,
+    skipabove=4pt
 }
 
 % Section Commands (Main Content)
@@ -55,7 +55,7 @@
   \color{slate400}\small\bfseries\uppercase
 }{}{0em}{}
 
-\titlespacing{\section}{0pt}{10pt}{5pt}
+\titlespacing{\section}{0pt}{6pt}{3pt}
 
 
 \begin{document}
@@ -72,7 +72,7 @@
     
     % Name
     {\Large \bfseries \color{slate900} \VAR{data.personalInfo.fullName}}
-    \vspace{0.4cm}
+    \vspace{0.2cm}
     
     % Contact
     {\small \color{slate600}
@@ -80,7 +80,7 @@
         \VAR{data.personalInfo.phone} \\
         \VAR{data.personalInfo.location}
     }
-    \vspace{1cm}
+    \vspace{0.5cm}
     
     % Skills
     \BLOCK{if data.skills}
@@ -89,7 +89,7 @@
         {\small \color{slate600} \VAR{skill}} \\ 
         {\color{slate400}\rule{4cm}{0.5pt}} \\ \vspace{2pt}
     \BLOCK{endfor}
-    \vspace{1cm}
+    \vspace{0.5cm}
     \BLOCK{endif}
     
     % Education

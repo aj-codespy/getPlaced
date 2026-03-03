@@ -3,10 +3,11 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { db } from "@/lib/firebase/config";
-import { doc, getDoc, updateDoc, increment } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from "firebase/firestore";
+import crypto from "crypto";
 
 const PYTHON_SERVICE_URL =
-  process.env.PDF_SERVICE_URL || "http://127.0.0.1:8000/generate-pdf";
+  (process.env.PYTHON_SERVICE_URL || "http://127.0.0.1:8000") + "/generate-pdf";
 
 export async function POST(req: Request) {
   try {
@@ -20,21 +21,12 @@ export async function POST(req: Request) {
     const userEmail = session.user.email;
     const userRef = doc(db, "users", userEmail);
 
-    // 2. Credit check
+    // 2. Auth checks
     const userSnap = await getDoc(userRef);
     if (!userSnap.exists()) {
       return NextResponse.json({ error: "User record not found" }, { status: 403 });
     }
-
     const userData = userSnap.data();
-    const currentCredits: number = userData.credits ?? 0;
-
-    if (currentCredits < 100) {
-      return NextResponse.json(
-        { error: "Insufficient credits. You need 100 credits to download." },
-        { status: 402 }
-      );
-    }
 
     // 3. Resolve resume data
     let dataToRender: Record<string, unknown>;
@@ -61,7 +53,45 @@ export async function POST(req: Request) {
       );
     }
 
-    // 4. Call Python PDF service with a timeout
+    // 4. Generate payload hash for caching
+    const payloadString = JSON.stringify({ data: dataToRender, template: templateToRender });
+    const payloadHash = crypto.createHash("sha256").update(payloadString).digest("hex");
+
+    // Check Cache First (Huge Savings)
+    const cacheRef = doc(db, "pdf_cache", payloadHash);
+    const cacheSnap = await getDoc(cacheRef);
+
+    if (cacheSnap.exists() && cacheSnap.data().pdfBase64) {
+      console.log(`[Cache Hit] Serving cached PDF for hash ${payloadHash}`);
+      const base64Data = cacheSnap.data().pdfBase64;
+      const buffer = Buffer.from(base64Data, "base64");
+      return new NextResponse(buffer, {
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `attachment; filename="${filename}.pdf"`,
+          "Content-Length": String(buffer.byteLength),
+        },
+      });
+    }
+
+    // 5. Rate Limit Verification (For un-cached recompilations only)
+    const isPremium = (userData.isPremium || 0) > 0 || userData.planType === 'premium' || userData.planType === 'pro' || userData.planType === 'standard';
+    const todayStr = new Date().toISOString().split('T')[0];
+    let dailyPdfGenerations = userData.dailyPdfGenerations || 0;
+    const lastPdfGenerationDate = userData.lastPdfGenerationDate || '';
+
+    if (lastPdfGenerationDate !== todayStr) {
+        dailyPdfGenerations = 0; // Reset for a new day
+    }
+
+    if (!isPremium && dailyPdfGenerations >= 3) {
+        return NextResponse.json(
+            { error: "Daily PDF generation limit reached (3/day) for Free plan. Please upgrade to Premium or wait until tomorrow." },
+            { status: 429 }
+        );
+    }
+
+    // 6. Call Python PDF service with a timeout
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 45_000); // 45s timeout
 
@@ -100,11 +130,31 @@ export async function POST(req: Request) {
       );
     }
 
-    // 5. Deduct credits ONLY after successful PDF generation
-    await updateDoc(userRef, { credits: increment(-100) });
-
-    // 6. Stream PDF back to client
+    // 7. Stream PDF back to client
     const pdfBuffer = await pdfRes.arrayBuffer();
+
+    // 8. Cache the generated PDF and Update User Limits asynchronously
+    (async () => {
+        try {
+            // Update user daily limits
+            await updateDoc(userRef, {
+                dailyPdfGenerations: dailyPdfGenerations + 1,
+                lastPdfGenerationDate: todayStr
+            });
+
+            // Cache the PDF if it's within Firestore size limits (< 900KB to be safe)
+            const base64Pdf = Buffer.from(pdfBuffer).toString("base64");
+            if (base64Pdf.length < 900000) {
+                await setDoc(cacheRef, {
+                    pdfBase64: base64Pdf,
+                    createdAt: serverTimestamp(),
+                    templateId: templateToRender
+                });
+            }
+        } catch (postGenErr) {
+            console.error("Failed to update cache or limits:", postGenErr);
+        }
+    })();
 
     return new NextResponse(pdfBuffer, {
       headers: {

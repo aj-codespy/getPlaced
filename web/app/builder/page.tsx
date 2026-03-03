@@ -322,11 +322,12 @@ export default function BuilderPage() {
                 <button
                   key={t.id}
                   onClick={() => pickTemplate(t.id)}
+                  disabled={isGenerating || !!hasResult}
                   className={`relative shrink-0 w-[72px] rounded-lg overflow-hidden border-2 transition-all duration-200 group focus:outline-none ${
                     selectedTemplate === t.id
                       ? "border-indigo-500 shadow-lg shadow-indigo-500/30"
                       : "border-white/10 hover:border-white/30"
-                  }`}
+                  } ${(isGenerating || hasResult) ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   <div className="aspect-[3/4] bg-white relative">
                     {t.thumbnail ? (
@@ -544,12 +545,6 @@ export default function BuilderPage() {
                     Resume generated
                   </span>
                 </div>
-                <button
-                  onClick={() => pickTemplate(selectedTemplate)}
-                  className="text-xs text-slate-500 hover:text-slate-300 transition-colors underline underline-offset-2"
-                >
-                  Change template
-                </button>
               </div>
               <div className="rounded-xl overflow-hidden shadow-2xl shadow-black/50 border border-white/5">
                 <ResumePreview

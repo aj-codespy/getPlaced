@@ -3,9 +3,9 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { db } from "@/lib/firebase/config";
-import { collection, query, where, getDocs, addDoc, serverTimestamp, doc, getDoc } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, doc, getDoc, updateDoc, increment } from "firebase/firestore";
 
-export async function POST(req: Request) {
+export async function POST() {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user?.email) {
@@ -24,10 +24,18 @@ export async function POST(req: Request) {
 
     const profileData = profileSnap.data();
 
-    // 2. Check Credits (Placeholder)
-    // TODO: Implement actual credit check against "users" collection
-    const hasCredits = true; 
-    if (!hasCredits) {
+    // 2. Check Credits
+    const userRef = doc(db, "users", email);
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) {
+      return NextResponse.json({ error: "User not found." }, { status: 404 });
+    }
+
+    const userData = userSnap.data();
+    const currentCredits = userData.credits || 0;
+
+    if (currentCredits < 50) { // Costs 50 credits to create/init a new resume
         return NextResponse.json({ error: "Insufficient credits" }, { status: 403 });
     }
 
@@ -53,6 +61,11 @@ export async function POST(req: Request) {
     };
 
     const docRef = await addDoc(collection(db, "resumes"), resumeData);
+
+    // Deduct 50 credits for new resume initialization
+    await updateDoc(userRef, {
+      credits: increment(-50)
+    });
 
     // 4. Return the new Resume ID
     return NextResponse.json({ success: true, resumeId: docRef.id });

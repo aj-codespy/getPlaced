@@ -24,7 +24,7 @@
 \renewcommand{\familydefault}{\sfdefault}
 
 % Margins for the MAIN CONTENT (Right 2/3)
-\geometry{left=8.5cm, right=1.5cm, top=1.5cm, bottom=1.5cm}
+\geometry{left=8.5cm, right=1cm, top=1cm, bottom=1cm}
 
 % Remove page numbers
 \pagestyle{empty}
@@ -34,7 +34,7 @@
   \color{black}\Large\bfseries
 }{}{0em}{}[\color{purple600}\titlerule \vspace{5pt}]
 
-\titlespacing{\section}{0pt}{12pt}{8pt}
+\titlespacing{\section}{0pt}{8pt}{4pt}
 
 \begin{document}
 
@@ -53,7 +53,7 @@
     \begin{center}
         \colorbox{gray}{\parbox[c][2cm][c]{2cm}{\centering \Huge \bfseries \VAR{data.personalInfo.fullName[:1]}}}
     \end{center}
-    \vspace{0.5cm}
+    \vspace{0.3cm}
     
     % Name
     {\Huge \bfseries \uppercase{\VAR{data.personalInfo.fullName}}}
@@ -61,7 +61,7 @@
     
     % Location
     {\small \color{lightgray} \VAR{data.personalInfo.location}}
-    \vspace{1cm}
+    \vspace{0.5cm}
     
     % Contact
     {\small
@@ -70,7 +70,7 @@
         \VAR{data.personalInfo.phone} \\ \vspace{2pt}
         \VAR{data.personalInfo.linkedin}
     }
-    \vspace{1cm}
+    \vspace{0.5cm}
     
     % Skills
     \BLOCK{if data.skills}
@@ -80,7 +80,7 @@
              \colorbox{black}{\textcolor{white}{\footnotesize \VAR{skill}}} \hspace{1pt}
         \BLOCK{endfor}
     }
-    \vspace{1cm}
+    \vspace{0.5cm}
     \BLOCK{endif}
     
     % Education (Sidebar)
@@ -105,7 +105,7 @@
 \BLOCK{if data.personalInfo.summary}
 \section{Profile}
 \small \color{textgray} \VAR{data.personalInfo.summary}
-\vspace{0.6cm}
+\vspace{0.3cm}
 \BLOCK{endif}
 
 % Experience
@@ -121,7 +121,7 @@
         \item \small \color{textgray} \VAR{bullet}
         \BLOCK{endfor}
     \end{itemize}
-    \vspace{0.5cm}
+    \vspace{0.2cm}
 \BLOCK{endfor}
 \BLOCK{endif}
 
@@ -140,7 +140,7 @@
         \BLOCK{endfor}
     \end{itemize}
     \BLOCK{endif}
-    \vspace{0.4cm}
+    \vspace{0.2cm}
 \BLOCK{endfor}
 \BLOCK{endif}
 

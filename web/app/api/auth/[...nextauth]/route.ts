@@ -2,9 +2,9 @@
 import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth, db } from "@/lib/firebase/config";
+import { db } from "@/lib/firebase/config";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import bcrypt from "bcryptjs";
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -22,24 +22,30 @@ export const authOptions: AuthOptions = {
         if (!credentials?.email || !credentials?.password) return null;
         
         try {
-          // Verify with Firebase Client SDK (acts as a proxy verification)
-          // Note: In a real "admin" backend, we would use firebase-admin SDK.
-          // For now, next-auth handles the session, we just want to verify creds.
-          // However, using client SDK in Node environment is tricky without polyfills.
-          // Strategy: Since User Auth is shifting to Firebase, ideally the CLIENT does the auth.
-          
-          // Fallback: For this hybrid transition, we will just allow "Mock" login or
-          // rely on the fact that Google Auth is the primary detailed flow.
-          // BUT, to make this work seamlessly:
-          
-          // Simulating success if we can't fully use Client Auth SDK here without more setup
-          // In a production app, we'd use `firebase-admin` `auth().getUserByEmail()`.
-          
-          return { id: "firebase-user", email: credentials.email, name: "User" };
-          
-          // Proper way: Use Firebase Admin SDK to verify or check existence.
+          const emailLower = credentials.email.toLowerCase();
+          const userRef = doc(db, "users", emailLower);
+          const userSnap = await getDoc(userRef);
+
+          if (!userSnap.exists()) {
+            return null;
+          }
+
+          const userData = userSnap.data();
+
+          if (!userData.password) {
+            // User likely logged in with Google exclusively
+            return null;
+          }
+
+          const isPasswordValid = await bcrypt.compare(credentials.password, userData.password);
+
+          if (!isPasswordValid) {
+            return null;
+          }
+
+          return { id: emailLower, email: userData.email, name: userData.name };
         } catch (e) {
-          console.error(e);
+          console.error("Credentials Auth Error:", e);
           return null;
         }
       },
@@ -82,7 +88,7 @@ export const authOptions: AuthOptions = {
     },
     async session({ session, token }) {
       if (session.user && token.sub) {
-        (session.user as any).id = token.sub;
+        (session.user as { id?: string }).id = token.sub;
       }
       return session;
     }

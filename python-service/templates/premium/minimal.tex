@@ -20,7 +20,7 @@
 \definecolor{darkgray}{RGB}{60,60,60}
 
 % Margins
-\geometry{left=1.5cm, right=1.5cm, top=1.5cm, bottom=1.5cm}
+\geometry{left=1cm, right=1cm, top=1cm, bottom=1cm}
 
 % Remove page numbers
 \pagestyle{empty}
@@ -41,7 +41,7 @@
   {} % Before
   [\vspace{-6pt}] % After
 
-\titlespacing{\section}{0pt}{24pt}{12pt}
+\titlespacing{\section}{0pt}{12pt}{6pt}
 
 \begin{document}
 
@@ -52,7 +52,7 @@
 \BLOCK{if data.personalInfo.summary}
 {\Large \color{darkgray} \VAR{data.personalInfo.summary}} \\
 \BLOCK{endif}
-\vspace{12pt}
+\vspace{6pt}
 
 \noindent
 \color{darkgray}
@@ -62,7 +62,7 @@
 \BLOCK{if data.personalInfo.linkedin} \quad \textbullet \quad \href{\VAR{data.personalInfo.linkedin}}{LinkedIn} \BLOCK{endif}
 \BLOCK{if data.personalInfo.github} \quad \textbullet \quad \href{\VAR{data.personalInfo.github}}{GitHub} \BLOCK{endif}
 \BLOCK{if data.personalInfo.portfolio} \quad \textbullet \quad \href{\VAR{data.personalInfo.portfolio}}{Portfolio} \BLOCK{endif}
-\vspace{24pt}
+\vspace{10pt}
 
 % --- SUMMARY (rendered in header above) ---
 
@@ -79,7 +79,7 @@
         \item \large \color{darkgray} \VAR{bullet}
         \BLOCK{endfor}
     \end{itemize}
-    \vspace{16pt}
+    \vspace{6pt}
 \BLOCK{endfor}
 \BLOCK{endif}
 
@@ -102,7 +102,7 @@
         \BLOCK{endfor}
     \end{itemize}
     \BLOCK{endif}
-    \vspace{16pt}
+    \vspace{6pt}
 \BLOCK{endfor}
 \BLOCK{endif}
 
@@ -114,7 +114,7 @@
     \textbf{\Large \VAR{edu.institution}} \hfill {\color{darkgray} \VAR{edu.startDate} -- \VAR{edu.endDate}} \\
     {\large \VAR{edu.degree}} 
     \BLOCK{if edu.score} \quad \textbullet \quad GPA: \VAR{edu.score} \BLOCK{endif}
-    \vspace{12pt}
+    \vspace{4pt}
 \BLOCK{endfor}
 \BLOCK{endif}
 
@@ -151,7 +151,7 @@
 \BLOCK{for pub in data.publications}
     \noindent
     {\large \color{darkgray} \textbf{\VAR{pub.title}}. \textit{\VAR{pub.journal}}. \VAR{pub.date}.}
-    \vspace{8pt}
+    \vspace{4pt}
 \BLOCK{endfor}
 \BLOCK{endif}
 

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
+import { isAdmin } from "@/lib/admin";
 import { Sparkles, User, LogOut, Crown, ChevronDown } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
@@ -48,7 +49,7 @@ export function DashboardHeader({ credits }: { credits?: number }) {
 
         {/* Center Nav */}
         <nav className="hidden md:flex items-center gap-1 bg-white/[0.03] border border-white/[0.05] rounded-full px-1.5 py-1">
-          {NAV_ITEMS.map((item) => {
+          {[...NAV_ITEMS, ...(isAdmin(session?.user?.email) ? [{ label: "Admin", href: "/admin" }] : [])].map((item) => {
             const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
             return (
               <Link

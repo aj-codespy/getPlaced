@@ -12,7 +12,7 @@
 \usepackage{xcolor}
 
 % Margins
-\geometry{left=0.6in, right=0.6in, top=0.6in, bottom=0.6in}
+\geometry{left=0.5in, right=0.5in, top=0.5in, bottom=0.5in}
 
 \pagestyle{empty}
 
@@ -29,7 +29,7 @@
   {} 
   [\titlerule]
 
-\titlespacing{\section}{0pt}{12pt}{8pt}
+\titlespacing{\section}{0pt}{8pt}{4pt}
 
 \begin{document}
 
@@ -48,7 +48,7 @@
     \BLOCK{if data.personalInfo.linkedin} \href{\VAR{data.personalInfo.linkedin}}{LinkedIn: \VAR{data.personalInfo.linkedin}} \BLOCK{endif}
 \end{center}
 
-\vspace{10pt}
+\vspace{4pt}
 
 % --- SKILLS (Top for Tech) ---
 \BLOCK{if data.skills}
@@ -74,7 +74,7 @@
         \BLOCK{endfor}
     \end{itemize}
     \BLOCK{endif}
-    \vspace{6pt}
+    \vspace{3pt}
 \BLOCK{endfor}
 \BLOCK{endif}
 
@@ -90,7 +90,7 @@
         \item \small \VAR{bullet}
         \BLOCK{endfor}
     \end{itemize}
-    \vspace{6pt}
+    \vspace{3pt}
 \BLOCK{endfor}
 \BLOCK{endif}
 
@@ -104,7 +104,7 @@
     \BLOCK{if edu.coursework}
     {\footnotesize \textit{CS Core: \VAR{edu.coursework}}}
     \BLOCK{endif}
-    \vspace{6pt}
+    \vspace{3pt}
 \BLOCK{endfor}
 \BLOCK{endif}
 
