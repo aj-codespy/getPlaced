@@ -107,7 +107,7 @@ const FAQS = [
   },
   {
     q: "I have a question that’s not listed here.",
-    a: "We’d love to help! Reach out to us at support@getplaced.co and we’ll get back to you as soon as possible. You can also DM us on our social channels."
+    a: "We’d love to help! Reach out to us at getplaced.web@gmail.com and we’ll get back to you as soon as possible. You can also DM us on our social channels."
   }
 ];
 

@@ -77,7 +77,7 @@ export default function PrivacyPage() {
               If you have any questions or concerns about this Privacy Policy, your rights, or how we handle your data, please contact us at:
             </p>
             <p className="font-medium text-indigo-400">
-              <a href="mailto:support@getplaced.in" className="hover:underline">support@getplaced.in</a>
+              <a href="mailto:getplaced.web@gmail.com" className="hover:underline">getplaced.web@gmail.com</a>
             </p>
           </section>
 
