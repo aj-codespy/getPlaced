@@ -272,13 +272,13 @@ All the tracking code is already injected into the application layout. You just 
 ### Step 2: Get Your Measurement ID
 
 1. On the Web stream details page that pops up, look at the top right.
-2. You will see a **Measurement ID** starting with "G-" (e.g., `G-1A2B3C4D5E`). Copy this exact ID.
+2. You will see a **Measurement ID** starting with "G-" (e.g., `G-X7XS96CJYE`). Copy this exact ID.
 
 ### Step 3: Add to Vercel
 
 1. Go to your Vercel Dashboard → Project → **Settings** → **Environment Variables**.
 2. Key: `NEXT_PUBLIC_GA_ID`
-3. Value: `G-1A2B3C4D5E` (Paste your copied ID)
+3. Value: `G-X7XS96CJYE`
 4. Environments: Check **Production**.
 5. Click **Save**.
 
