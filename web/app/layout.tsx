@@ -33,6 +33,10 @@ export const metadata: Metadata = {
     description: "Build tailored, ATS-optimized resumes in under 30 seconds with Google Gemini AI.",
     images: ["https://getplaced.in/og-image.png"],
   },
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
   robots: { index: true, follow: true },
 };
 

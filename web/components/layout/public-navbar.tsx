@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Briefcase, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import Image from "next/image";
 
 const ALL_LINKS = [
   { label: "Home", href: "/" },
@@ -17,9 +18,15 @@ export function PublicNavbar({ currentPath }: PublicNavbarProps) {
 
   return (
     <nav className="relative z-50 flex items-center justify-between px-6 py-5 max-w-7xl mx-auto w-full">
-      <Link href="/" className="flex items-center gap-2.5 font-bold text-xl tracking-tight">
-        <div className="h-8 w-8 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/30">
-          <Briefcase size={16} className="text-white" />
+      <Link href="/" className="flex items-center gap-2.5 font-bold text-xl tracking-tight group">
+        <div className="relative h-9 w-9 shrink-0">
+          <Image
+            src="/logo.png"
+            alt="getPlaced"
+            width={36}
+            height={36}
+            className="drop-shadow-[0_0_10px_rgba(99,102,241,0.4)] group-hover:drop-shadow-[0_0_16px_rgba(99,102,241,0.6)] transition-all duration-300"
+          />
         </div>
         <span className="bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
           getPlaced

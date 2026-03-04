@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { isAdmin } from "@/lib/admin";
 import { Sparkles, User, LogOut, Crown, ChevronDown } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard" },
@@ -41,8 +42,14 @@ export function DashboardHeader({ credits }: { credits?: number }) {
           href="/"
           className="font-bold text-lg hover:opacity-80 transition-opacity flex items-center gap-2.5 text-white group"
         >
-          <div className="h-8 w-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40 transition-shadow">
-            <Sparkles size={15} className="text-white" fill="currentColor" />
+          <div className="relative h-8 w-8 shrink-0">
+            <Image
+              src="/logo.png"
+              alt="getPlaced"
+              width={32}
+              height={32}
+              className="drop-shadow-[0_0_8px_rgba(99,102,241,0.35)] group-hover:drop-shadow-[0_0_14px_rgba(99,102,241,0.55)] transition-all duration-300"
+            />
           </div>
           <span className="hidden sm:inline">getPlaced</span>
         </Link>

@@ -1,14 +1,18 @@
 import Link from "next/link";
-import { Briefcase } from "lucide-react";
+import Image from "next/image";
 
 export function PublicFooter() {
   return (
     <footer className="relative z-10 border-t border-white/5 py-8 px-6">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
         <Link href="/" className="flex items-center gap-2 font-bold text-sm text-slate-400 hover:text-white transition-colors">
-          <div className="h-6 w-6 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-md flex items-center justify-center">
-            <Briefcase size={12} className="text-white" />
-          </div>
+          <Image
+            src="/logo.png"
+            alt="getPlaced"
+            width={24}
+            height={24}
+            className="drop-shadow-[0_0_6px_rgba(99,102,241,0.3)]"
+          />
           getPlaced
         </Link>
         <div className="flex items-center gap-6 text-xs text-slate-600">
