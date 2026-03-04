@@ -62,8 +62,9 @@ export default function PricingPage() {
         key: data.keyId,
         amount: data.amount,
         currency: data.currency,
-        name: "getPlaced Premium",
+        name: "getPlaced",
         description: `Unlock ${planId}`,
+        image: "https://getplaced.in/og-image.png",
         order_id: data.orderId,
         handler: async function (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string; }) {
           const verifyRes = await fetch("/api/payment/verify", {
@@ -86,8 +87,12 @@ export default function PricingPage() {
           }
         },
         prefill: {
-          name: session.user?.name,
-          email: session.user?.email,
+          name: session.user?.name || "",
+          email: session.user?.email || "",
+          contact: ""
+        },
+        notes: {
+          address: "getPlaced Pro Subscription"
         },
         theme: {
           color: "#4f46e5",

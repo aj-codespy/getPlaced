@@ -457,7 +457,7 @@ export default function OnboardingPage() {
             </div>
 
             {/* Footer */}
-            <div className="bg-white/5 border-t border-white/5 p-6 flex justify-between">
+            <div className="bg-white/5 border-t border-white/5 p-6 flex justify-between items-center">
                 <Button 
                     variant="ghost" 
                     onClick={() => setStep(s => s - 1)} 
@@ -467,9 +467,18 @@ export default function OnboardingPage() {
                     <ChevronLeft className="mr-2 h-4 w-4"/> Previous
                 </Button>
                 
-                <Button onClick={handleNext} className="bg-indigo-600 hover:bg-indigo-500 text-white px-8 shadow-lg shadow-indigo-500/25">
-                    {step === 6 ? "Finish Profile" : "Next Step"} <ChevronRight className="ml-2 h-4 w-4"/>
-                </Button>
+                <div className="flex gap-4 items-center">
+                    <Button 
+                        variant="ghost" 
+                        onClick={() => router.push("/dashboard")} 
+                        className="text-slate-400 hover:text-white hover:bg-white/5"
+                    >
+                        Skip for now
+                    </Button>
+                    <Button onClick={handleNext} className="bg-indigo-600 hover:bg-indigo-500 text-white px-8 shadow-lg shadow-indigo-500/25">
+                        {step === 6 ? "Finish Profile" : "Next Step"} <ChevronRight className="ml-2 h-4 w-4"/>
+                    </Button>
+                </div>
             </div>
         </div>
     </div>

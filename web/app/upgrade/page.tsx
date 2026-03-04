@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Script from "next/script";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Check, Star, Zap, Shield, Crown } from "lucide-react";
+import { Check, Star, Zap, Shield, Crown, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DashboardHeader } from "@/components/layout/dashboard-header";
 import { PublicNavbar } from "@/components/layout/public-navbar";
@@ -11,9 +13,11 @@ import { PublicFooter } from "@/components/layout/public-footer";
 import { useSession } from "next-auth/react";
 
 export default function UpgradePage() {
-  const { status } = useSession();
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("annual");
   const [currency, setCurrency] = useState<"INR" | "USD" | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetch("https://ipapi.co/json/")
@@ -28,8 +32,83 @@ export default function UpgradePage() {
   const proBilledYearly = currency === "USD" ? "Billed $43 yearly" : "Billed ₹3588 yearly";
   const proPrice = billingCycle === "annual" ? proAnnual : proMonthly;
 
+  const handleUpgrade = async () => {
+    if (!session) {
+      router.push("/login?callbackUrl=/upgrade");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Create Order API
+      const planId = billingCycle === "annual" ? "plan_pro" : "plan_pro"; 
+      const res = await fetch("/api/payment/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        // Passing exact plan details
+        body: JSON.stringify({ planId, currency }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error);
+
+      // Initialize Razorpay with exact parameters from SDK recommendations
+      const options = {
+        key: data.keyId,
+        amount: data.amount,
+        currency: data.currency,
+        name: "getPlaced",
+        description: `Pro Plan (${billingCycle})`,
+        image: "https://getplaced.in/og-image.png",
+        order_id: data.orderId,
+        handler: async function (response: any) {
+          const verifyRes = await fetch("/api/payment/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              planId: planId,
+              userEmail: session.user?.email,
+            }),
+          });
+          
+          if (verifyRes.ok) {
+              alert("Payment Successful! Welcome to Pro.");
+              router.push("/dashboard");
+          } else {
+              alert("Payment Verification Failed");
+          }
+        },
+        prefill: {
+          name: session.user?.name || "",
+          email: session.user?.email || "",
+          contact: "" 
+        },
+        notes: {
+          address: "getPlaced Pro Subscription"
+        },
+        theme: {
+          color: "#4f46e5",
+        },
+      };
+
+      const RazorpayConstructor = (window as any).Razorpay;
+      const rzp = new RazorpayConstructor(options);
+      rzp.open();
+
+    } catch (e: any) {
+      alert("Payment Failed: " + (e.message || "Unknown error"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col font-sans text-slate-200 bg-[#030712]">
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
       {/* Ambient background for public view */}
       {status !== "authenticated" && (
         <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
@@ -137,7 +216,12 @@ export default function UpgradePage() {
                             )}
                         </div>
 
-                        <Button className="w-full h-12 text-base font-bold bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-lg shadow-indigo-500/25 rounded-xl transition-all hover:scale-[1.02]">
+                        <Button 
+                            className="w-full h-12 text-base font-bold bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-lg shadow-indigo-500/25 rounded-xl transition-all hover:scale-[1.02]"
+                            onClick={handleUpgrade}
+                            disabled={loading}
+                        >
+                            {loading ? <Loader2 className="animate-spin mr-2" /> : null}
                             Upgrade Now
                         </Button>
                         <p className="text-center text-[11px] text-slate-600 mt-3">14-day money-back guarantee. Cancel anytime.</p>
