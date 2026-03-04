@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 import { BackgroundAmbience } from "@/components/layout/background-ambience";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import { Analytics } from "@vercel/analytics/next";
 
 const outfit = Outfit({ 
   subsets: ["latin"], 
@@ -53,6 +54,7 @@ export default function RootLayout({
         {process.env.NEXT_PUBLIC_GA_ID && (
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
         )}
+        <Analytics />
       </body>
     </html>
   );
