@@ -125,7 +125,7 @@ export default function ResumeEditor() {
                         variant="outline"
                         size="sm"
                         className="h-8 text-xs border-white/[0.08] bg-white/[0.03] text-slate-300 hover:text-white hover:bg-white/[0.06] rounded-lg"
-                        onClick={() => console.log("Save")}
+                        onClick={() => {}}
                     >
                         <Save size={13} className="mr-1.5" /> Save
                     </Button>

@@ -12,13 +12,13 @@ export async function GET(req: Request) {
   if (!session?.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const userRef = doc(db, "users", session.user.email);
-  let userSnap = await getDoc(userRef);
+  const userSnap = await getDoc(userRef);
 
   if (!userSnap.exists()) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 
-  let userData = userSnap.data();
+  const userData = userSnap.data();
 
   // Lazy Gen: If no code, generate one
   if (!userData.referralCode) {

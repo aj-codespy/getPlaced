@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     await addDoc(collection(db, "transactions"), {
         userId: userEmail,
         planId: planId,
-        amount: plan.price.INR, // Or USD, logic simplified here
+        amount: plan.price.INR, // Logged for reference; actual charge is in payment currency
         creditsAdded: plan.credits,
         provider: "razorpay",
         paymentId: razorpay_payment_id,

@@ -1,18 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Check, Star, Zap, Shield, Crown, ArrowLeft, Sparkles } from "lucide-react";
+import { Check, Star, Zap, Shield, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DashboardHeader } from "@/components/layout/dashboard-header";
+import { PublicNavbar } from "@/components/layout/public-navbar";
+import { PublicFooter } from "@/components/layout/public-footer";
+import { useSession } from "next-auth/react";
 
 export default function UpgradePage() {
+  const { status } = useSession();
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("annual");
+  const [currency, setCurrency] = useState<"INR" | "USD" | null>(null);
+
+  useEffect(() => {
+    fetch("https://ipapi.co/json/")
+      .then((res) => res.json())
+      .then((data) => setCurrency(data.country_code === "IN" ? "INR" : "USD"))
+      .catch(() => setCurrency("USD"));
+  }, []);
+
+  const freeLabel = currency === "USD" ? "$0" : "₹0";
+  const proMonthly = currency === "USD" ? "$5.99" : "₹499";
+  const proAnnual = currency === "USD" ? "$3.59" : "₹299";
+  const proBilledYearly = currency === "USD" ? "Billed $43 yearly" : "Billed ₹3588 yearly";
+  const proPrice = billingCycle === "annual" ? proAnnual : proMonthly;
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-slate-200">
-      <DashboardHeader />
+    <div className="min-h-screen flex flex-col font-sans text-slate-200 bg-[#030712]">
+      {/* Ambient background for public view */}
+      {status !== "authenticated" && (
+        <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-[-15%] left-[15%] w-[700px] h-[700px] bg-indigo-600/15 rounded-full blur-[130px]" />
+          <div className="absolute top-[40%] right-[-5%] w-[500px] h-[500px] bg-violet-600/10 rounded-full blur-[100px]" />
+        </div>
+      )}
+
+      {status === "authenticated" ? <DashboardHeader /> : <PublicNavbar currentPath="/upgrade" />}
 
       <main className="flex-1">
         {/* Hero Section */}
@@ -63,7 +89,7 @@ export default function UpgradePage() {
                        <h3 className="text-xl font-bold text-white">Free</h3>
                        <p className="text-slate-500 text-sm mt-2">Perfect for trying out the builder.</p>
                        <div className="mt-6 flex items-baseline gap-1">
-                          <span className="text-5xl font-extrabold text-white">₹0</span>
+                          <span className="text-5xl font-extrabold text-white">{currency ? freeLabel : <span className="inline-block w-16 h-10 bg-white/[0.06] rounded-lg animate-pulse" />}</span>
                           <span className="text-slate-500 font-medium">/ forever</span>
                        </div>
                     </div>
@@ -102,12 +128,12 @@ export default function UpgradePage() {
                             <p className="text-slate-400 text-sm mt-2">Everything you need to get hired.</p>
                             <div className="mt-6 flex items-baseline gap-1">
                                 <span className="text-5xl font-extrabold text-white">
-                                    {billingCycle === "annual" ? "₹299" : "₹499"}
+                                    {currency ? proPrice : <span className="inline-block w-20 h-10 bg-white/[0.06] rounded-lg animate-pulse" />}
                                 </span>
                                 <span className="text-slate-400 font-medium">/ month</span>
                             </div>
                             {billingCycle === "annual" && (
-                                <p className="text-sm text-indigo-400/80 mt-2 font-medium">Billed ₹3588 yearly</p>
+                                <p className="text-sm text-indigo-400/80 mt-2 font-medium">{proBilledYearly}</p>
                             )}
                         </div>
 
@@ -177,10 +203,7 @@ export default function UpgradePage() {
            </div>
         </section>
       </main>
-      
-      <footer className="py-8 text-center text-slate-600 text-xs border-t border-white/[0.03]">
-          <p>© 2026 getPlaced. All rights reserved.</p>
-      </footer>
+      {status !== "authenticated" && <PublicFooter />}
     </div>
   );
 }

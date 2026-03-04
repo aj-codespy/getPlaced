@@ -3,6 +3,7 @@ import { Outfit } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { BackgroundAmbience } from "@/components/layout/background-ambience";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 const outfit = Outfit({ 
   subsets: ["latin"], 
@@ -24,11 +25,13 @@ export const metadata: Metadata = {
     url: "https://getplaced.in",
     siteName: "getPlaced",
     type: "website",
+    images: [{ url: "https://getplaced.in/og-image.png", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
     title: "getPlaced — AI Resume Builder",
     description: "Build tailored, ATS-optimized resumes in under 30 seconds with Google Gemini AI.",
+    images: ["https://getplaced.in/og-image.png"],
   },
   robots: { index: true, follow: true },
 };
@@ -47,6 +50,9 @@ export default function RootLayout({
         <Providers>
           {children}
         </Providers>
+        {process.env.NEXT_PUBLIC_GA_ID && (
+          <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
+        )}
       </body>
     </html>
   );

@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
 import {
-  Sparkles,
   ArrowRight,
   Zap,
   Shield,
@@ -13,62 +12,40 @@ import {
   MousePointer2,
   CheckCircle2,
   FileText,
-  Star,
   ChevronRight,
 } from "lucide-react";
-
-const NAV_LINKS = [
-  { label: "Features", href: "/features" },
-  { label: "Pricing", href: "/pricing" },
-  { label: "FAQ", href: "/faq" },
-];
+import { PublicNavbar } from "@/components/layout/public-navbar";
+import { PublicFooter } from "@/components/layout/public-footer";
 
 const FEATURES = [
   {
     icon: Zap,
-    color: "text-amber-400",
-    bg: "from-amber-500/10",
-    border: "border-amber-500/20",
-    title: "Instant AI Generation",
-    desc: "Paste a job description. Get a tailored, ATS-optimized resume in under 30 seconds.",
+    title: "30-Second Custom Resumes",
+    desc: "Paste any job description — our AI rewrites your resume to match it in seconds, not hours. Every bullet, every keyword, perfectly tailored.",
   },
   {
     icon: TrendingUp,
-    color: "text-emerald-400",
-    bg: "from-emerald-500/10",
-    border: "border-emerald-500/20",
-    title: "ATS Score Boost",
-    desc: "Our AI rewrites your bullets with action verbs and quantified results that pass ATS filters.",
+    title: "Beat the ATS, Every Time",
+    desc: "75% of resumes are rejected before a human ever sees them. Ours are engineered with the right keywords, action verbs, and formatting to pass every filter.",
   },
   {
     icon: FileText,
-    color: "text-blue-400",
-    bg: "from-blue-500/10",
-    border: "border-blue-500/20",
-    title: "12 Premium Templates",
-    desc: "From minimal to Ivy League — pick a design that matches your industry and personality.",
+    title: "Professional-Grade Templates",
+    desc: "LaTeX-compiled, pixel-perfect templates designed for every industry — from tech startups to Fortune 500 boardrooms.",
   },
   {
     icon: Shield,
-    color: "text-violet-400",
-    bg: "from-violet-500/10",
-    border: "border-violet-500/20",
-    title: "LinkedIn Audit",
-    desc: "AI-powered analysis of your LinkedIn profile with actionable improvement suggestions.",
+    title: "LinkedIn Profile Audit",
+    desc: "Your resume gets you the interview, your LinkedIn closes the deal. Get AI-powered suggestions to make recruiters come to you.",
   },
 ];
 
 const STEPS = [
-  { n: "01", title: "Complete your profile", desc: "Enter your experience, education, and skills once." },
-  { n: "02", title: "Paste the job description", desc: "Drop in any JD — our AI reads it and tailors your resume to it." },
-  { n: "03", title: "Download your PDF", desc: "Pick a template and download a polished, recruiter-ready resume." },
+  { n: "01", title: "Add your background once", desc: "Drop in your experience, education, and skills. You'll never type it again." },
+  { n: "02", title: "Paste any job description", desc: "Our AI analyzes the role and rewrites your resume to match — the right keywords, the right tone." },
+  { n: "03", title: "Download & apply", desc: "Choose a template, download a recruiter-ready PDF, and apply with confidence." },
 ];
 
-const TESTIMONIALS = [
-  { name: "Priya S.", role: "SWE @ Google", text: "Got 3 interview calls in a week after using getPlaced. The AI rewrites are insanely good.", stars: 5 },
-  { name: "Arjun M.", role: "PM @ Razorpay", text: "Went from 0 callbacks to 5 in 2 weeks. The ATS optimization is real.", stars: 5 },
-  { name: "Sneha R.", role: "Designer @ Swiggy", text: "The templates are beautiful and the AI actually understands design roles.", stars: 5 },
-];
 
 export default function LandingPage() {
   const { status } = useSession();
@@ -97,97 +74,60 @@ export default function LandingPage() {
         />
       </div>
 
-      {/* ── Navbar ─────────────────────────────────────────────────────────── */}
-      <nav className="relative z-50 flex items-center justify-between px-6 py-5 max-w-7xl mx-auto">
-        <Link href="/" className="flex items-center gap-2.5 font-bold text-xl tracking-tight">
-          <div className="h-8 w-8 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/30">
-            <Sparkles size={16} fill="white" className="text-white" />
-          </div>
-          <span className="bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-            getPlaced
-          </span>
-        </Link>
-
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
-          {NAV_LINKS.map((l) => (
-            <Link key={l.label} href={l.href} className="hover:text-white transition-colors duration-200">
-              {l.label}
-            </Link>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Link href="/login" className="hidden sm:block text-sm font-medium text-slate-400 hover:text-white transition-colors">
-            Log in
-          </Link>
-          <Link href="/signup">
-            <button className="group relative flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-500/25 border border-indigo-500/50 transition-all duration-200 hover:shadow-indigo-500/40 hover:shadow-xl">
-              Get started free
-              <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
-            </button>
-          </Link>
-        </div>
-      </nav>
+      <PublicNavbar currentPath="/" />
 
       <main className="relative z-10">
 
         {/* ── Hero ───────────────────────────────────────────────────────────── */}
         <section className="text-center max-w-5xl mx-auto px-4 pt-16 pb-8">
 
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full px-4 py-1.5 text-xs font-medium text-indigo-300 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500" />
-            </span>
-            Powered by Google Gemini AI
-          </div>
+
 
           <h1 className="text-5xl sm:text-6xl md:text-[80px] font-extrabold tracking-tight leading-[1.05] mb-6 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100">
             <span className="bg-gradient-to-b from-white via-white to-slate-400 bg-clip-text text-transparent">
-              Your dream job
+              Apply less.
             </span>
             <br />
             <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-blue-400 bg-clip-text text-transparent">
-              starts with a great CV
+              Land more interviews.
             </span>
           </h1>
 
           <p className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
-            AI-powered resume builder that reads the job description and rewrites your resume to match it — perfectly. ATS-optimized, recruiter-approved.
+            Most resumes get rejected in 6 seconds. getPlaced reads the job description and rebuilds your resume to match it — every keyword, every skill, every time.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-10 duration-700 delay-300">
             <Link href="/signup">
               <button className="group flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold px-8 py-4 rounded-2xl shadow-2xl shadow-indigo-500/30 border border-indigo-500/30 transition-all duration-300 hover:shadow-indigo-500/50 hover:scale-[1.02] text-base">
-                <Sparkles size={18} />
-                Build my resume &mdash; it&apos;s free
+                <FileText size={18} />
+                Build my resume — free
                 <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
               </button>
             </Link>
             <Link href="/pricing">
               <button className="flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium transition-colors">
-                View pricing <ChevronRight size={14} />
+                See plans <ChevronRight size={14} />
               </button>
             </Link>
           </div>
 
-          {/* Social proof */}
-          <div className="flex items-center justify-center gap-3 mt-8 text-sm text-slate-500 animate-in fade-in duration-700 delay-500">
-            <div className="flex -space-x-2">
-              {["bg-indigo-400", "bg-violet-400", "bg-blue-400", "bg-emerald-400", "bg-pink-400"].map((c, i) => (
-                <div key={i} className={`h-7 w-7 rounded-full ${c} border-2 border-[#030712]`} />
-              ))}
-            </div>
-            <span>Trusted by <strong className="text-slate-300">50,000+</strong> job seekers</span>
+          {/* Product highlights */}
+          <div className="flex flex-wrap items-center justify-center gap-3 mt-8 animate-in fade-in duration-700 delay-500">
+            {["Free to start", "Beats ATS filters", "Multiple templates", "No credit card needed"].map((label) => (
+              <div key={label} className="flex items-center gap-1.5 bg-white/[0.04] border border-white/[0.08] rounded-full px-3.5 py-1.5 text-xs text-slate-400">
+                <CheckCircle2 size={12} className="text-indigo-400" />
+                {label}
+              </div>
+            ))}
           </div>
         </section>
 
         {/* ── Hero visual: floating resume mockup ────────────────────────────── */}
         <section className="relative max-w-5xl mx-auto px-4 py-8 flex justify-center">
           {/* Floating AI chips */}
-          <div className="absolute top-8 left-[5%] md:left-[8%] z-20 animate-float delay-1000 hidden md:flex items-center gap-2 bg-[#0f172a]/90 backdrop-blur-xl border border-white/10 px-4 py-2.5 rounded-2xl shadow-2xl">
-            <Sparkles size={12} className="text-indigo-400" />
+          <div className="absolute top-20 left-[5%] md:left-[8%] z-20 animate-float delay-1000 hidden md:flex items-center gap-2 bg-[#0f172a]/90 backdrop-blur-xl border border-white/10 px-4 py-2.5 rounded-2xl shadow-2xl">
+            <Zap size={12} className="text-indigo-400" />
             <span className="text-xs text-slate-300">Try: <span className="text-indigo-300">&ldquo;Led a team of 8 engineers&rdquo;</span></span>
           </div>
 
@@ -201,56 +141,91 @@ export default function LandingPage() {
             <span className="text-xs text-slate-300">Improved: <span className="text-violet-300">+24% conversion</span></span>
           </div>
 
-          {/* Resume card */}
+          {/* Resume card — floating */}
           <div
-            className="relative w-full max-w-[580px] bg-white rounded-2xl shadow-[0_40px_80px_rgba(0,0,0,0.6)] overflow-hidden"
-            style={{ transform: "rotateX(20deg) scale(0.92)", transformOrigin: "center top", perspective: "2000px" }}
+            className="relative w-full max-w-[580px] animate-float-slow"
+            style={{ perspective: "2000px" }}
           >
-            {/* Resume header */}
-            <div className="bg-gradient-to-r from-slate-900 to-slate-800 p-6 pb-5">
-              <div className="h-5 w-40 bg-white/90 rounded mb-2" />
-              <div className="h-3 w-28 bg-white/40 rounded mb-4" />
-              <div className="flex gap-3">
-                {["bg-white/20", "bg-white/20", "bg-white/20"].map((c, i) => (
-                  <div key={i} className={`h-2 w-20 ${c} rounded`} />
-                ))}
+            <div
+              className="bg-white rounded-2xl shadow-[0_40px_80px_rgba(0,0,0,0.6)] overflow-hidden"
+              style={{ transform: "rotateX(16deg) scale(0.92)", transformOrigin: "center top" }}
+            >
+              {/* Resume header */}
+              <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-7 py-5">
+                <h3 className="text-white font-bold text-lg tracking-tight leading-tight">Simon Martin</h3>
+                <p className="text-slate-400 text-[11px] mt-0.5">Full Stack Developer</p>
+                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2.5 text-[10px] text-slate-500">
+                  <span>simon.martin@email.com</span>
+                  <span>+1 (415) 839-2741</span>
+                  <span>San Francisco, CA</span>
+                  <span>linkedin.com/in/simonmartin</span>
+                </div>
               </div>
-            </div>
 
-            {/* Resume body */}
-            <div className="p-6 grid grid-cols-3 gap-6">
-              <div className="space-y-3">
-                <div className="h-3 w-16 bg-slate-800 rounded" />
-                {[1, 0.7, 0.9, 0.6].map((w, i) => (
-                  <div key={i} className="h-2 bg-slate-100 rounded" style={{ width: `${w * 100}%` }} />
-                ))}
-                <div className="h-3 w-16 bg-slate-800 rounded mt-4" />
-                {["bg-indigo-100", "bg-indigo-100", "bg-violet-100"].map((c, i) => (
-                  <div key={i} className={`h-2 ${c} rounded w-full`} />
-                ))}
-              </div>
-              <div className="col-span-2 space-y-4">
-                <div className="h-3 w-28 bg-slate-800 rounded" />
-                <div className="space-y-2">
-                  {[1, 0.9, 0.85, 0.7].map((w, i) => (
-                    <div key={i} className="h-2 bg-slate-100 rounded" style={{ width: `${w * 100}%` }} />
-                  ))}
-                </div>
-                {/* Highlighted line */}
-                <div className="bg-indigo-50 border-l-2 border-indigo-400 pl-3 py-1.5 rounded-r">
-                  <div className="h-2 bg-indigo-200 rounded w-full mb-1" />
-                  <div className="h-2 bg-indigo-200 rounded w-4/5" />
-                </div>
-                <div className="space-y-2 pt-2">
-                  {[0.95, 0.8, 0.9].map((w, i) => (
-                    <div key={i} className="h-2 bg-slate-100 rounded" style={{ width: `${w * 100}%` }} />
-                  ))}
-                </div>
-              </div>
-            </div>
+              {/* Resume body */}
+              <div className="px-7 py-5 grid grid-cols-3 gap-6 text-[10px] leading-relaxed">
 
-            {/* Fade out at bottom */}
-            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#030712] to-transparent pointer-events-none" />
+                {/* Left column */}
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="text-[11px] font-bold text-slate-800 uppercase tracking-wider mb-1.5">Skills</h4>
+                    <div className="flex flex-wrap gap-1">
+                      {["React", "Next.js", "Node.js", "Python", "TypeScript", "AWS", "Docker", "PostgreSQL"].map(s => (
+                        <span key={s} className="bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded text-[9px] font-medium">{s}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-[11px] font-bold text-slate-800 uppercase tracking-wider mb-1.5">Education</h4>
+                    <p className="font-semibold text-slate-700">B.Tech Computer Science</p>
+                    <p className="text-slate-500">Westbrook University &bull; 2020&ndash;2024</p>
+                    <p className="text-slate-500 mt-0.5">GPA: 3.9/4.0</p>
+                  </div>
+                  <div>
+                    <h4 className="text-[11px] font-bold text-slate-800 uppercase tracking-wider mb-1.5">Certifications</h4>
+                    <p className="text-slate-600">AWS Solutions Architect</p>
+                    <p className="text-slate-600">Google Cloud Professional</p>
+                  </div>
+                </div>
+
+                {/* Right column */}
+                <div className="col-span-2 space-y-4">
+                  <div>
+                    <h4 className="text-[11px] font-bold text-slate-800 uppercase tracking-wider mb-1.5">Experience</h4>
+                    <div>
+                      <div className="flex justify-between items-baseline">
+                        <p className="font-semibold text-slate-700">Senior Software Engineer</p>
+                        <p className="text-slate-400 text-[9px]">2023&ndash;Present</p>
+                      </div>
+                      <p className="text-slate-500 italic">NovaPay &bull; San Francisco</p>
+                      <ul className="mt-1 space-y-0.5 text-slate-600">
+                        <li className="flex gap-1"><span className="text-indigo-400 mt-[3px]">&bull;</span>Architected microservices handling 2M+ daily transactions</li>
+                        <li className="flex gap-1"><span className="text-indigo-400 mt-[3px]">&bull;</span>Reduced API latency by 40% through caching layer redesign</li>
+                      </ul>
+                    </div>
+                    {/* Highlighted line — AI-optimized */}
+                    <div className="bg-indigo-50 border-l-2 border-indigo-400 pl-2.5 py-1.5 rounded-r mt-2">
+                      <p className="text-indigo-700 font-medium">Led a cross-functional team of 8 engineers to deliver a payment gateway serving 150K+ merchants, increasing revenue by 23% QoQ</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between items-baseline">
+                      <p className="font-semibold text-slate-700">Software Developer</p>
+                      <p className="text-slate-400 text-[9px]">2021&ndash;2023</p>
+                    </div>
+                    <p className="text-slate-500 italic">Stackridge &bull; Austin</p>
+                    <ul className="mt-1 space-y-0.5 text-slate-600">
+                      <li className="flex gap-1"><span className="text-slate-300 mt-[3px]">&bull;</span>Built real-time inventory system for 500K+ SKUs</li>
+                      <li className="flex gap-1"><span className="text-slate-300 mt-[3px]">&bull;</span>Implemented CI/CD pipelines reducing deploy time by 60%</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Fade out at bottom */}
+              <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#030712] to-transparent pointer-events-none" />
+            </div>
           </div>
 
           {/* Match score glow */}
@@ -261,37 +236,71 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ── Features bento grid ─────────────────────────────────────────────── */}
+        {/* ── Features ─────────────────────────────────────────────────────── */}
         <section id="features" className="max-w-6xl mx-auto px-6 py-24">
-          <div className="text-center mb-14">
-            <div className="inline-flex items-center gap-2 text-indigo-400 text-xs font-semibold uppercase tracking-widest mb-4">
-              <Sparkles size={12} /> Features
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Everything you need to{" "}
+          <div className="text-center mb-16">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 mb-4">Why it works</p>
+            <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
+              Built for people who are{" "}
               <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
-                get hired faster
+                tired of hearing nothing back
               </span>
             </h2>
-            <p className="text-slate-400 max-w-xl mx-auto">
-              Not just a resume builder — a complete career acceleration toolkit.
-            </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-5">
-            {FEATURES.map((f, i) => (
-              <div
-                key={i}
-                className={`group relative bg-gradient-to-br ${f.bg} to-transparent border ${f.border} rounded-3xl p-8 overflow-hidden hover:scale-[1.01] transition-all duration-300 cursor-default`}
-              >
-                <div className="absolute inset-0 bg-white/[0.02] opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl" />
-                <div className={`inline-flex items-center justify-center h-12 w-12 rounded-2xl bg-white/5 border border-white/10 mb-5 ${f.color}`}>
-                  <f.icon size={22} />
+          {/* Asymmetric bento grid */}
+          <div className="grid md:grid-cols-5 gap-4">
+
+            {/* Hero card — spans 3 cols */}
+            <div className="md:col-span-3 feature-card rounded-3xl p-10 overflow-hidden">
+              <div className="absolute top-0 right-0 w-60 h-60 bg-indigo-500/[0.04] rounded-full blur-3xl pointer-events-none" />
+              <span className="feature-number text-[80px] font-black absolute top-4 right-8 leading-none select-none">01</span>
+              <div className="relative z-10">
+                <div className="feature-icon inline-flex items-center justify-center h-11 w-11 rounded-xl bg-white/[0.05] border border-white/[0.08] mb-6">
+                  <Zap size={20} className="text-slate-300" />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2">{f.title}</h3>
-                <p className="text-slate-400 leading-relaxed">{f.desc}</p>
+                <h3 className="text-2xl font-bold text-white mb-3 tracking-tight">{FEATURES[0].title}</h3>
+                <p className="text-slate-400 leading-relaxed max-w-md">{FEATURES[0].desc}</p>
               </div>
-            ))}
+            </div>
+
+            {/* Card 2 — spans 2 cols */}
+            <div className="md:col-span-2 feature-card rounded-3xl p-8 overflow-hidden">
+              <span className="feature-number text-[80px] font-black absolute top-4 right-6 leading-none select-none">02</span>
+              <div className="relative z-10">
+                <div className="feature-icon inline-flex items-center justify-center h-11 w-11 rounded-xl bg-white/[0.05] border border-white/[0.08] mb-6">
+                  <TrendingUp size={20} className="text-slate-300" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2 tracking-tight">{FEATURES[1].title}</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">{FEATURES[1].desc}</p>
+              </div>
+            </div>
+
+            {/* Card 3 — spans 2 cols */}
+            <div className="md:col-span-2 feature-card rounded-3xl p-8 overflow-hidden">
+              <span className="feature-number text-[80px] font-black absolute top-4 right-6 leading-none select-none">03</span>
+              <div className="relative z-10">
+                <div className="feature-icon inline-flex items-center justify-center h-11 w-11 rounded-xl bg-white/[0.05] border border-white/[0.08] mb-6">
+                  <FileText size={20} className="text-slate-300" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2 tracking-tight">{FEATURES[2].title}</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">{FEATURES[2].desc}</p>
+              </div>
+            </div>
+
+            {/* Card 4 — spans 3 cols */}
+            <div className="md:col-span-3 feature-card rounded-3xl p-10 overflow-hidden">
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-violet-500/[0.04] rounded-full blur-3xl pointer-events-none" />
+              <span className="feature-number text-[80px] font-black absolute top-4 right-8 leading-none select-none">04</span>
+              <div className="relative z-10">
+                <div className="feature-icon inline-flex items-center justify-center h-11 w-11 rounded-xl bg-white/[0.05] border border-white/[0.08] mb-6">
+                  <Shield size={20} className="text-slate-300" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-3 tracking-tight">{FEATURES[3].title}</h3>
+                <p className="text-slate-400 leading-relaxed max-w-md">{FEATURES[3].desc}</p>
+              </div>
+            </div>
+
           </div>
         </section>
 
@@ -302,7 +311,7 @@ export default function LandingPage() {
               <Zap size={12} /> How it works
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-white">
-              Resume ready in{" "}
+              From zero to interview-ready in{" "}
               <span className="bg-gradient-to-r from-violet-400 to-blue-400 bg-clip-text text-transparent">
                 3 steps
               </span>
@@ -310,57 +319,25 @@ export default function LandingPage() {
           </div>
 
           <div className="relative">
-            {/* Connector line */}
-            <div className="absolute left-8 top-10 bottom-10 w-px bg-gradient-to-b from-indigo-500/50 via-violet-500/50 to-blue-500/50 hidden md:block" />
-
             <div className="space-y-6">
               {STEPS.map((s, i) => (
-                <div key={i} className="flex gap-6 items-start group">
-                  <div className="shrink-0 h-16 w-16 rounded-2xl bg-gradient-to-br from-indigo-600/20 to-violet-600/20 border border-indigo-500/20 flex items-center justify-center font-black text-indigo-400 text-lg group-hover:from-indigo-600/30 group-hover:border-indigo-500/40 transition-all duration-300">
-                    {s.n}
-                  </div>
-                  <div className="pt-3">
-                    <h3 className="text-lg font-bold text-white mb-1">{s.title}</h3>
-                    <p className="text-slate-400">{s.desc}</p>
+                <div key={i} className="relative">
+                  {/* Connector line between this card and the next */}
+                  {i < STEPS.length - 1 && (
+                    <div className="absolute left-8 top-16 h-6 w-px bg-gradient-to-b from-indigo-500/40 to-violet-500/40 hidden md:block" />
+                  )}
+                  <div className="flex gap-6 items-start group">
+                    <div className="shrink-0 h-16 w-16 rounded-2xl bg-gradient-to-br from-indigo-600/20 to-violet-600/20 border border-indigo-500/20 flex items-center justify-center font-black text-indigo-400 text-lg group-hover:from-indigo-600/30 group-hover:border-indigo-500/40 transition-all duration-300 relative z-10">
+                      {s.n}
+                    </div>
+                    <div className="pt-3">
+                      <h3 className="text-lg font-bold text-white mb-1">{s.title}</h3>
+                      <p className="text-slate-400">{s.desc}</p>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
-        </section>
-
-        {/* ── Testimonials ────────────────────────────────────────────────────── */}
-        <section className="max-w-6xl mx-auto px-6 py-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">
-              Loved by job seekers
-            </h2>
-            <p className="text-slate-400">Real results from real people.</p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-5">
-            {TESTIMONIALS.map((t, i) => (
-              <div
-                key={i}
-                className="bg-white/[0.03] border border-white/8 rounded-3xl p-6 hover:bg-white/[0.05] hover:border-white/15 transition-all duration-300"
-              >
-                <div className="flex gap-0.5 mb-4">
-                  {Array.from({ length: t.stars }).map((_, j) => (
-                    <Star key={j} size={14} className="text-amber-400 fill-amber-400" />
-                  ))}
-                </div>
-                <p className="text-slate-300 text-sm leading-relaxed mb-5">&ldquo;{t.text}&rdquo;</p>
-                <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-sm font-bold">
-                    {t.name[0]}
-                  </div>
-                  <div>
-                    <div className="text-sm font-semibold text-white">{t.name}</div>
-                    <div className="text-xs text-slate-500">{t.role}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
           </div>
         </section>
 
@@ -375,14 +352,14 @@ export default function LandingPage() {
                 <CheckCircle2 size={12} /> No credit card required
               </div>
               <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight">
-                Ready to get placed?
+                Your next interview is one resume away.
               </h2>
               <p className="text-slate-400 mb-8 max-w-md mx-auto">
-                Join thousands of professionals who landed their dream jobs with getPlaced.
+                Stop tweaking the same resume. Build one that actually matches the job — in 30 seconds.
               </p>
               <Link href="/signup">
                 <button className="group inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold px-10 py-4 rounded-2xl shadow-2xl shadow-indigo-500/30 border border-indigo-500/30 transition-all duration-300 hover:scale-[1.02] text-lg">
-                  Start for free
+                  Build my resume — free
                   <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </button>
               </Link>
@@ -392,23 +369,7 @@ export default function LandingPage() {
 
       </main>
 
-      {/* ── Footer ─────────────────────────────────────────────────────────── */}
-      <footer className="relative z-10 border-t border-white/5 py-8 px-6">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-2 font-bold text-sm text-slate-400 hover:text-white transition-colors">
-            <div className="h-6 w-6 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-md flex items-center justify-center">
-              <Sparkles size={12} fill="white" className="text-white" />
-            </div>
-            getPlaced
-          </Link>
-          <div className="flex items-center gap-6 text-xs text-slate-600">
-            <Link href="/privacy" className="hover:text-slate-400 transition-colors">Privacy</Link>
-            <Link href="/terms" className="hover:text-slate-400 transition-colors">Terms</Link>
-            <Link href="/faq" className="hover:text-slate-400 transition-colors">FAQ</Link>
-          </div>
-          <p className="text-xs text-slate-700">© 2026 getPlaced. All rights reserved.</p>
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   );
 }

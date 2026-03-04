@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Sparkles, CheckCircle2, Zap, FileText, Brain, Shield, Layout, ArrowRight } from "lucide-react";
+import { CheckCircle2, Zap, FileText, Brain, Shield, Layout, ArrowRight, Layers } from "lucide-react";
+import { PublicNavbar } from "@/components/layout/public-navbar";
+import { PublicFooter } from "@/components/layout/public-footer";
 
 export const metadata: Metadata = {
   title: "Features — AI Resume Builder Tools",
@@ -50,37 +52,13 @@ export default function FeaturesPage() {
         <div className="absolute bottom-[-10%] right-[5%] w-[500px] h-[500px] bg-violet-600/8 rounded-full blur-[100px]" />
       </div>
 
-      {/* ── Navbar ──────────────────────────────────────────────────────── */}
-      <nav className="relative z-50 flex items-center justify-between px-6 py-5 max-w-7xl mx-auto">
-        <Link href="/" className="flex items-center gap-2.5 font-bold text-xl tracking-tight">
-          <div className="h-8 w-8 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/30">
-            <Sparkles size={16} fill="white" className="text-white" />
-          </div>
-          <span className="bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">getPlaced</span>
-        </Link>
-
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
-          <Link href="/features" className="text-white">Features</Link>
-          <Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link>
-          <Link href="/faq" className="hover:text-white transition-colors">FAQ</Link>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Link href="/login" className="hidden sm:block text-sm font-medium text-slate-400 hover:text-white transition-colors">Log in</Link>
-          <Link href="/signup">
-            <button className="group flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-500/25 border border-indigo-500/50 transition-all">
-              Get started free
-              <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
-            </button>
-          </Link>
-        </div>
-      </nav>
+      <PublicNavbar currentPath="/features" />
 
       {/* ── Hero ───────────────────────────────────────────────────────── */}
       <main className="relative z-10">
         <section className="text-center max-w-4xl mx-auto px-6 pt-16 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
           <div className="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full px-4 py-1.5 text-xs font-medium text-indigo-300 mb-6">
-            <Sparkles size={12} /> Everything you need
+            <Layers size={12} /> Everything you need
           </div>
           <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-6">
             <span className="bg-gradient-to-b from-white via-white to-slate-400 bg-clip-text text-transparent">Features that</span>
@@ -134,23 +112,7 @@ export default function FeaturesPage() {
         </section>
       </main>
 
-      {/* ── Footer ──────────────────────────────────────────────────────── */}
-      <footer className="relative z-10 border-t border-white/5 py-8 px-6">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-2 font-bold text-sm text-slate-400 hover:text-white transition-colors">
-            <div className="h-6 w-6 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-md flex items-center justify-center">
-              <Sparkles size={12} fill="white" className="text-white" />
-            </div>
-            getPlaced
-          </Link>
-          <div className="flex items-center gap-6 text-xs text-slate-600">
-            <Link href="/privacy" className="hover:text-slate-400 transition-colors">Privacy</Link>
-            <Link href="/terms" className="hover:text-slate-400 transition-colors">Terms</Link>
-            <Link href="/faq" className="hover:text-slate-400 transition-colors">FAQ</Link>
-          </div>
-          <p className="text-xs text-slate-700">© 2026 getPlaced. All rights reserved.</p>
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   );
 }

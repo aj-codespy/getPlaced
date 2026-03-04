@@ -62,7 +62,7 @@ export async function POST(req: Request) {
     const cacheSnap = await getDoc(cacheRef);
 
     if (cacheSnap.exists() && cacheSnap.data().pdfBase64) {
-      console.log(`[Cache Hit] Serving cached PDF for hash ${payloadHash}`);
+      // Cache hit
       const base64Data = cacheSnap.data().pdfBase64;
       const buffer = Buffer.from(base64Data, "base64");
       return new NextResponse(buffer, {

@@ -6,7 +6,9 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import Link from "next/link";
-import { Sparkles, ArrowRight, HelpCircle } from "lucide-react";
+import { ArrowRight, HelpCircle } from "lucide-react";
+import { PublicNavbar } from "@/components/layout/public-navbar";
+import { PublicFooter } from "@/components/layout/public-footer";
 
 export const metadata: Metadata = {
   title: "FAQ — Frequently Asked Questions",
@@ -16,24 +18,96 @@ export const metadata: Metadata = {
 
 const FAQS = [
   {
-    q: "Is it really free?",
-    a: "Yes! You can create one resume and download it as a TXT file completely for free. No credit card required. To unlock PDF downloads and unlimited resumes, you can upgrade to Pro."
+    q: "Is getPlaced really free to use?",
+    a: "Yes. You get 200 free credits when you sign up — no credit card needed. That’s enough to generate multiple resumes, test templates, and see real results before you spend anything."
   },
   {
-    q: "How does the AI work?",
-    a: "We use Google's advanced Gemini AI. It analyzes your input (experience, education) and rewrites it to be more professional, action-oriented, and grammatically correct. It can also tailor your resume to a specific job description."
+    q: "How does the AI tailor my resume to a job description?",
+    a: "When you paste a job description, our AI (powered by Google Gemini) analyzes the role’s requirements, keywords, and tone. It then rewrites your resume bullets to highlight matching experience, injects relevant keywords, and uses action verbs that applicant tracking systems look for."
   },
   {
-    q: "What is an ATS friendly resume?",
-    a: "ATS (Applicant Tracking Systems) are software used by recruiters to filter resumes. Complex layouts often get garbled. Our templates are built with standard formatting that machines can read easily, ensuring your resume actually reaches a human."
+    q: "What is ATS and why does it matter?",
+    a: "ATS (Applicant Tracking System) is software that companies use to filter resumes before a human ever sees them. Over 75% of resumes are rejected by ATS due to formatting issues or missing keywords. Our templates and AI are specifically designed to pass these filters."
+  },
+  {
+    q: "Can I use getPlaced for different job roles?",
+    a: "Absolutely. That’s the whole point. Each time you paste a different job description, the AI generates a unique, tailored resume for that specific role. Apply to 10 jobs, get 10 custom resumes."
+  },
+  {
+    q: "What are credits and how do they work?",
+    a: "Credits are the currency for using AI features. Generating a resume costs ~100 credits. You get 200 free credits on signup. If you run out, you can purchase more through our Standard or Pro plans."
+  },
+  {
+    q: "What’s the difference between the Standard and Pro plans?",
+    a: "The Standard plan gives you 9 resume generations per month along with 1 LinkedIn audit. The Pro plan gives you 25 generations, 3 LinkedIn audits, access to premium templates, and priority AI processing for faster results."
   },
   {
     q: "Can I cancel my subscription?",
-    a: "Absolutely. You can cancel anytime from your dashboard. You will retain access until the end of your billing period."
+    a: "Yes — you can cancel anytime from your dashboard. You’ll keep access to your plan’s features until the end of the current billing period. No questions asked."
+  },
+  {
+    q: "What payment methods do you accept?",
+    a: "We accept all major credit/debit cards, UPI, net banking, and wallet payments through Razorpay. International cards (Visa, Mastercard) are fully supported."
   },
   {
     q: "Do you offer student discounts?",
-    a: "Our pricing is already optimized for students (less than the price of a movie ticket). However, we do run seasonal promotions, so keep an eye out!"
+    a: "Our pricing is already designed to be affordable for students — less than the cost of a coffee. We also run seasonal promotions, so keep an eye on our social channels."
+  },
+  {
+    q: "What templates are available?",
+    a: "We offer multiple professional templates including Classic, Modern, Business, Academic, and more. Each is LaTeX-compiled for pixel-perfect typography and layout. Free users get access to basic templates, while paid plans unlock the full library."
+  },
+  {
+    q: "Can I download my resume as a PDF?",
+    a: "Yes. All plans support PDF downloads. Your resume is compiled using LaTeX on our backend for a polished, professional output that looks identical on every device and printer."
+  },
+  {
+    q: "My PDF download failed. What should I do?",
+    a: "PDF generation depends on our backend service. If a download fails, try again in a few seconds. If it persists, check that your profile has all required fields filled in (name, at least one experience or education entry). Clearing your browser cache can also help."
+  },
+  {
+    q: "Why does my resume generation say 'Failed to optimize'?",
+    a: "This usually means our AI service is temporarily overloaded or your session has expired. Try refreshing the page and generating again. If the issue continues, log out and log back in."
+  },
+  {
+    q: "Can I edit my resume after generating it?",
+    a: "The AI generates optimized content based on your profile and the job description. To make changes, update your profile data (experience, skills, etc.) and regenerate. Each generation produces a fresh resume."
+  },
+  {
+    q: "Is my data safe and private?",
+    a: "Yes. We use Firebase for secure authentication and encrypted data storage. Your resume data is never sold to recruiters, third-party services, or advertisers. You own your data."
+  },
+  {
+    q: "What is the LinkedIn Profile Audit?",
+    a: "It’s an AI-powered review of your LinkedIn profile that identifies weak spots and gives specific, actionable suggestions — from your headline and summary to your experience descriptions. Think of it as a free career coach for your online presence."
+  },
+  {
+    q: "Does getPlaced work for non-tech roles?",
+    a: "Yes. Our AI and templates work across all industries — marketing, finance, healthcare, education, design, operations, and more. The AI adapts its language and keywords based on the job description you provide."
+  },
+  {
+    q: "Can I use getPlaced outside of India?",
+    a: "Absolutely. getPlaced works worldwide. We automatically detect your location and show pricing in your local currency (INR for India, USD for everywhere else). All features are available globally."
+  },
+  {
+    q: "Why am I seeing an error when trying to log in?",
+    a: "Make sure you’re using the same Google account you originally signed up with. If you’re seeing a session error, clear your browser cookies for the site and try again. We use Google OAuth, so there are no passwords to reset."
+  },
+  {
+    q: "How many resumes can I create with the free plan?",
+    a: "With 200 free credits, you can generate approximately 2 full resumes. Each generation costs about 100 credits. This is enough to see the quality before deciding to upgrade."
+  },
+  {
+    q: "Do my credits expire?",
+    a: "Credits from paid plans are refreshed monthly with your subscription. Unused credits do not carry over to the next billing cycle. Free starter credits do not expire."
+  },
+  {
+    q: "Can I get a refund?",
+    a: "If you’re unsatisfied with your purchase, contact us within 7 days and we’ll work with you on a resolution. Refunds are handled on a case-by-case basis and processed through Razorpay."
+  },
+  {
+    q: "I have a question that’s not listed here.",
+    a: "We’d love to help! Reach out to us at support@getplaced.co and we’ll get back to you as soon as possible. You can also DM us on our social channels."
   }
 ];
 
@@ -47,31 +121,7 @@ export default function FAQPage() {
         <div className="absolute bottom-[-15%] left-[10%] w-[400px] h-[400px] bg-indigo-600/8 rounded-full blur-[100px]" />
       </div>
 
-      {/* ── Navbar ───────────────────────────────────────────────── */}
-      <nav className="relative z-50 flex items-center justify-between px-6 py-5 max-w-7xl mx-auto w-full">
-        <Link href="/" className="flex items-center gap-2.5 font-bold text-xl tracking-tight">
-          <div className="h-8 w-8 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/30">
-            <Sparkles size={16} fill="white" className="text-white" />
-          </div>
-          <span className="bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">getPlaced</span>
-        </Link>
-
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
-          <Link href="/features" className="hover:text-white transition-colors">Features</Link>
-          <Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link>
-          <Link href="/faq" className="text-white">FAQ</Link>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Link href="/login" className="hidden sm:block text-sm font-medium text-slate-400 hover:text-white transition-colors">Log in</Link>
-          <Link href="/signup">
-            <button className="group flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-500/25 border border-indigo-500/50 transition-all">
-              Get started free
-              <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
-            </button>
-          </Link>
-        </div>
-      </nav>
+      <PublicNavbar currentPath="/faq" />
 
       {/* ── Content ──────────────────────────────────────────────── */}
       <main className="relative z-10 flex-1 max-w-3xl mx-auto px-6 py-16 w-full">
@@ -119,23 +169,7 @@ export default function FAQPage() {
         </div>
       </main>
 
-      {/* ── Footer ───────────────────────────────────────────────── */}
-      <footer className="relative z-10 border-t border-white/5 py-8 px-6">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-2 font-bold text-sm text-slate-400 hover:text-white transition-colors">
-            <div className="h-6 w-6 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-md flex items-center justify-center">
-              <Sparkles size={12} fill="white" className="text-white" />
-            </div>
-            getPlaced
-          </Link>
-          <div className="flex items-center gap-6 text-xs text-slate-600">
-            <Link href="/privacy" className="hover:text-slate-400 transition-colors">Privacy</Link>
-            <Link href="/terms" className="hover:text-slate-400 transition-colors">Terms</Link>
-            <Link href="/features" className="hover:text-slate-400 transition-colors">Features</Link>
-          </div>
-          <p className="text-xs text-slate-700">© 2026 getPlaced. All rights reserved.</p>
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   );
 }
