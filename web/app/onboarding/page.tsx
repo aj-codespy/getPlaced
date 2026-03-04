@@ -17,7 +17,7 @@ export default function OnboardingPage() {
   const [referralCode, setReferralCode] = useState("");
 
   const [profile, setProfile] = useState({
-     personalInfo: { fullName: "", email: "", phone: "", location: "", headline: "", linkedin: "", github: "", portfolio: "", summary: "" },
+     personalInfo: { fullName: "", email: "", phone: "", location: "", headline: "", linkedin: "", github: "", portfolio: "", summary: "", intent: "" },
      education: [{ institution: "", degree: "", startDate: "", endDate: "", score: "" }],
      experience: [{ company: "", role: "", startDate: "", endDate: "", location: "", description: "", bullets: [""] }],
      projects: [{ title: "", role: "", techStack: "", link: "", description: "" }],
@@ -307,9 +307,21 @@ export default function OnboardingPage() {
                                 <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Location <span className="text-indigo-400">*</span></label>
                                 <Input className="bg-white/5 border-white/10 text-white focus:ring-indigo-500" value={profile.personalInfo.location} onChange={(e) => updateInfo("location", e.target.value)} placeholder="City, Country" />
                             </div>
-                            <div className="col-span-2 space-y-2">
+                            <div className="space-y-2">
                                 <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Headline/Role</label>
                                 <Input className="bg-white/5 border-white/10 text-white focus:ring-indigo-500" value={profile.personalInfo.headline} onChange={(e) => updateInfo("headline", e.target.value)} placeholder="e.g. Senior Software Engineer" />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Goal <span className="text-indigo-400">*</span></label>
+                                <select 
+                                    className="w-full flex h-10 rounded-md border text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-white/5 border-white/10 text-white focus:ring-indigo-500 px-3 py-2"
+                                    value={profile.personalInfo.intent || ""}
+                                    onChange={(e) => updateInfo("intent", e.target.value)}
+                                >
+                                    <option value="" disabled className="bg-slate-900 text-slate-400">Select your goal</option>
+                                    <option value="job" className="bg-slate-900 text-white">Getting a Job (Industry)</option>
+                                    <option value="masters" className="bg-slate-900 text-white">Applying for Higher Studies (Master&apos;s/PhD)</option>
+                                </select>
                             </div>
                              <div className="col-span-2 space-y-2 pt-4 border-t border-white/5 mt-4">
                                 <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2"><Sparkles size={12}/> Referral Code (Optional)</label>

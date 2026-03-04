@@ -5,6 +5,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { db } from "@/lib/firebase/config";
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import crypto from "crypto";
+import { RESUME_TEMPLATES } from "@/lib/templates";
 
 const PYTHON_SERVICE_URL =
   (process.env.PYTHON_SERVICE_URL || "http://127.0.0.1:8000") + "/generate-pdf";
@@ -76,6 +77,16 @@ export async function POST(req: Request) {
 
     // 5. Rate Limit Verification (For un-cached recompilations only)
     const isPremium = (userData.isPremium || 0) > 0 || userData.planType === 'premium' || userData.planType === 'pro' || userData.planType === 'standard';
+    
+    // Validate Premium Template Access First
+    const templateConfig = RESUME_TEMPLATES.find(t => t.id === templateToRender);
+    if (templateConfig?.type === 'premium' && !isPremium) {
+        return NextResponse.json(
+            { error: "Access Denied: You must upgrade to Pro to use Premium templates." },
+            { status: 403 }
+        );
+    }
+
     const todayStr = new Date().toISOString().split('T')[0];
     let dailyPdfGenerations = userData.dailyPdfGenerations || 0;
     const lastPdfGenerationDate = userData.lastPdfGenerationDate || '';

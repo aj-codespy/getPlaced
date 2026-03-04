@@ -1,13 +1,12 @@
-
 import { db } from "@/lib/firebase/config";
-import { doc, getDoc, updateDoc, increment, collection, setDoc, query, where, getDocs, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, updateDoc, increment, collection, query, where, getDocs, serverTimestamp } from "firebase/firestore";
 import { nanoid } from "nanoid";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
 
 // GET: Fetch Referral Code & Stats
-export async function GET(req: Request) {
+export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -31,7 +30,9 @@ export async function GET(req: Request) {
       code: userData.referralCode,
       referralCount: userData.referralCount || 0,
       referralCredits: userData.referralCredits || 0,
-      totalCredits: userData.credits || 0
+      totalCredits: userData.credits || 0,
+      isPremium: userData.isPremium || 0,
+      planType: userData.planType || "free"
   });
 }
 

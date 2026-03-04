@@ -8,15 +8,15 @@ import { PRICING_PLANS } from "@/lib/razorpay/pricing";
 export async function POST(req: Request) {
   try {
     const {
-      razorpay_order_id,
+      razorpay_subscription_id,
       razorpay_payment_id,
       razorpay_signature,
       planId,
       userEmail
     } = await req.json();
 
-    // 1. Verify Signature
-    const body = razorpay_order_id + "|" + razorpay_payment_id;
+    // 1. Verify Signature — Subscriptions use subscription_id|payment_id
+    const body = razorpay_subscription_id + "|" + razorpay_payment_id;
     const expectedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
       .update(body.toString())
@@ -39,11 +39,12 @@ export async function POST(req: Request) {
     await addDoc(collection(db, "transactions"), {
         userId: userEmail,
         planId: planId,
-        amount: plan.price.INR, // Logged for reference; actual charge is in payment currency
+        amount: plan.price.INR,
         creditsAdded: plan.credits,
         provider: "razorpay",
+        type: "subscription",
         paymentId: razorpay_payment_id,
-        orderId: razorpay_order_id,
+        subscriptionId: razorpay_subscription_id,
         createdAt: serverTimestamp(),
         status: "success"
     });
@@ -55,10 +56,12 @@ export async function POST(req: Request) {
         credits: increment(plan.credits),
         planType: planId === "plan_pro" ? "pro" : "standard",
         isPremium: isPremiumValue,
+        subscriptionId: razorpay_subscription_id,
+        subscriptionActive: true,
         updatedAt: serverTimestamp()
     });
 
-    return NextResponse.json({ success: true, message: "Payment Verified & Credits Added" });
+    return NextResponse.json({ success: true, message: "Subscription Activated & Credits Added" });
 
   } catch (e: unknown) {
     console.error("Payment Verification Error:", e);

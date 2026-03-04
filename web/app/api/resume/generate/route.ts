@@ -5,6 +5,7 @@ import { filterResumeDataForTemplate, getTemplateSections } from "@/lib/template
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { doc, getDoc, updateDoc, increment } from "firebase/firestore";
+import { RESUME_TEMPLATES } from "@/lib/templates";
 
 export async function POST(req: Request) {
   try {
@@ -35,6 +36,16 @@ export async function POST(req: Request) {
     }
 
     const resolvedTemplateId = templateId || "classic";
+
+    const isPremium = (userData.isPremium || 0) > 0 || userData.planType === 'premium' || userData.planType === 'pro' || userData.planType === 'standard';
+    const templateConfig = RESUME_TEMPLATES.find(t => t.id === resolvedTemplateId);
+    if (templateConfig?.type === 'premium' && !isPremium) {
+        return NextResponse.json(
+            { error: "Access Denied: You must upgrade to Pro to generate Premium templates." },
+            { status: 403 }
+        );
+    }
+
     const templateSections = getTemplateSections(resolvedTemplateId);
 
     const { personalInfo, education, achievements, certifications, publications } = profile;

@@ -3,10 +3,12 @@ export const PRICING_PLANS = {
   STANDARD: {
     id: "plan_standard",
     name: "Standard Plan",
-    credits: 900, // 9 Resumes
+    credits: 900, // 9 Resumes per month
+    period: "monthly" as const,
+    type: "subscription" as const,
     features: [
-      "9 Resume Generations",
-      "1 LinkedIn Profile Audit",
+      "9 Resume Generations / month",
+      "1 LinkedIn Profile Audit / month",
       "Standard Templates",
       "ATS Keyword Optimization"
     ],
@@ -18,10 +20,12 @@ export const PRICING_PLANS = {
   PRO: {
     id: "plan_pro",
     name: "Pro Plan",
-    credits: 2500, // 25 Resumes
+    credits: 2500, // 25 Resumes per month
+    period: "monthly" as const,
+    type: "subscription" as const,
     features: [
-      "25 Resume Generations",
-      "3 LinkedIn Profile Audits",
+      "25 Resume Generations / month",
+      "3 LinkedIn Profile Audits / month",
       "Premium Templates (Publication/Academic)",
       "Priority AI Processing",
       "Cover Letter Generator (Coming Soon)"

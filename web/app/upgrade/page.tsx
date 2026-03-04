@@ -15,7 +15,6 @@ import { useSession } from "next-auth/react";
 export default function UpgradePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("annual");
   const [currency, setCurrency] = useState<"INR" | "USD" | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -27,10 +26,7 @@ export default function UpgradePage() {
   }, []);
 
   const freeLabel = currency === "USD" ? "$0" : "₹0";
-  const proMonthly = currency === "USD" ? "$5.99" : "₹499";
-  const proAnnual = currency === "USD" ? "$3.59" : "₹299";
-  const proBilledYearly = currency === "USD" ? "Billed $43 yearly" : "Billed ₹3588 yearly";
-  const proPrice = billingCycle === "annual" ? proAnnual : proMonthly;
+  const proPrice = currency === "USD" ? "$8.99" : "₹299";
 
   const handleUpgrade = async () => {
     if (!session) {
@@ -41,8 +37,8 @@ export default function UpgradePage() {
     setLoading(true);
 
     try {
-      // Create Order API
-      const planId = billingCycle === "annual" ? "plan_pro" : "plan_pro"; 
+      // Create Subscription
+      const planId = "plan_pro";
       const res = await fetch("/api/payment/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -53,21 +49,19 @@ export default function UpgradePage() {
 
       if (!res.ok) throw new Error(data.error);
 
-      // Initialize Razorpay with exact parameters from SDK recommendations
+      // Initialize Razorpay with subscription parameters
       const options = {
         key: data.keyId,
-        amount: data.amount,
-        currency: data.currency,
+        subscription_id: data.orderId,
         name: "getPlaced",
-        description: `Pro Plan (${billingCycle})`,
+        description: `Pro Plan — Monthly Subscription`,
         image: "https://getplaced.in/og-image.png",
-        order_id: data.orderId,
-        handler: async function (response: any) {
+        handler: async function (response: { razorpay_subscription_id: string; razorpay_payment_id: string; razorpay_signature: string }) {
           const verifyRes = await fetch("/api/payment/verify", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              razorpay_order_id: response.razorpay_order_id,
+              razorpay_subscription_id: response.razorpay_subscription_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
               planId: planId,
@@ -76,7 +70,7 @@ export default function UpgradePage() {
           });
           
           if (verifyRes.ok) {
-              alert("Payment Successful! Welcome to Pro.");
+              alert("Subscription Activated! Welcome to Pro.");
               router.push("/dashboard");
           } else {
               alert("Payment Verification Failed");
@@ -88,19 +82,19 @@ export default function UpgradePage() {
           contact: "" 
         },
         notes: {
-          address: "getPlaced Pro Subscription"
+          address: "getPlaced Monthly Subscription"
         },
         theme: {
           color: "#4f46e5",
         },
       };
 
-      const RazorpayConstructor = (window as any).Razorpay;
-      const rzp = new RazorpayConstructor(options);
+      const RazorpayConstructor = (window as Window & typeof globalThis & { Razorpay: new (options: Record<string, unknown>) => { open: () => void } }).Razorpay;
+      const rzp = new RazorpayConstructor(options as Record<string, unknown>);
       rzp.open();
 
-    } catch (e: any) {
-      alert("Payment Failed: " + (e.message || "Unknown error"));
+    } catch (e: unknown) {
+      alert("Payment Failed: " + (e instanceof Error ? e.message : "Unknown error"));
     } finally {
       setLoading(false);
     }
@@ -137,25 +131,10 @@ export default function UpgradePage() {
                 Get unlimited AI generations, premium templates, and advanced customization to land your dream job 2x faster.
               </p>
 
-              {/* Billing Toggle */}
-              <div className="flex items-center justify-center gap-3 mb-16 animate-slide-up delay-300">
-                 <span className={cn("text-sm font-semibold transition-colors", billingCycle === "monthly" ? "text-white" : "text-slate-500")}>Monthly</span>
-                 <button 
-                   onClick={() => setBillingCycle(billingCycle === "monthly" ? "annual" : "monthly")}
-                   className="relative w-14 h-8 bg-white/[0.06] border border-white/[0.08] rounded-full p-1 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-[#030712]"
-                 >
-                    <div className={cn(
-                      "w-6 h-6 rounded-full shadow-md transition-all duration-300",
-                      billingCycle === "annual" 
-                        ? "translate-x-6 bg-gradient-to-r from-indigo-500 to-purple-500" 
-                        : "translate-x-0 bg-slate-400"
-                    )} />
-                 </button>
-                 <div className="flex items-center gap-2">
-                    <span className={cn("text-sm font-semibold transition-colors", billingCycle === "annual" ? "text-white" : "text-slate-500")}>Annual</span>
-                    <span className="bg-white/[0.06] text-slate-400 text-[10px] font-bold px-2 py-1 rounded-full border border-emerald-500/20">SAVE 40%</span>
-                 </div>
-              </div>
+               {/* Monthly label */}
+               <div className="flex items-center justify-center gap-2 mb-16 animate-slide-up delay-300">
+                  <span className="text-sm font-semibold text-slate-400">Billed monthly · Cancel anytime</span>
+               </div>
            </div>
 
            {/* Pricing Cards */}
@@ -211,9 +190,7 @@ export default function UpgradePage() {
                                 </span>
                                 <span className="text-slate-400 font-medium">/ month</span>
                             </div>
-                            {billingCycle === "annual" && (
-                                <p className="text-sm text-indigo-400/80 mt-2 font-medium">{proBilledYearly}</p>
-                            )}
+                            <p className="text-sm text-indigo-400/80 mt-2 font-medium">Billed monthly · Cancel anytime</p>
                         </div>
 
                         <Button 

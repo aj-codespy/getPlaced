@@ -25,23 +25,41 @@ export async function POST(req: Request) {
     // Razorpay accepts amount in smallest currency unit (paise or cents)
     const amountInSmallestUnit = Math.round(amount * 100);
 
-    // 3. Create Order on Razorpay
+    // 3. Find or Create a Plan on Razorpay
+    const { items: existingPlans } = await razorpay.plans.all();
+    let rzpPlan = (existingPlans as any[]).find((p) => p.item.name === plan.name && p.item.amount === amountInSmallestUnit && p.item.currency === (currency || "INR") && p.period === "monthly");
+    
+    if (!rzpPlan) {
+        rzpPlan = await razorpay.plans.create({
+            period: "monthly",
+            interval: 1,
+            item: {
+                name: plan.name,
+                amount: amountInSmallestUnit,
+                currency: currency || "INR",
+                description: `${plan.name} Monthly Subscription`
+            }
+        });
+    }
+
+    // 4. Create Subscription on Razorpay
     const options = {
-      amount: amountInSmallestUnit,
-      currency: currency || "INR",
-      receipt: `receipt_${Date.now()}_${session.user.email.substring(0, 5)}`,
+      plan_id: rzpPlan.id,
+      customer_notify: 1,
+      total_count: 120, // 10 years duration max
       notes: {
         userEmail: session.user.email,
         planId: plan.id,
-        credits: plan.credits
+        credits: String(plan.credits)
       }
     };
 
-    const order = await razorpay.orders.create(options);
+    const subscription = await razorpay.subscriptions.create(options as any) as any;
 
     return NextResponse.json({
         success: true,
-        orderId: order.id,
+        orderId: subscription.id,
+        isSubscription: true,
         amount: amountInSmallestUnit,
         currency: currency || "INR",
         keyId: process.env.RAZORPAY_KEY_ID

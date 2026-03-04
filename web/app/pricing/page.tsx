@@ -60,18 +60,16 @@ export default function PricingPage() {
 
       const options = {
         key: data.keyId,
-        amount: data.amount,
-        currency: data.currency,
+        subscription_id: data.orderId,
         name: "getPlaced",
-        description: `Unlock ${planId}`,
+        description: `Monthly Subscription — ${planId}`,
         image: "https://getplaced.in/og-image.png",
-        order_id: data.orderId,
-        handler: async function (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string; }) {
+        handler: async function (response: { razorpay_subscription_id: string; razorpay_payment_id: string; razorpay_signature: string; }) {
           const verifyRes = await fetch("/api/payment/verify", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              razorpay_order_id: response.razorpay_order_id,
+              razorpay_subscription_id: response.razorpay_subscription_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
               planId: planId,
@@ -80,7 +78,7 @@ export default function PricingPage() {
           });
           
           if (verifyRes.ok) {
-              alert("Payment Successful! Credits Added.");
+              alert("Subscription Activated! Credits Added.");
               router.push("/dashboard");
           } else {
               alert("Payment Verification Failed");
@@ -92,7 +90,7 @@ export default function PricingPage() {
           contact: ""
         },
         notes: {
-          address: "getPlaced Pro Subscription"
+          address: "getPlaced Monthly Subscription"
         },
         theme: {
           color: "#4f46e5",

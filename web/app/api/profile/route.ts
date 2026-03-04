@@ -2,20 +2,10 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { db } from "@/lib/firebase/config"; // Import Firebase
-import { collection, query, where, getDocs, doc, setDoc, getDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, setDoc } from "firebase/firestore";
 
-// Helper to look up user doc in Firebase by email
-async function getFirebaseUserByEmail(email: string) {
-    const usersRef = collection(db, "users");
-    const q = query(usersRef, where("email", "==", email));
-    const snapshot = await getDocs(q);
-    if (!snapshot.empty) {
-        return { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
-    }
-    return null;
-}
 
-export async function GET(req: Request) {
+export async function GET() {
     try {
         const session = await getServerSession(authOptions);
         if (!session || !session.user?.email) {
@@ -65,6 +55,7 @@ export async function POST(req: Request) {
            achievements: data.achievements || [],
            certifications: data.certifications || [],
            publications: data.publications || [],
+           courses: data.courses || [],
            updatedAt: new Date().toISOString()
         };
 

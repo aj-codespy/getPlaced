@@ -13,6 +13,7 @@ import {
   Wand2,
   FileText,
   AlertTriangle,
+  Lock,
 } from "lucide-react";
 import Link from "next/link";
 import { RESUME_TEMPLATES, getTemplateSections } from "@/lib/templates";
@@ -32,6 +33,7 @@ export default function BuilderPage() {
 
   const [profile, setProfile] = useState<Record<string, unknown> | null>(null);
   const [credits, setCredits] = useState(0);
+  const [isPremium, setIsPremium] = useState(false);
 
   const [selectedTemplate, setSelectedTemplate] = useState<string>(() => {
     if (typeof window !== "undefined") {
@@ -106,6 +108,9 @@ export default function BuilderPage() {
         if (referralData?.totalCredits !== undefined) {
           setCredits(referralData.totalCredits);
         }
+        if (referralData?.isPremium > 0 || referralData?.planType === "pro" || referralData?.planType === "premium" || referralData?.planType === "standard") {
+          setIsPremium(true);
+        }
       })
       .catch(console.error)
       .finally(() => setFetchingProfile(false));
@@ -113,6 +118,13 @@ export default function BuilderPage() {
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   const pickTemplate = (id: string) => {
+    const template = RESUME_TEMPLATES.find((t) => t.id === id);
+    if (template?.type === "premium" && !isPremium) {
+      if (confirm("This is a Premium template. Upgrade to Pro to use it?")) {
+        router.push("/pricing");
+      }
+      return;
+    }
     setSelectedTemplate(id);
     localStorage.setItem("lastTemplate", id);
   };
@@ -345,6 +357,11 @@ export default function BuilderPage() {
                     {t.type === "premium" && (
                       <div className="absolute top-0.5 right-0.5 bg-amber-400 text-[7px] font-black text-black px-1 rounded leading-4">
                         PRO
+                      </div>
+                    )}
+                    {t.type === "premium" && !isPremium && (
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-[1px]">
+                        <Lock size={16} className="text-white/70" />
                       </div>
                     )}
                     {selectedTemplate === t.id && (
