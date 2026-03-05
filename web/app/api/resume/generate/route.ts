@@ -54,7 +54,7 @@ export async function POST(req: Request) {
     // Send the FULL profile to the optimizer so it has complete candidate context
     // for anti-hallucination. The optimizer only rewrites writable sections (summary,
     // experience, projects, skills) but needs the full profile for context.
-    const pythonApiUrl = process.env.PYTHON_SERVICE_URL || "http://127.0.0.1:8000";
+    const pythonApiUrl = (process.env.PYTHON_SERVICE_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
     const res = await fetch(`${pythonApiUrl}/optimize-resume`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

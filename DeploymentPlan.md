@@ -142,7 +142,7 @@ The frontend is specifically optimized for Edge and Serverless deployment on Ver
 3. **Set Environment Variables:**
    Before clicking "Deploy", add the following live API keys:
    - **Python Core Connection:**
-     - `PYTHON_SERVICE_URL` -> Exactly the Cloud Run URL from step 1.9 (e.g., `https://resume-api-xxxxx.a.run.app/generate-pdf`)
+     - `PYTHON_SERVICE_URL` -> Exactly the Cloud Run URL from step 1.9 (e.g., `https://resume-api-xxxxx.a.run.app`)
    - **Firebase Rules (Database & Cache)**
      - `NEXT_PUBLIC_FIREBASE_API_KEY`
      - `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`

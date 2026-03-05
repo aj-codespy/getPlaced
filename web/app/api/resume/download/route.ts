@@ -8,7 +8,7 @@ import crypto from "crypto";
 import { RESUME_TEMPLATES } from "@/lib/templates";
 
 const PYTHON_SERVICE_URL =
-  (process.env.PYTHON_SERVICE_URL || "http://127.0.0.1:8000") + "/generate-pdf";
+  (process.env.PYTHON_SERVICE_URL || "http://127.0.0.1:8000").replace(/\/$/, "") + "/generate-pdf";
 
 export async function POST(req: Request) {
   try {
