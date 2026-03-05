@@ -33,7 +33,7 @@ export default function ContactPage() {
             <div className="space-y-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Email</p>
-                <a href="mailto:getplaced.web@gmail.com" className="text-indigo-400 hover:text-indigo-300 font-medium">getplaced.web@gmail.com</a>
+                <a href="mailto:support@getplaced.online" className="text-indigo-400 hover:text-indigo-300 font-medium">support@getplaced.online</a>
               </div>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Response Time</p>
@@ -50,7 +50,7 @@ export default function ContactPage() {
             <div className="space-y-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Email</p>
-                <a href="mailto:getplaced.web@gmail.com" className="text-indigo-400 hover:text-indigo-300 font-medium">getplaced.web@gmail.com</a>
+                <a href="mailto:support@getplaced.online" className="text-indigo-400 hover:text-indigo-300 font-medium">support@getplaced.online</a>
               </div>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Company Info</p>

@@ -43,7 +43,7 @@ export default function RefundPage() {
               <li><strong>Major service disruption:</strong> If a persistent, documented technical error on our end prevented you from accessing the service entirely for a period of 48 hours or more.</li>
             </ul>
             <p className="mt-4">
-              To request a refund under these conditions, you must email <a href="mailto:getplaced.web@gmail.com" className="text-indigo-400 hover:underline">getplaced.web@gmail.com</a> within 7 days of the transaction.
+              To request a refund under these conditions, you must email <a href="mailto:support@getplaced.online" className="text-indigo-400 hover:underline">support@getplaced.online</a> within 7 days of the transaction.
             </p>
           </section>
 
@@ -69,7 +69,7 @@ export default function RefundPage() {
           <section>
             <h3 className="text-white font-bold text-lg mb-4">5. Contact Us</h3>
             <p>
-              For any payment or billing questions, please reach out to our team at <a href="mailto:getplaced.web@gmail.com" className="text-indigo-400 hover:underline">getplaced.web@gmail.com</a>. We strive to respond within 24-48 hours.
+              For any payment or billing questions, please reach out to our team at <a href="mailto:support@getplaced.online" className="text-indigo-400 hover:underline">support@getplaced.online</a>. We strive to respond within 24-48 hours.
             </p>
           </section>
         </div>
