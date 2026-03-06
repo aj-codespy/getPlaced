@@ -17,7 +17,7 @@ export default function OnboardingPage() {
   const [referralCode, setReferralCode] = useState("");
 
   const [profile, setProfile] = useState({
-     personalInfo: { fullName: "", email: "", phone: "", location: "", headline: "", linkedin: "", github: "", portfolio: "", summary: "", intent: "" },
+     personalInfo: { fullName: "", email: "", phone: "", location: "", headline: "", linkedin: "", github: "", portfolio: "", summary: "", intent: "", additionalLinks: [{ platform: "", url: "" }] },
      education: [{ institution: "", degree: "", startDate: "", endDate: "", score: "" }],
      experience: [{ company: "", role: "", startDate: "", endDate: "", location: "", description: "", bullets: [""] }],
      projects: [{ title: "", role: "", techStack: "", link: "", description: "" }],
@@ -198,6 +198,44 @@ export default function OnboardingPage() {
           return { ...prev, [section]: arr } as typeof prev;
       });
   };
+
+  const updateAdditionalLink = (index: number, field: "platform" | "url", value: string) => {
+      setProfile(prev => {
+          const links = [...(prev.personalInfo.additionalLinks || [{ platform: "", url: "" }])];
+          links[index] = { ...links[index], [field]: value };
+          return {
+              ...prev,
+              personalInfo: {
+                  ...prev.personalInfo,
+                  additionalLinks: links
+              }
+          };
+      });
+  };
+
+  const addAdditionalLink = () => {
+      setProfile(prev => ({
+          ...prev,
+          personalInfo: {
+              ...prev.personalInfo,
+              additionalLinks: [...(prev.personalInfo.additionalLinks || []), { platform: "", url: "" }]
+          }
+      }));
+  };
+
+  const removeAdditionalLink = (index: number) => {
+      setProfile(prev => {
+          const links = [...(prev.personalInfo.additionalLinks || [{ platform: "", url: "" }])];
+          if (links.length > 1) links.splice(index, 1);
+          return {
+              ...prev,
+              personalInfo: {
+                  ...prev.personalInfo,
+                  additionalLinks: links
+              }
+          };
+      });
+  };
   
   const addArrayItem = (section: keyof typeof profile, template: Record<string, unknown>) => {
       setProfile(prev => ({
@@ -341,6 +379,40 @@ export default function OnboardingPage() {
                                 <Input className="bg-white/5 border-white/10 text-white" value={profile.personalInfo.linkedin} onChange={(e) => updateInfo("linkedin", e.target.value)} placeholder="LinkedIn URL" />
                                 <Input className="bg-white/5 border-white/10 text-white" value={profile.personalInfo.github} onChange={(e) => updateInfo("github", e.target.value)} placeholder="GitHub URL" />
                                 <Input className="bg-white/5 border-white/10 text-white" value={profile.personalInfo.portfolio} onChange={(e) => updateInfo("portfolio", e.target.value)} placeholder="Portfolio URL" />
+                             </div>
+                             <div className="space-y-3 pt-2">
+                                {(profile.personalInfo.additionalLinks || [{ platform: "", url: "" }]).map((link: { platform: string; url: string }, idx: number) => (
+                                    <div key={idx} className="grid md:grid-cols-[1fr_2fr_auto] gap-3">
+                                        <Input
+                                            className="bg-white/5 border-white/10 text-white"
+                                            value={link.platform}
+                                            onChange={(e) => updateAdditionalLink(idx, "platform", e.target.value)}
+                                            placeholder="Platform (e.g. LeetCode)"
+                                        />
+                                        <Input
+                                            className="bg-white/5 border-white/10 text-white"
+                                            value={link.url}
+                                            onChange={(e) => updateAdditionalLink(idx, "url", e.target.value)}
+                                            placeholder="https://..."
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            className="text-slate-400 hover:text-red-400"
+                                            onClick={() => removeAdditionalLink(idx)}
+                                        >
+                                            <X size={16} />
+                                        </Button>
+                                    </div>
+                                ))}
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    className="border-dashed border-white/20 bg-transparent text-slate-300 hover:bg-white/5"
+                                    onClick={addAdditionalLink}
+                                >
+                                    <Plus className="mr-2 h-4 w-4" /> Add Custom Link (Kaggle, LeetCode, etc.)
+                                </Button>
                              </div>
                         </div>
                     </div>

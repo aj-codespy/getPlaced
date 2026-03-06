@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { db } from "@/lib/firebase/config";
 import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { selectDisplayLinks } from "@/lib/profile-links";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
@@ -152,6 +153,7 @@ Return ONLY valid JSON:
       personalInfo: {
         ...current.personalInfo,
         summary: (aiOutput.summary as string) || current.personalInfo?.summary || "",
+        displayLinks: selectDisplayLinks(current.personalInfo || {}, jobDescription || "", 4),
       },
       experience: aiOutput.experience || current.experience,
       projects:   aiOutput.projects   || current.projects,

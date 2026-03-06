@@ -48,15 +48,17 @@
 \begin{minipage}[b]{0.6\textwidth}
     {\fontsize{30}{36}\selectfont \textbf{\color{blue900}\VAR{data.personalInfo.fullName}}} \\
     \vspace{4pt}
-    {\Large \color{blue600} \VAR{data.personalInfo.location}}
+    \BLOCK{if data.personalInfo.location}{\Large \color{blue600} \VAR{data.personalInfo.location}}\BLOCK{endif}
 \end{minipage}
 \hfill
 \begin{minipage}[b]{0.35\textwidth}
     \raggedleft
     \small \color{gray600}
-    \VAR{data.personalInfo.email} \\
-    \VAR{data.personalInfo.phone} \\
-    \VAR{data.personalInfo.linkedin}
+    \BLOCK{if data.personalInfo.email}\VAR{data.personalInfo.email} \\ \BLOCK{endif}
+    \BLOCK{if data.personalInfo.phone}\VAR{data.personalInfo.phone} \\ \BLOCK{endif}
+    \BLOCK{if data.personalInfo.displayLinks}
+      \BLOCK{for link in data.personalInfo.displayLinks}\href{\VAR{link.url}}{\VAR{link.label}}\BLOCK{if not loop.last} \;|\; \BLOCK{endif}\BLOCK{endfor}
+    \BLOCK{endif}
 \end{minipage}
 
 \vspace{0.2cm}
@@ -82,7 +84,7 @@
         \begin{tabular}{@{\color{blue600}\vrule width 2pt \hspace{6pt}}p{0.96\textwidth}}
             \textbf{\large \color{gray600} \VAR{exp.role}} \hfill {\footnotesize \color{blue600} \textbf{\VAR{exp.startDate} -- \VAR{exp.endDate}}} \\
             {\small \textbf{\VAR{exp.company}}} \\
-            \begin{itemize}[leftmargin=1.5em, nosep, label={\color{gray600}\small\textbullet}]
+            \begin{itemize}[leftmargin=0.7em, nosep, label={\color{gray600}\small\textbullet}]
                 \BLOCK{for bullet in exp.bullets}
                 \item \small \color{gray600} \VAR{bullet}
                 \BLOCK{endfor}
@@ -105,7 +107,7 @@
         \end{tabular}
     \end{minipage}
     \BLOCK{if proj.bullets}
-    \begin{itemize}[leftmargin=1.5em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
+    \begin{itemize}[leftmargin=0.7em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
         \BLOCK{for bullet in proj.bullets}
         \item \small \VAR{bullet}
         \BLOCK{endfor}
@@ -145,7 +147,7 @@
 % ACHIEVEMENTS
 \BLOCK{if data.achievements}
 \section{Achievements}
-\begin{itemize}[leftmargin=1.5em, nosep, label={\color{blue600}\small\textbullet}]
+\begin{itemize}[leftmargin=0.7em, nosep, label={\color{blue600}\small\textbullet}]
     \BLOCK{for ach in data.achievements}
     \item \small \color{gray600} \VAR{ach}
     \BLOCK{endfor}
@@ -155,7 +157,7 @@
 % CERTIFICATIONS
 \BLOCK{if data.certifications}
 \section{Certifications}
-\begin{itemize}[leftmargin=1.5em, nosep, label={\color{blue600}\small\textbullet}]
+\begin{itemize}[leftmargin=0.7em, nosep, label={\color{blue600}\small\textbullet}]
     \BLOCK{for cert in data.certifications}
     \item \small \color{gray600} \VAR{cert}
     \BLOCK{endfor}

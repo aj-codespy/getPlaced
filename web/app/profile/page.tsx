@@ -20,8 +20,7 @@ interface PersonalInfo {
   linkedin: string;
   github: string;
   portfolio: string;
-  twitter: string;
-  otherLink: string;
+  additionalLinks: { platform: string; url: string }[];
   yearsOfExperience: string;
 }
 
@@ -100,7 +99,7 @@ const INITIAL_STATE: UserProfile = {
   isLocked: false,
   personalInfo: { 
     fullName: "", email: "", phone: "", location: "", country: "", headline: "", photoUrl: "",
-    linkedin: "", github: "", portfolio: "", twitter: "", otherLink: "", yearsOfExperience: ""
+    linkedin: "", github: "", portfolio: "", additionalLinks: [{ platform: "", url: "" }], yearsOfExperience: ""
   },
   education: [{ institution: "", degree: "", fieldOfStudy: "", startDate: "", endDate: "", score: "", coursework: "" }],
   experience: [{ jobTitle: "", company: "", location: "", startDate: "", endDate: "", isCurrentRole: false, description: "" }],
@@ -196,9 +195,16 @@ export default function ProfilePage() {
                        ...p, techStack: Array.isArray(p.techStack) ? p.techStack.join(", ") : p.techStack
                    })) || INITIAL_STATE.projects;
 
-                   setFormData({
+                  setFormData({
                        ...INITIAL_STATE,
                        ...profile,
+                       personalInfo: {
+                         ...INITIAL_STATE.personalInfo,
+                         ...(profile.personalInfo || {}),
+                         additionalLinks: Array.isArray(profile.personalInfo?.additionalLinks) && profile.personalInfo.additionalLinks.length
+                           ? profile.personalInfo.additionalLinks
+                           : INITIAL_STATE.personalInfo.additionalLinks,
+                       },
                        skills: formattedSkills,
                        education: formattedEducation,
                        projects: formattedProjects,
@@ -297,6 +303,44 @@ export default function ProfilePage() {
        }
   };
 
+  const updateAdditionalLink = (index: number, field: "platform" | "url", value: string) => {
+    setFormData(prev => {
+      const links = [...(prev.personalInfo.additionalLinks || [{ platform: "", url: "" }])];
+      links[index] = { ...links[index], [field]: value };
+      return {
+        ...prev,
+        personalInfo: {
+          ...prev.personalInfo,
+          additionalLinks: links,
+        },
+      };
+    });
+  };
+
+  const addAdditionalLink = () => {
+    setFormData(prev => ({
+      ...prev,
+      personalInfo: {
+        ...prev.personalInfo,
+        additionalLinks: [...(prev.personalInfo.additionalLinks || []), { platform: "", url: "" }],
+      },
+    }));
+  };
+
+  const removeAdditionalLink = (index: number) => {
+    setFormData(prev => {
+      const links = [...(prev.personalInfo.additionalLinks || [{ platform: "", url: "" }])];
+      if (links.length > 1) links.splice(index, 1);
+      return {
+        ...prev,
+        personalInfo: {
+          ...prev.personalInfo,
+          additionalLinks: links,
+        },
+      };
+    });
+  };
+
   const removeItem = (section: keyof UserProfile, index: number) => {
        if (Array.isArray(formData[section])) {
            setFormData(prev => {
@@ -377,6 +421,23 @@ export default function ProfilePage() {
                     <Field label="LinkedIn URL" value={formData.personalInfo.linkedin} onChange={(v: string) => updateReq("personalInfo", null, "linkedin", v)} />
                     <Field label="GitHub URL" value={formData.personalInfo.github} onChange={(v: string) => updateReq("personalInfo", null, "github", v)} />
                     <Field label="Portfolio URL" value={formData.personalInfo.portfolio} onChange={(v: string) => updateReq("personalInfo", null, "portfolio", v)} />
+                </div>
+                <div className="space-y-3 mt-4">
+                    <label className="text-xs font-semibold uppercase text-slate-500 tracking-wider block">Custom Links</label>
+                    {(formData.personalInfo.additionalLinks || [{ platform: "", url: "" }]).map((link, i) => (
+                        <div key={i} className="grid md:grid-cols-[1fr_2fr_auto] gap-3">
+                            <Field label="Platform" value={link.platform} onChange={(v: string) => updateAdditionalLink(i, "platform", v)} placeholder="LeetCode, Kaggle, Medium..." />
+                            <Field label="URL" value={link.url} onChange={(v: string) => updateAdditionalLink(i, "url", v)} placeholder="https://..." />
+                            <div className="flex items-end pb-1">
+                                <button onClick={() => removeAdditionalLink(i)} className="text-slate-600 hover:text-red-400 p-2 rounded-lg hover:bg-red-500/10">
+                                    <Trash2 size={16} />
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                    <Button type="button" variant="outline" onClick={addAdditionalLink} className="border-dashed border-white/[0.08] bg-transparent text-slate-400 hover:text-white hover:bg-white/[0.04]">
+                        <Plus className="mr-2 h-4 w-4" /> Add Custom Link
+                    </Button>
                 </div>
             </Section>
 

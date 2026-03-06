@@ -150,7 +150,7 @@ def normalize_achievements(ach_list: list) -> list:
     """
     result = []
     for ach in ach_list:
-        if isinstance(ach, str):
+        if isinstance(ach, str) and ach.strip():
             result.append(ach)
         elif isinstance(ach, dict):
             # Convert structured object to readable string
@@ -161,8 +161,44 @@ def normalize_achievements(ach_list: list) -> list:
                 parts.append(f"— {ach['organization']}")
             if ach.get("dateReceived"):
                 parts.append(f"({ach['dateReceived']})")
-            result.append(" ".join(parts) if parts else str(ach))
+            combined = " ".join(parts) if parts else ""
+            if combined.strip():
+                result.append(combined)
     return result
+
+
+def normalize_links(personal_info: dict) -> list:
+    if not isinstance(personal_info, dict):
+        return []
+    links = []
+    for link in personal_info.get("displayLinks") or []:
+        if not isinstance(link, dict):
+            continue
+        label = str(link.get("label") or "").strip()
+        url = str(link.get("url") or "").strip()
+        if label and url:
+            links.append({"label": label, "url": url})
+    return links[:4]
+
+
+def _has_meaningful_value(value):
+    if isinstance(value, str):
+        return bool(value.strip())
+    if isinstance(value, list):
+        return any(_has_meaningful_value(v) for v in value)
+    if isinstance(value, dict):
+        return any(_has_meaningful_value(v) for v in value.values())
+    return bool(value)
+
+
+def prune_empty_records(items: list, keys: list) -> list:
+    pruned = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        if any(_has_meaningful_value(item.get(k)) for k in keys):
+            pruned.append(item)
+    return pruned
 
 
 def cleanup_old_files(max_age_seconds: int = 300):
@@ -213,9 +249,9 @@ async def generate_pdf(req: ResumeRequest):
     raw = req.data
     normalized = {
         **raw,
-        "education":  normalize_education(raw.get("education") or []),
-        "experience": normalize_experience(raw.get("experience") or []),
-        "projects":   normalize_projects(raw.get("projects") or []),
+        "education":  prune_empty_records(normalize_education(raw.get("education") or []), ["institution", "degree", "score", "coursework"]),
+        "experience": prune_empty_records(normalize_experience(raw.get("experience") or []), ["company", "role", "location", "bullets"]),
+        "projects":   prune_empty_records(normalize_projects(raw.get("projects") or []), ["title", "role", "link", "description", "bullets", "techStack"]),
         # Ensure skills is always a list of strings
         "skills": (
             raw.get("skills") if isinstance(raw.get("skills"), list)
@@ -241,6 +277,7 @@ async def generate_pdf(req: ResumeRequest):
                 or (raw.get("personalInfo") or {}).get("summary")
                 or ""
             ),
+            "displayLinks": normalize_links(raw.get("personalInfo") or {}),
         },
     }
 
@@ -251,10 +288,13 @@ async def generate_pdf(req: ResumeRequest):
         if not val or (isinstance(val, list) and len(val) == 0):
             normalized[list_key] = []
 
-    # Strip empty summary
+    # Strip empty summary and trim string fields.
     pi = normalized.get("personalInfo", {})
     if not pi.get("summary") or (isinstance(pi.get("summary"), str) and not pi["summary"].strip()):
         pi["summary"] = ""
+    for field in ("fullName", "headline", "email", "phone", "location", "linkedin", "github", "portfolio", "summary"):
+        if isinstance(pi.get(field), str):
+            pi[field] = pi[field].strip()
     normalized["personalInfo"] = pi
 
     # 2. Escape LaTeX special chars (None → "")

@@ -75,10 +75,51 @@ function normalizeSkills(skills: any): string[] {
   return [];
 }
 
+function normalizeDisplayLinks(personalInfo: any): Array<{ label: string; url: string }> {
+  const links: Array<{ label: string; url: string }> = [];
+  const add = (label: string, rawUrl: any) => {
+    if (typeof rawUrl !== "string" || !rawUrl.trim()) return;
+    const url = /^https?:\/\//i.test(rawUrl.trim()) ? rawUrl.trim() : `https://${rawUrl.trim()}`;
+    links.push({ label, url });
+  };
+
+  if (Array.isArray(personalInfo?.displayLinks)) {
+    for (const link of personalInfo.displayLinks) {
+      if (!link || typeof link !== "object") continue;
+      add(String(link.label || ""), link.url);
+    }
+  }
+  add("LinkedIn", personalInfo?.linkedin);
+  add("GitHub", personalInfo?.github);
+  add("Portfolio", personalInfo?.portfolio);
+  if (Array.isArray(personalInfo?.additionalLinks)) {
+    for (const link of personalInfo.additionalLinks) {
+      if (!link || typeof link !== "object") continue;
+      add(String(link.platform || ""), (link as any).url);
+    }
+  }
+
+  const seen = new Set<string>();
+  return links
+    .filter((l) => l.label.trim() && l.url.trim())
+    .filter((l) => {
+      const key = l.url.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, 4);
+}
+
 function normalizeData(data: any): any {
   if (!data) return data;
+  const personalInfo = {
+    ...(data.personalInfo || {}),
+    displayLinks: normalizeDisplayLinks(data.personalInfo || {}),
+  };
   return {
     ...data,
+    personalInfo,
     education:  normalizeEducation(data.education),
     experience: normalizeExperience(data.experience),
     projects:   normalizeProjects(data.projects),
@@ -137,9 +178,9 @@ const ClassicTemplate = ({ data }: { data: any }) => (
         {data.personalInfo?.email && <span>{data.personalInfo.email}</span>}
         {data.personalInfo?.phone && <span>| {data.personalInfo.phone}</span>}
         {data.personalInfo?.location && <span>| {data.personalInfo.location}</span>}
-        {data.personalInfo?.linkedin && <span>| <a href={data.personalInfo.linkedin} target="_blank" rel="noreferrer" className="hover:underline">LinkedIn</a></span>}
-        {data.personalInfo?.github && <span>| <a href={data.personalInfo.github} target="_blank" rel="noreferrer" className="hover:underline">GitHub</a></span>}
-        {data.personalInfo?.portfolio && <span>| <a href={data.personalInfo.portfolio} target="_blank" rel="noreferrer" className="hover:underline">Portfolio</a></span>}
+        {data.personalInfo?.displayLinks?.map((link: { label: string; url: string }, i: number) => (
+          <span key={`${link.url}-${i}`}>| <a href={link.url} target="_blank" rel="noreferrer" className="hover:underline">{link.label}</a></span>
+        ))}
       </div>
     </div>
 
@@ -281,9 +322,12 @@ const ModernTemplate = ({ data }: { data: any }) => (
         <div className="text-right text-sm space-y-1 text-gray-600">
              <div className="flex items-center justify-end gap-2"><Mail size={14}/> {data.personalInfo?.email}</div>
              <div className="flex items-center justify-end gap-2"><Phone size={14}/> {data.personalInfo?.phone}</div>
-             {data.personalInfo?.linkedin && <div className="flex items-center justify-end gap-2"><Linkedin size={14}/> <a href={data.personalInfo?.linkedin} className="hover:text-blue-600">LinkedIn</a></div>}
-             {data.personalInfo?.github && <div className="flex items-center justify-end gap-2"><Globe size={14}/> <a href={data.personalInfo?.github} className="hover:text-blue-600">GitHub</a></div>}
-             {data.personalInfo?.portfolio && <div className="flex items-center justify-end gap-2"><Globe size={14}/> <a href={data.personalInfo?.portfolio} className="hover:text-blue-600">Portfolio</a></div>}
+             {data.personalInfo?.displayLinks?.map((link: { label: string; url: string }, i: number) => (
+                <div key={`${link.url}-${i}`} className="flex items-center justify-end gap-2">
+                  {link.label.toLowerCase() === "linkedin" ? <Linkedin size={14}/> : <Globe size={14}/>}
+                  <a href={link.url} className="hover:text-blue-600">{link.label}</a>
+                </div>
+             ))}
         </div>
     </div>
 
@@ -409,8 +453,12 @@ const CreativeTemplate = ({ data }: { data: any }) => (
              <div className="space-y-3 text-sm">
                  <div className="flex items-center gap-2"><Mail size={16} className="text-slate-400"/> {data.personalInfo?.email}</div>
                  <div className="flex items-center gap-2"><Phone size={16} className="text-slate-400"/> {data.personalInfo?.phone}</div>
-                 {data.personalInfo?.linkedin && <div className="flex items-center gap-2 block truncate"><Linkedin size={16} className="text-slate-400"/>In</div>}
-                 {data.personalInfo?.github && <div className="flex items-center gap-2 block truncate"><Globe size={16} className="text-slate-400"/>Git</div>}
+                 {data.personalInfo?.displayLinks?.map((link: { label: string; url: string }, i: number) => (
+                    <div key={`${link.url}-${i}`} className="flex items-center gap-2 block truncate">
+                      {link.label.toLowerCase() === "linkedin" ? <Linkedin size={16} className="text-slate-400"/> : <Globe size={16} className="text-slate-400"/>}
+                      {link.label}
+                    </div>
+                 ))}
              </div>
 
              {data.skills?.length > 0 && (
@@ -507,7 +555,11 @@ const BusinessTemplate = ({ data }: { data: any }) => (
              <div className="text-right text-sm font-medium space-y-1 text-slate-600">
                  <p>{data.personalInfo?.email}</p>
                  <p>{data.personalInfo?.phone}</p>
-                 <p>{data.personalInfo?.linkedin}</p>
+                 <div className="space-y-1">
+                   {data.personalInfo?.displayLinks?.map((link: { label: string; url: string }, i: number) => (
+                     <p key={`${link.url}-${i}`}>{link.label}</p>
+                   ))}
+                 </div>
              </div>
         </header>
 

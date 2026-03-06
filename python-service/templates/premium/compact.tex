@@ -41,12 +41,16 @@
 \begin{center}
     {\huge \textbf{\VAR{data.personalInfo.fullName}}} \\ \vspace{4pt}
     \small 
-    \VAR{data.personalInfo.location} \quad | \quad 
-    \href{mailto:\VAR{data.personalInfo.email}}{\VAR{data.personalInfo.email}} \quad | \quad 
-    \VAR{data.personalInfo.phone} \\
-    \BLOCK{if data.personalInfo.linkedin} \href{\VAR{data.personalInfo.linkedin}}{LinkedIn} \quad | \quad \BLOCK{endif}
-    \BLOCK{if data.personalInfo.github} \href{\VAR{data.personalInfo.github}}{GitHub} \quad | \quad \BLOCK{endif}
-    \BLOCK{if data.personalInfo.portfolio} \href{\VAR{data.personalInfo.portfolio}}{Portfolio} \BLOCK{endif}
+    \BLOCK{set contact = []}
+    \BLOCK{if data.personalInfo.location}\BLOCK{set _ = contact.append(data.personalInfo.location)}\BLOCK{endif}
+    \BLOCK{if data.personalInfo.email}\BLOCK{set _ = contact.append(data.personalInfo.email)}\BLOCK{endif}
+    \BLOCK{if data.personalInfo.phone}\BLOCK{set _ = contact.append(data.personalInfo.phone)}\BLOCK{endif}
+    \BLOCK{if contact}
+      \BLOCK{for c in contact}\VAR{c}\BLOCK{if not loop.last} \quad | \quad \BLOCK{endif}\BLOCK{endfor} \\
+    \BLOCK{endif}
+    \BLOCK{if data.personalInfo.displayLinks}
+      \BLOCK{for link in data.personalInfo.displayLinks}\href{\VAR{link.url}}{\VAR{link.label}}\BLOCK{if not loop.last} \quad | \quad \BLOCK{endif}\BLOCK{endfor}
+    \BLOCK{endif}
 \end{center}
 
 % --- SUMMARY ---
@@ -72,7 +76,7 @@
     \textbf{\VAR{exp.role}} \hfill \textbf{\VAR{exp.startDate} -- \VAR{exp.endDate}} \\
     \textit{\VAR{exp.company}} \hfill \textit{\VAR{exp.location}}
     \vspace{-2pt}
-    \begin{itemize}[leftmargin=15pt, itemsep=1pt, parsep=0pt]
+    \begin{itemize}[leftmargin=0.7em, itemsep=1pt, parsep=0pt]
         \BLOCK{for bullet in exp.bullets}
         \item \small \VAR{bullet}
         \BLOCK{endfor}
@@ -89,7 +93,7 @@
     \textbf{\VAR{proj.title}} \BLOCK{if proj.link} \href{\VAR{proj.link}}{[Link]} \BLOCK{endif} \hfill \textit{\VAR{proj.techStack|join(', ')}} \\
     \small \VAR{proj.description}
     \BLOCK{if proj.bullets}
-    \begin{itemize}[leftmargin=1.5em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
+    \begin{itemize}[leftmargin=0.7em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
         \BLOCK{for bullet in proj.bullets}
         \item \small \VAR{bullet}
         \BLOCK{endfor}
@@ -114,7 +118,7 @@
 % --- ACHIEVEMENTS ---
 \BLOCK{if data.achievements}
 \section{Achievements}
-\begin{itemize}[leftmargin=15pt, itemsep=1pt]
+\begin{itemize}[leftmargin=0.7em, itemsep=1pt]
 \BLOCK{for ach in data.achievements}
     \item \small \VAR{ach}
 \BLOCK{endfor}
@@ -124,7 +128,7 @@
 % --- CERTIFICATIONS ---
 \BLOCK{if data.certifications}
 \section{Certifications}
-\begin{itemize}[leftmargin=15pt, itemsep=1pt]
+\begin{itemize}[leftmargin=0.7em, itemsep=1pt]
 \BLOCK{for cert in data.certifications}
     \item \small \VAR{cert}
 \BLOCK{endfor}

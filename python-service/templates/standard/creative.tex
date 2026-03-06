@@ -60,15 +60,21 @@
     \vspace{0.2cm}
     
     % Location
+    \BLOCK{if data.personalInfo.location}
     {\small \color{lightgray} \VAR{data.personalInfo.location}}
+    \BLOCK{endif}
     \vspace{0.5cm}
     
     % Contact
     {\small
         \textbf{\color{purple600} Contact} \\ \vspace{2pt}
-        \VAR{data.personalInfo.email} \\ \vspace{2pt}
-        \VAR{data.personalInfo.phone} \\ \vspace{2pt}
-        \VAR{data.personalInfo.linkedin}
+        \BLOCK{if data.personalInfo.email}\VAR{data.personalInfo.email} \\ \vspace{2pt}\BLOCK{endif}
+        \BLOCK{if data.personalInfo.phone}\VAR{data.personalInfo.phone} \\ \vspace{2pt}\BLOCK{endif}
+        \BLOCK{if data.personalInfo.displayLinks}
+          \BLOCK{for link in data.personalInfo.displayLinks}
+            \href{\VAR{link.url}}{\VAR{link.label}}\\ \vspace{2pt}
+          \BLOCK{endfor}
+        \BLOCK{endif}
     }
     \vspace{0.5cm}
     
@@ -116,7 +122,7 @@
     \textbf{\large \color{black} \VAR{exp.company}} \hfill {\small \color{purple600} \textbf{\VAR{exp.startDate} -- \VAR{exp.endDate}}} \\
     {\small \textit{\color{textgray} \VAR{exp.role}}}
     
-    \begin{itemize}[leftmargin=1.2em, nosep, label={\color{purple600}\small\textbullet}]
+    \begin{itemize}[leftmargin=0.7em, nosep, label={\color{purple600}\small\textbullet}]
         \BLOCK{for bullet in exp.bullets}
         \item \small \color{textgray} \VAR{bullet}
         \BLOCK{endfor}
@@ -134,7 +140,7 @@
     {\small \color{textgray} \textit{\VAR{proj.techStack|join(', ')}}} \\
     {\small \color{textgray} \VAR{proj.description}}
     \BLOCK{if proj.bullets}
-    \begin{itemize}[leftmargin=1.5em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
+    \begin{itemize}[leftmargin=0.7em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
         \BLOCK{for bullet in proj.bullets}
         \item \small \VAR{bullet}
         \BLOCK{endfor}
@@ -147,7 +153,7 @@
 % Achievements
 \BLOCK{if data.achievements}
 \section{Achievements}
-\begin{itemize}[leftmargin=1.2em, nosep, label={\color{purple600}\small\textbullet}]
+\begin{itemize}[leftmargin=0.7em, nosep, label={\color{purple600}\small\textbullet}]
     \BLOCK{for ach in data.achievements}
     \item \small \color{textgray} \VAR{ach}
     \BLOCK{endfor}
@@ -157,7 +163,7 @@
 % Certifications
 \BLOCK{if data.certifications}
 \section{Certifications}
-\begin{itemize}[leftmargin=1.2em, nosep, label={\color{purple600}\small\textbullet}]
+\begin{itemize}[leftmargin=0.7em, nosep, label={\color{purple600}\small\textbullet}]
     \BLOCK{for cert in data.certifications}
     \item \small \color{textgray} \VAR{cert}
     \BLOCK{endfor}

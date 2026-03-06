@@ -55,14 +55,18 @@
 %----------HEADER-----------------
 \begin{minipage}[t]{0.65\textwidth}
     {\Huge \textbf{\VAR{data.personalInfo.fullName}}} \\ \vspace{5pt}
-    \large{\VAR{data.personalInfo.location}}
+    \BLOCK{if data.personalInfo.location}\large{\VAR{data.personalInfo.location}}\BLOCK{endif}
 \end{minipage}
 \begin{minipage}[t]{0.35\textwidth}
     \begin{flushright}
       \small
-      \href{mailto:\VAR{data.personalInfo.email}}{\VAR{data.personalInfo.email}} \\
-      \VAR{data.personalInfo.phone} \\
-      \href{\VAR{data.personalInfo.linkedin}}{LinkedIn}
+      \BLOCK{if data.personalInfo.email}\href{mailto:\VAR{data.personalInfo.email}}{\VAR{data.personalInfo.email}} \\ \BLOCK{endif}
+      \BLOCK{if data.personalInfo.phone}\VAR{data.personalInfo.phone} \\ \BLOCK{endif}
+      \BLOCK{if data.personalInfo.displayLinks}
+        \BLOCK{for link in data.personalInfo.displayLinks}
+          \href{\VAR{link.url}}{\VAR{link.label}}\BLOCK{if not loop.last} \;|\; \BLOCK{endif}
+        \BLOCK{endfor}
+      \BLOCK{endif}
     \end{flushright}
 \end{minipage}
 
@@ -87,7 +91,7 @@
         \smallskip
         \textbf{\large \VAR{exp.company}} \hfill \textit{\small \VAR{exp.startDate} -- \VAR{exp.endDate}} \\
         {\color{darkblue}\textbf{\small \VAR{exp.role}}}
-        \begin{itemize}[leftmargin=1.2em, topsep=2pt, itemsep=1pt]
+        \begin{itemize}[leftmargin=0.7em, topsep=2pt, itemsep=1pt]
              \BLOCK{for bullet in exp.bullets}
              \item \small \VAR{bullet}
              \BLOCK{endfor}
@@ -105,7 +109,7 @@
         {\small \color{darkblue} \textit{\VAR{proj.techStack|join(', ')}}} \\
         {\small \VAR{proj.description}}
         \BLOCK{if proj.bullets}
-        \begin{itemize}[leftmargin=1.5em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
+        \begin{itemize}[leftmargin=0.7em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
             \BLOCK{for bullet in proj.bullets}
             \item \small \VAR{bullet}
             \BLOCK{endfor}
@@ -140,7 +144,7 @@
     % SKILLS
     \BLOCK{if data.skills}
     \section{Expertise}
-    \begin{itemize}[leftmargin=1.2em, label={$\bullet$}, itemsep=1pt, parsep=0pt, topsep=2pt]
+    \begin{itemize}[leftmargin=0.7em, label={$\bullet$}, itemsep=1pt, parsep=0pt, topsep=2pt]
        \BLOCK{for skill in data.skills}
        \item \small \VAR{skill}
        \BLOCK{endfor}
@@ -165,7 +169,7 @@
 % --- ACHIEVEMENTS (Full width below columns) ---
 \BLOCK{if data.achievements}
 \section{Achievements}
-\begin{itemize}[leftmargin=1.2em, label={$\bullet$}, itemsep=1pt, parsep=0pt, topsep=2pt]
+\begin{itemize}[leftmargin=0.7em, label={$\bullet$}, itemsep=1pt, parsep=0pt, topsep=2pt]
     \BLOCK{for ach in data.achievements}
     \item \small \VAR{ach}
     \BLOCK{endfor}
@@ -175,7 +179,7 @@
 % --- PUBLICATIONS ---
 \BLOCK{if data.publications}
 \section{Publications}
-\begin{itemize}[leftmargin=1.2em, label={--}, itemsep=1pt, parsep=0pt, topsep=2pt]
+\begin{itemize}[leftmargin=0.7em, label={--}, itemsep=1pt, parsep=0pt, topsep=2pt]
     \BLOCK{for pub in data.publications}
     \item \small \textbf{\VAR{pub.title}}. \textit{\VAR{pub.journal}}. \VAR{pub.date}.
     \BLOCK{endfor}

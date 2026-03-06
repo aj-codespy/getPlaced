@@ -76,9 +76,14 @@
     
     % Contact
     {\small \color{slate600}
-        \VAR{data.personalInfo.email} \\
-        \VAR{data.personalInfo.phone} \\
-        \VAR{data.personalInfo.location}
+        \BLOCK{if data.personalInfo.email}\VAR{data.personalInfo.email} \\ \BLOCK{endif}
+        \BLOCK{if data.personalInfo.phone}\VAR{data.personalInfo.phone} \\ \BLOCK{endif}
+        \BLOCK{if data.personalInfo.location}\VAR{data.personalInfo.location} \\ \BLOCK{endif}
+        \BLOCK{if data.personalInfo.displayLinks}
+          \BLOCK{for link in data.personalInfo.displayLinks}
+            \href{\VAR{link.url}}{\VAR{link.label}}\\
+          \BLOCK{endfor}
+        \BLOCK{endif}
     }
     \vspace{0.5cm}
     
@@ -124,7 +129,7 @@
         \textbf{\large \color{blue900} \VAR{exp.company}} \hfill {\scriptsize \bfseries \colorbox{sidebarbg}{\color{slate600} \VAR{exp.startDate} -- \VAR{exp.endDate}}} \\
         {\small \textbf{\color{slate600} \VAR{exp.role}}}
         \vspace{4pt}
-        \begin{itemize}[leftmargin=1.2em, nosep, label={\color{slate600}\small\textbullet}]
+        \begin{itemize}[leftmargin=0.7em, nosep, label={\color{slate600}\small\textbullet}]
             \BLOCK{for bullet in exp.bullets}
             \item \small \color{slate900} \VAR{bullet}
             \BLOCK{endfor}
@@ -141,11 +146,11 @@
         \textbf{\large \color{blue900} \VAR{proj.title}} \BLOCK{if proj.link} \href{\VAR{proj.link}}{[Link]} \BLOCK{endif} \hfill {\scriptsize \bfseries \colorbox{sidebarbg}{\color{slate600} \VAR{proj.role}}} \\
         {\small \textit{\color{slate600} \VAR{proj.techStack|join(', ')}}}
         \vspace{4pt}
-        \begin{itemize}[leftmargin=1.2em, nosep, label={\color{slate600}\small\textbullet}]
+        \begin{itemize}[leftmargin=0.7em, nosep, label={\color{slate600}\small\textbullet}]
             \item \small \color{slate900} \VAR{proj.description}
         \end{itemize}
         \BLOCK{if proj.bullets}
-        \begin{itemize}[leftmargin=1.5em, nosep, label={\color{slate600}\small\textbullet}]
+        \begin{itemize}[leftmargin=0.7em, nosep, label={\color{slate600}\small\textbullet}]
             \BLOCK{for bullet in proj.bullets}
             \item \small \color{slate900} \VAR{bullet}
             \BLOCK{endfor}
@@ -159,7 +164,7 @@
 \BLOCK{if data.achievements}
 \section{Achievements}
 \begin{mdframed}[style=card]
-    \begin{itemize}[leftmargin=1.2em, nosep, label={\color{slate600}\small\textbullet}]
+    \begin{itemize}[leftmargin=0.7em, nosep, label={\color{slate600}\small\textbullet}]
         \BLOCK{for ach in data.achievements}
         \item \small \color{slate900} \VAR{ach}
         \BLOCK{endfor}
@@ -171,7 +176,7 @@
 \BLOCK{if data.certifications}
 \section{Certifications}
 \begin{mdframed}[style=card]
-    \begin{itemize}[leftmargin=1.2em, nosep, label={\color{slate600}\small\textbullet}]
+    \begin{itemize}[leftmargin=0.7em, nosep, label={\color{slate600}\small\textbullet}]
         \BLOCK{for cert in data.certifications}
         \item \small \color{slate900} \VAR{cert}
         \BLOCK{endfor}

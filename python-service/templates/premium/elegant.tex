@@ -46,16 +46,17 @@
 \begin{center}
     {\Huge \scshape \color{accent} \VAR{data.personalInfo.fullName}} \\ \vspace{4pt}
     {\small \color{textgray}
-        \VAR{data.personalInfo.location} \quad \textbullet \quad 
-        \VAR{data.personalInfo.phone} \quad \textbullet \quad 
-        \VAR{data.personalInfo.email} 
+      \BLOCK{set contact = []}
+      \BLOCK{if data.personalInfo.location}\BLOCK{set _ = contact.append(data.personalInfo.location)}\BLOCK{endif}
+      \BLOCK{if data.personalInfo.phone}\BLOCK{set _ = contact.append(data.personalInfo.phone)}\BLOCK{endif}
+      \BLOCK{if data.personalInfo.email}\BLOCK{set _ = contact.append(data.personalInfo.email)}\BLOCK{endif}
+      \BLOCK{for c in contact}\VAR{c}\BLOCK{if not loop.last} \quad \textbullet \quad \BLOCK{endif}\BLOCK{endfor}
     } \\ \vspace{4pt}
-    {\small 
-        \BLOCK{if data.personalInfo.linkedin} \href{\VAR{data.personalInfo.linkedin}}{LinkedIn} \BLOCK{endif}
-        \BLOCK{if data.personalInfo.linkedin and data.personalInfo.github} \quad \textbullet \quad \BLOCK{endif}
-        \BLOCK{if data.personalInfo.github} \href{\VAR{data.personalInfo.github}}{GitHub} \BLOCK{endif}
-        \BLOCK{if data.personalInfo.portfolio} \quad \textbullet \quad \href{\VAR{data.personalInfo.portfolio}}{Portfolio} \BLOCK{endif}
+    \BLOCK{if data.personalInfo.displayLinks}
+    {\small
+      \BLOCK{for link in data.personalInfo.displayLinks}\href{\VAR{link.url}}{\VAR{link.label}}\BLOCK{if not loop.last} \quad \textbullet \quad \BLOCK{endif}\BLOCK{endfor}
     }
+    \BLOCK{endif}
 \end{center}
 
 \vspace{4pt}
@@ -109,7 +110,7 @@
     \quad \textemdash \quad {\small \color{textgray} \textit{\VAR{proj.techStack|join(', ')}}} \\
     {\small \VAR{proj.description}}
     \BLOCK{if proj.bullets}
-    \begin{itemize}[leftmargin=1.5em, label={\color{accent}\tiny$\blacksquare$}, itemsep=1pt, parsep=0pt, topsep=2pt]
+    \begin{itemize}[leftmargin=0.7em, label={\color{accent}\tiny$\blacksquare$}, itemsep=1pt, parsep=0pt, topsep=2pt]
         \BLOCK{for bullet in proj.bullets}
         \item \small \VAR{bullet}
         \BLOCK{endfor}

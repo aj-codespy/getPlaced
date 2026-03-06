@@ -2,10 +2,15 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/firebase/config";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { filterResumeDataForTemplate, getTemplateSections } from "@/lib/templates";
+import { selectDisplayLinks } from "@/lib/profile-links";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { doc, getDoc, updateDoc, increment } from "firebase/firestore";
 import { RESUME_TEMPLATES } from "@/lib/templates";
+
+// Allow this serverless function up to 60s on Vercel (Pro plan).
+// The Python optimizer runs 4 parallel Gemini calls and may need 15-30s.
+export const maxDuration = 60;
 
 export async function POST(req: Request) {
   try {
@@ -55,15 +60,38 @@ export async function POST(req: Request) {
     // for anti-hallucination. The optimizer only rewrites writable sections (summary,
     // experience, projects, skills) but needs the full profile for context.
     const pythonApiUrl = (process.env.PYTHON_SERVICE_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
-    const res = await fetch(`${pythonApiUrl}/optimize-resume`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        profile: profile,
-        target_role: targetRole,
-        template_sections: templateSections,
-      }),
-    });
+
+    // Add timeout to prevent hanging if the Python service is slow or cold-starting
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 55_000); // 55s timeout
+
+    let res: Response;
+    try {
+      res = await fetch(`${pythonApiUrl}/optimize-resume`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          profile: profile,
+          target_role: targetRole,
+          template_sections: templateSections,
+        }),
+        signal: controller.signal,
+      });
+    } catch (fetchErr: unknown) {
+      if (fetchErr instanceof DOMException && fetchErr.name === "AbortError") {
+        return NextResponse.json(
+          { success: false, error: "Resume optimization timed out. The AI service may be warming up — please try again in a moment." },
+          { status: 504 }
+        );
+      }
+      console.error("Python service connection error:", fetchErr);
+      return NextResponse.json(
+        { success: false, error: "AI optimization service is currently unavailable. Please try again in a few seconds." },
+        { status: 503 }
+      );
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     if (!res.ok) {
       const errText = await res.text();
@@ -87,6 +115,7 @@ export async function POST(req: Request) {
       personalInfo: {
         ...personalInfo,
         summary: aiOutput.summary || "",
+        displayLinks: selectDisplayLinks(personalInfo, targetRole, 4),
       },
       education:        education        || [],
       achievements:     achievements     || [],
@@ -119,7 +148,7 @@ export async function POST(req: Request) {
       };
 
       const docRef = await addDoc(collection(db, "resumes"), {
-        userId:     userId || "anonymous",
+        userId:     userId || (session.user as { id?: string }).id || userEmail,
         targetRole: targetJob || "General",
         content:    sanitize(optimizedContent),
         templateId: resolvedTemplateId,

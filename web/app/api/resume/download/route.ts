@@ -3,12 +3,17 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { db } from "@/lib/firebase/config";
-import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp, increment } from "firebase/firestore";
 import crypto from "crypto";
 import { RESUME_TEMPLATES } from "@/lib/templates";
+import { selectDisplayLinks } from "@/lib/profile-links";
+
+// Allow up to 60s for PDF generation (LaTeX compilation on Cloud Run)
+export const maxDuration = 60;
 
 const PYTHON_SERVICE_URL =
   (process.env.PYTHON_SERVICE_URL || "http://127.0.0.1:8000").replace(/\/$/, "") + "/generate-pdf";
+
 
 export async function POST(req: Request) {
   try {
@@ -53,6 +58,21 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    const roleHint =
+      (typeof (dataToRender as { targetRole?: unknown }).targetRole === "string"
+        ? ((dataToRender as { targetRole?: string }).targetRole || "")
+        : "") || filename || "";
+
+    const dataRecord = dataToRender as Record<string, unknown>;
+    const personalInfo = (dataRecord.personalInfo || {}) as Record<string, unknown>;
+    if (!Array.isArray(personalInfo.displayLinks) || personalInfo.displayLinks.length === 0) {
+      dataRecord.personalInfo = {
+        ...personalInfo,
+        displayLinks: selectDisplayLinks(personalInfo, roleHint, 4),
+      };
+    }
+    dataToRender = dataRecord;
 
     // 4. Generate payload hash for caching
     const payloadString = JSON.stringify({ data: dataToRender, template: templateToRender });
@@ -147,10 +167,11 @@ export async function POST(req: Request) {
     // 8. Cache the generated PDF and Update User Limits asynchronously
     (async () => {
         try {
-            // Update user daily limits
+            // Update user daily limits and total downloads
             await updateDoc(userRef, {
                 dailyPdfGenerations: dailyPdfGenerations + 1,
-                lastPdfGenerationDate: todayStr
+                lastPdfGenerationDate: todayStr,
+                totalDownloads: increment(1)
             });
 
             // Cache the PDF if it's within Firestore size limits (< 900KB to be safe)
