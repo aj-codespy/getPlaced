@@ -5,16 +5,17 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { db } from "@/lib/firebase/config";
 import { doc, getDoc, updateDoc, increment } from "firebase/firestore";
+import { safeJsonParse } from "@/lib/safe-json";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
-// Text-only path: use flash-lite (cheapest)
+// Text-only path
 const textModel = genAI.getGenerativeModel({
   model: "gemini-2.5-flash",
   generationConfig: {
     responseMimeType: "application/json",
     temperature: 0.3,
-    maxOutputTokens: 1024, // Audit output is small — scores + short strings
+    maxOutputTokens: 4096, // Increased — 1024 was too low, causing truncated/invalid JSON
   },
 });
 
@@ -24,7 +25,7 @@ const visionModel = genAI.getGenerativeModel({
   generationConfig: {
     responseMimeType: "application/json",
     temperature: 0.3,
-    maxOutputTokens: 1024,
+    maxOutputTokens: 4096,
   },
 });
 
@@ -67,24 +68,21 @@ export async function POST(req: Request) {
       );
     }
 
-    // 2. Credit / premium check
+    // 2. Premium / Plan Check
     const userRef = doc(db, "users", session.user.email);
     const userSnap = await getDoc(userRef);
     if (!userSnap.exists()) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     const userData = userSnap.data();
     const isPremium: number = userData.isPremium || 0;
-    const credits: number = userData.credits || 0;
-    const auditsUsed: number = userData.auditsUsed || 0;
+    const planType: string = userData.planType || "free";
+    
+    const hasPremiumPlan = isPremium > 0 || ["standard", "premium", "pro"].includes(planType.toLowerCase());
 
-    let cost = 200;
-    if (isPremium === 1 && auditsUsed < 1) cost = 0;
-    if (isPremium === 2 && auditsUsed < 3) cost = 0;
-
-    if (cost > 0 && credits < cost) {
+    if (!hasPremiumPlan) {
       return NextResponse.json(
-        { error: `Insufficient credits. Audit costs ${cost} credits.` },
-        { status: 402 }
+        { error: "LinkedIn Audit is an exclusive feature for Standard and Pro members. Please upgrade your plan." },
+        { status: 403 }
       );
     }
 
@@ -109,20 +107,19 @@ export async function POST(req: Request) {
         }
       });
       const result = await visionModel.generateContent(parts);
-      analysisData = JSON.parse(result.response.text());
+      analysisData = safeJsonParse(result.response.text());
     } else {
       // Text-only path — cheaper model, cap input at 4000 chars
       const prompt = buildPrompt(profileText.substring(0, 4000));
       const result = await textModel.generateContent(prompt);
-      analysisData = JSON.parse(result.response.text());
+      analysisData = safeJsonParse(result.response.text());
     }
 
-    // 4. Deduct credits / increment audit count
+    // 4. Increment audit count
     const updates: Record<string, ReturnType<typeof increment> | number> = { auditsUsed: increment(1) };
-    if (cost > 0) updates.credits = increment(-cost);
     await updateDoc(userRef, updates);
 
-    return NextResponse.json({ success: true, analysis: analysisData, creditsDeducted: cost });
+    return NextResponse.json({ success: true, analysis: analysisData, creditsDeducted: 0 });
 
   } catch (e: unknown) {
     console.error("LinkedIn Audit Error:", e);

@@ -4,6 +4,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { db } from "@/lib/firebase/config";
 import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { selectDisplayLinks } from "@/lib/profile-links";
+import { safeJsonParse } from "@/lib/safe-json";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
@@ -114,7 +115,7 @@ Return ONLY valid JSON:
 
     let aiOutput: Record<string, unknown>;
     try {
-      aiOutput = JSON.parse(text);
+      aiOutput = safeJsonParse(text);
     } catch {
       console.error("AI JSON Parse Error:", text.slice(0, 300));
       return NextResponse.json({ error: "AI failed to produce valid JSON" }, { status: 500 });

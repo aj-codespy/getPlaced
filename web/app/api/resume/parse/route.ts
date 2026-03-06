@@ -1,6 +1,7 @@
 
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { safeJsonParse } from "@/lib/safe-json";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
@@ -64,7 +65,7 @@ JSON SCHEMA:
 
     const result = await model.generateContent(prompt);
     const text = result.response.text();
-    const parsedData = JSON.parse(text);
+    const parsedData = safeJsonParse(text);
 
     return NextResponse.json({ success: true, data: parsedData });
 

@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { safeJsonParse } from "@/lib/safe-json";
 
 const API_KEY = process.env.GEMINI_API_KEY || "";
 const genAI = new GoogleGenerativeAI(API_KEY);
@@ -47,7 +48,7 @@ Return ONLY this JSON:
   try {
     const result = await model.generateContent(prompt);
     const text = result.response.text();
-    const aiOutput = JSON.parse(text);
+    const aiOutput = safeJsonParse(text);
 
     // Re-assemble: inject static sections back
     return {
