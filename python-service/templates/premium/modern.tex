@@ -13,6 +13,7 @@
 \usepackage{hyperref}
 \usepackage{multicol}
 \usepackage{tabularx}
+\usepackage{xurl}
 
 % Colors
 \definecolor{blue600}{RGB}{37,99,235}
@@ -34,6 +35,8 @@
 
 % Remove page numbers
 \pagestyle{empty}
+\urlstyle{same}
+\setlength{\emergencystretch}{3em}
 
 % Section Commands
 \titleformat{\section}{
@@ -46,6 +49,7 @@
 
 % HEADER
 \begin{minipage}[b]{0.6\textwidth}
+    \raggedright
     {\fontsize{30}{36}\selectfont \textbf{\color{blue900}\VAR{data.personalInfo.fullName}}} \\
     \vspace{4pt}
     \BLOCK{if data.personalInfo.location}{\Large \color{blue600} \VAR{data.personalInfo.location}}\BLOCK{endif}
@@ -54,10 +58,10 @@
 \begin{minipage}[b]{0.35\textwidth}
     \raggedleft
     \small \color{gray600}
-    \BLOCK{if data.personalInfo.email}\VAR{data.personalInfo.email} \\ \BLOCK{endif}
+    \BLOCK{if data.personalInfo.email}\nolinkurl{\VAR{data.personalInfo.email}} \\ \BLOCK{endif}
     \BLOCK{if data.personalInfo.phone}\VAR{data.personalInfo.phone} \\ \BLOCK{endif}
     \BLOCK{if data.personalInfo.displayLinks}
-      \BLOCK{for link in data.personalInfo.displayLinks}\href{\VAR{link.url}}{\VAR{link.label}}\BLOCK{if not loop.last} \;|\; \BLOCK{endif}\BLOCK{endfor}
+      \BLOCK{for link in data.personalInfo.displayLinks}\href{\VAR{link.url}}{\VAR{link.label}}\BLOCK{if not loop.last} \\[-1pt] \BLOCK{endif}\BLOCK{endfor}
     \BLOCK{endif}
 \end{minipage}
 
@@ -67,8 +71,9 @@
 
 % SUMMARY
 \BLOCK{if data.personalInfo.summary}
+\noindent
 \colorbox{gray100!30}{
-    \begin{minipage}{\dimexpr\textwidth-2\fboxsep}
+    \begin{minipage}{\dimexpr\textwidth-2\fboxsep-6pt\relax}
         \small \color{gray600} \VAR{data.personalInfo.summary}
     \end{minipage}
 }
@@ -79,17 +84,16 @@
 \BLOCK{if data.experience}
 \section{Experience}
 \BLOCK{for exp in data.experience}
-    \begin{minipage}{\textwidth}
-        % Simulating the left border with a vertical bar in a tabular or just indentation
-        \begin{tabular}{@{\color{blue600}\vrule width 2pt \hspace{6pt}}p{0.96\textwidth}}
-            \textbf{\large \color{gray600} \VAR{exp.role}} \hfill {\footnotesize \color{blue600} \textbf{\VAR{exp.startDate} -- \VAR{exp.endDate}}} \\
-            {\small \textbf{\VAR{exp.company}}} \\
-            \begin{itemize}[leftmargin=0.7em, nosep, label={\color{gray600}\small\textbullet}]
-                \BLOCK{for bullet in exp.bullets}
-                \item \small \color{gray600} \VAR{bullet}
-                \BLOCK{endfor}
-            \end{itemize}
-        \end{tabular}
+    \noindent
+    {\color{blue600}\vrule width 2pt}\hspace{6pt}%
+    \begin{minipage}[t]{\dimexpr\textwidth-10pt\relax}
+        \textbf{\large \color{gray600} \VAR{exp.role}} \hfill {\footnotesize \color{blue600} \textbf{\VAR{exp.startDate} -- \VAR{exp.endDate}}} \\
+        {\small \textbf{\VAR{exp.company}}}
+        \begin{itemize}[leftmargin=0.5em, nosep, label={\color{gray600}\small\textbullet}]
+            \BLOCK{for bullet in exp.bullets}
+            \item \small \color{gray600} \VAR{bullet}
+            \BLOCK{endfor}
+        \end{itemize}
     \end{minipage}
     \vspace{0.15cm}
 \BLOCK{endfor}
@@ -99,15 +103,16 @@
 \BLOCK{if data.projects}
 \section{Projects}
 \BLOCK{for proj in data.projects}
-    \begin{minipage}{\textwidth}
-        \begin{tabular}{@{\color{blue600}\vrule width 2pt \hspace{6pt}}p{0.96\textwidth}}
-            \textbf{\large \color{gray600} \VAR{proj.title}} \BLOCK{if proj.link} \href{\VAR{proj.link}}{\footnotesize \color{blue600} [Link]} \BLOCK{endif} \hfill {\footnotesize \color{blue600} \textbf{\VAR{proj.role}}} \\
-            {\small \textit{\VAR{proj.techStack|join(', ')}}} \\
-            {\small \color{gray600} \VAR{proj.description}}
-        \end{tabular}
+    \noindent
+    {\color{blue600}\vrule width 2pt}\hspace{6pt}%
+    \begin{minipage}[t]{\dimexpr\textwidth-10pt\relax}
+        \textbf{\large \color{gray600} \VAR{proj.title}} \BLOCK{if proj.link} \href{\VAR{proj.link}}{\footnotesize \color{blue600} [Link]} \BLOCK{endif} \\
+        \BLOCK{if proj.role}{\footnotesize \color{blue600} \textbf{\VAR{proj.role}}} \\ \BLOCK{endif}
+        {\small \textit{\VAR{proj.techStack|join(', ')}}} \\
+        {\small \color{gray600} \VAR{proj.description}}
     \end{minipage}
     \BLOCK{if proj.bullets}
-    \begin{itemize}[leftmargin=0.7em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
+    \begin{itemize}[leftmargin=0.5em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
         \BLOCK{for bullet in proj.bullets}
         \item \small \VAR{bullet}
         \BLOCK{endfor}

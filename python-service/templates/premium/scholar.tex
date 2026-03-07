@@ -10,11 +10,16 @@
 \usepackage{enumitem}
 \usepackage{hyperref}
 \usepackage{xcolor}
+\usepackage{xurl}
 
 % Margins
 \geometry{left=0.5in, right=0.5in, top=0.5in, bottom=0.5in}
 
 \pagestyle{empty}
+\urlstyle{same}
+\setlength{\emergencystretch}{3em}
+\sloppy
+\hfuzz=3pt
 
 % Section Titles: Left side prominent
 \titleformat{\section}
@@ -30,17 +35,16 @@
 
 % --- HEADER (Left Aligned) ---
 \noindent
-{\Huge \textbf{\sffamily \VAR{data.personalInfo.fullName}}} \\
+{\large \textbf{\sffamily \parbox{\textwidth}{\raggedright \VAR{data.personalInfo.fullName}}}} \\
 \vspace{4pt}
-\small
-\BLOCK{set contact = []}
-\BLOCK{if data.personalInfo.email}\BLOCK{set _ = contact.append(data.personalInfo.email)}\BLOCK{endif}
-\BLOCK{if data.personalInfo.phone}\BLOCK{set _ = contact.append(data.personalInfo.phone)}\BLOCK{endif}
-\BLOCK{if data.personalInfo.location}\BLOCK{set _ = contact.append(data.personalInfo.location)}\BLOCK{endif}
-\BLOCK{for c in contact}\VAR{c}\BLOCK{if not loop.last} \quad | \quad \BLOCK{endif}\BLOCK{endfor} \\
+{\small \parbox{\textwidth}{\raggedright
+\BLOCK{if data.personalInfo.email}\nolinkurl{\VAR{data.personalInfo.email}} \\ \BLOCK{endif}
+\BLOCK{if data.personalInfo.phone}\VAR{data.personalInfo.phone} \\ \BLOCK{endif}
+\BLOCK{if data.personalInfo.location}\VAR{data.personalInfo.location} \\ \BLOCK{endif}
 \BLOCK{if data.personalInfo.displayLinks}
   \BLOCK{for link in data.personalInfo.displayLinks}\href{\VAR{link.url}}{\VAR{link.label}}\BLOCK{if not loop.last} \quad | \quad \BLOCK{endif}\BLOCK{endfor}
 \BLOCK{endif}
+}}
 
 \vspace{8pt}
 

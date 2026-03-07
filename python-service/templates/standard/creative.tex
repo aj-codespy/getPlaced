@@ -13,6 +13,7 @@
 \usepackage{hyperref}
 \usepackage{eso-pic} % For background sidebar
 \usepackage[absolute,overlay]{textpos} % For absolute positioning of sidebar text
+\usepackage{xurl}
 
 % Colors
 \definecolor{darkbg}{RGB}{30,30,35} % Approximating Gray-900
@@ -28,6 +29,8 @@
 
 % Remove page numbers
 \pagestyle{empty}
+\urlstyle{same}
+\setlength{\emergencystretch}{3em}
 
 % Section Commands (Main Content)
 \titleformat{\section}{
@@ -68,7 +71,7 @@
     % Contact
     {\small
         \textbf{\color{purple600} Contact} \\ \vspace{2pt}
-        \BLOCK{if data.personalInfo.email}\VAR{data.personalInfo.email} \\ \vspace{2pt}\BLOCK{endif}
+        \BLOCK{if data.personalInfo.email}\nolinkurl{\VAR{data.personalInfo.email}} \\ \vspace{2pt}\BLOCK{endif}
         \BLOCK{if data.personalInfo.phone}\VAR{data.personalInfo.phone} \\ \vspace{2pt}\BLOCK{endif}
         \BLOCK{if data.personalInfo.displayLinks}
           \BLOCK{for link in data.personalInfo.displayLinks}
@@ -175,7 +178,7 @@
 \section{Publications}
 \BLOCK{for pub in data.publications}
     \noindent
-    {\small \color{textgray} \textbf{\VAR{pub.title}}. \textit{\VAR{pub.journal}}. \VAR{pub.date}.}
+    {\small \color{textgray} \raggedright \textbf{\VAR{pub.title}}. \textit{\VAR{pub.journal}}. \VAR{pub.date}.}
     \vspace{4pt}
 \BLOCK{endfor}
 \BLOCK{endif}

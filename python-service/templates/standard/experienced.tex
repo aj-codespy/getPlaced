@@ -14,6 +14,7 @@
 \usepackage{eso-pic} 
 \usepackage[absolute,overlay]{textpos}
 \usepackage{mdframed} % For cards
+\usepackage{xurl}
 
 % Colors
 \definecolor{sidebarbg}{RGB}{229,231,235} % Slate-200
@@ -37,6 +38,9 @@
 
 % Remove page numbers
 \pagestyle{empty}
+\urlstyle{same}
+\setlength{\emergencystretch}{3em}
+\sloppy
 
 % Card Style
 \mdfdefinestyle{card}{
@@ -76,7 +80,7 @@
     
     % Contact
     {\small \color{slate600}
-        \BLOCK{if data.personalInfo.email}\VAR{data.personalInfo.email} \\ \BLOCK{endif}
+        \BLOCK{if data.personalInfo.email}\nolinkurl{\VAR{data.personalInfo.email}} \\ \BLOCK{endif}
         \BLOCK{if data.personalInfo.phone}\VAR{data.personalInfo.phone} \\ \BLOCK{endif}
         \BLOCK{if data.personalInfo.location}\VAR{data.personalInfo.location} \\ \BLOCK{endif}
         \BLOCK{if data.personalInfo.displayLinks}

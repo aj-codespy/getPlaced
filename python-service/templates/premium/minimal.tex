@@ -11,6 +11,7 @@
 \usepackage{enumitem}
 \usepackage{hyperref}
 \usepackage{xcolor}
+\usepackage{xurl}
 
 % Font
 \renewcommand{\familydefault}{\sfdefault}
@@ -32,6 +33,8 @@
     filecolor=black,
     urlcolor=black,
 }
+\urlstyle{same}
+\setlength{\emergencystretch}{3em}
 
 % Section Titles: Large, Bold, No Line
 \titleformat{\section}
@@ -47,7 +50,7 @@
 
 % --- HEADER ---
 \noindent
-{\fontsize{40}{48}\selectfont \textbf{\uppercase{\VAR{data.personalInfo.fullName}}}} \\
+{\parbox{\textwidth}{\raggedright\fontsize{34}{40}\selectfont \textbf{\uppercase{\VAR{data.personalInfo.fullName}}}}} \\
 \vspace{8pt}
 \BLOCK{if data.personalInfo.summary}
 {\Large \color{darkgray} \VAR{data.personalInfo.summary}} \\
@@ -56,15 +59,20 @@
 
 \noindent
 \color{darkgray}
+{\small
+\parbox{\textwidth}{
+\raggedright
 \BLOCK{set contact = []}
 \BLOCK{if data.personalInfo.location}\BLOCK{set _ = contact.append(data.personalInfo.location)}\BLOCK{endif}
-\BLOCK{if data.personalInfo.email}\BLOCK{set _ = contact.append(data.personalInfo.email)}\BLOCK{endif}
+\BLOCK{if data.personalInfo.email}\BLOCK{set _ = contact.append('\\nolinkurl{' ~ data.personalInfo.email ~ '}')}\BLOCK{endif}
 \BLOCK{if data.personalInfo.phone}\BLOCK{set _ = contact.append(data.personalInfo.phone)}\BLOCK{endif}
 \BLOCK{for c in contact}\VAR{c}\BLOCK{if not loop.last} \quad \textbullet \quad \BLOCK{endif}\BLOCK{endfor}
 \BLOCK{if data.personalInfo.displayLinks}
-  \BLOCK{if contact} \quad \textbullet \quad \BLOCK{endif}
+  \BLOCK{if contact} \par\vspace{-2pt} \BLOCK{endif}
   \BLOCK{for link in data.personalInfo.displayLinks}\href{\VAR{link.url}}{\VAR{link.label}}\BLOCK{if not loop.last} \quad \textbullet \quad \BLOCK{endif}\BLOCK{endfor}
 \BLOCK{endif}
+}
+}
 \vspace{10pt}
 
 % --- SUMMARY (rendered in header above) ---
@@ -91,9 +99,9 @@
 \section{Projects}
 \BLOCK{for proj in data.projects}
     \noindent
-    \textbf{\Large \VAR{proj.title}} 
+    \textbf{\Large \VAR{proj.title}}
     \BLOCK{if proj.link} \href{\VAR{proj.link}}{\color{blue} \textit{[Link]}} \BLOCK{endif}
-    \hfill {\color{darkgray} \VAR{proj.role}} \\
+    \BLOCK{if proj.role} \\[-1pt] {\small \color{darkgray} \VAR{proj.role}} \BLOCK{endif} \\
     {\color{darkgray} \textit{\VAR{proj.techStack|join(', ')}}}
     \vspace{4pt}
     \noindent
