@@ -33,6 +33,26 @@ type MessageBoxState = {
   onConfirm?: () => void;
 };
 
+function isProfileComplete(profile: Record<string, unknown> | null): boolean {
+  if (!profile) return false;
+  const pi = (profile.personalInfo || {}) as Record<string, unknown>;
+  const hasCorePersonalInfo =
+    typeof pi.fullName === "string" &&
+    pi.fullName.trim().length > 0 &&
+    typeof pi.email === "string" &&
+    pi.email.trim().length > 0 &&
+    typeof pi.location === "string" &&
+    pi.location.trim().length > 0;
+
+  const hasSomeResumeData =
+    (Array.isArray(profile.experience) && profile.experience.length > 0) ||
+    (Array.isArray(profile.projects) && profile.projects.length > 0) ||
+    (Array.isArray(profile.education) && profile.education.length > 0) ||
+    (Array.isArray(profile.skills) && profile.skills.length > 0);
+
+  return hasCorePersonalInfo && hasSomeResumeData;
+}
+
 export default function BuilderPage() {
   const router = useRouter();
 
@@ -141,8 +161,17 @@ export default function BuilderPage() {
           showConfirm(
             "Profile Incomplete",
             "Please complete your profile before generating a resume.",
-            () => router.push("/profile"),
-            "Go to Profile",
+            () => router.push("/onboarding"),
+            "Complete Profile",
+          );
+          return;
+        }
+        if (!isProfileComplete(p as Record<string, unknown>)) {
+          showConfirm(
+            "Profile Incomplete",
+            "Resume generation is locked until your profile is fully completed.",
+            () => router.push("/onboarding"),
+            "Complete Profile",
           );
           return;
         }
@@ -187,6 +216,16 @@ export default function BuilderPage() {
 
   // ── Generate ───────────────────────────────────────────────────────────────
   const handleGenerate = async () => {
+    if (!isProfileComplete(profile)) {
+      showConfirm(
+        "Profile Incomplete",
+        "Please fill your profile details first. You can skip onboarding, but generation needs completed data.",
+        () => router.push("/onboarding"),
+        "Complete Profile",
+      );
+      return;
+    }
+
     if (credits < 100) {
       showConfirm(
         "Insufficient Credits",

@@ -12,12 +12,37 @@ import { RESUME_TEMPLATES } from "@/lib/templates";
 // The Python optimizer runs 4 parallel Gemini calls and may need 15-30s.
 export const maxDuration = 60;
 
+function isProfileComplete(profile: Record<string, unknown>): boolean {
+  const personalInfo = (profile.personalInfo || {}) as Record<string, unknown>;
+  const hasCorePersonalInfo =
+    typeof personalInfo.fullName === "string" &&
+    personalInfo.fullName.trim().length > 0 &&
+    typeof personalInfo.email === "string" &&
+    personalInfo.email.trim().length > 0 &&
+    typeof personalInfo.location === "string" &&
+    personalInfo.location.trim().length > 0;
+
+  const hasSomeResumeData =
+    (Array.isArray(profile.experience) && profile.experience.length > 0) ||
+    (Array.isArray(profile.projects) && profile.projects.length > 0) ||
+    (Array.isArray(profile.education) && profile.education.length > 0) ||
+    (Array.isArray(profile.skills) && profile.skills.length > 0);
+
+  return hasCorePersonalInfo && hasSomeResumeData;
+}
+
 export async function POST(req: Request) {
   try {
     const { profile, targetJob, templateId, userId } = await req.json();
 
     if (!profile) {
       return NextResponse.json({ error: "Profile data missing" }, { status: 400 });
+    }
+    if (!isProfileComplete(profile as Record<string, unknown>)) {
+      return NextResponse.json(
+        { error: "Complete your profile first before generating resumes." },
+        { status: 400 },
+      );
     }
 
     const session = await getServerSession(authOptions);

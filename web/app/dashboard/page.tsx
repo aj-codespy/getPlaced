@@ -50,6 +50,26 @@ type SummaryPayload = {
   downloads?: DownloadSummary[];
 };
 
+function isProfileComplete(profile: Record<string, unknown> | null): boolean {
+  if (!profile) return false;
+  const pi = (profile.personalInfo || {}) as Record<string, unknown>;
+  const hasCorePersonalInfo =
+    typeof pi.fullName === "string" &&
+    pi.fullName.trim().length > 0 &&
+    typeof pi.email === "string" &&
+    pi.email.trim().length > 0 &&
+    typeof pi.location === "string" &&
+    pi.location.trim().length > 0;
+
+  const hasSomeResumeData =
+    (Array.isArray(profile.experience) && profile.experience.length > 0) ||
+    (Array.isArray(profile.projects) && profile.projects.length > 0) ||
+    (Array.isArray(profile.education) && profile.education.length > 0) ||
+    (Array.isArray(profile.skills) && profile.skills.length > 0);
+
+  return hasCorePersonalInfo && hasSomeResumeData;
+}
+
 export default function Dashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -59,6 +79,7 @@ export default function Dashboard() {
   const [downloads, setDownloads] = useState<DownloadSummary[]>([]);
   const [activeHistoryTab, setActiveHistoryTab] = useState<"generated" | "downloads">("generated");
   const [loading, setLoading] = useState(true);
+  const [profileComplete, setProfileComplete] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -73,12 +94,7 @@ export default function Dashboard() {
           const payload = (await res.json()) as { success?: boolean; data?: SummaryPayload };
           const data = payload?.data || {};
           const profile = data.profile || null;
-
-          const profilePI = (profile as { personalInfo?: { fullName?: string } } | null)?.personalInfo;
-          if (!profilePI?.fullName) {
-            router.push("/onboarding");
-            return;
-          }
+          setProfileComplete(isProfileComplete(profile as Record<string, unknown> | null));
 
           setUserData({ ...(data.user || {}), ...(profile || {}) });
           setResumes(Array.isArray(data.resumes) ? data.resumes : []);
@@ -166,6 +182,20 @@ export default function Dashboard() {
             <Link href="/pricing">
               <Button className="bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/30 text-amber-200">
                 Upgrade Plan
+              </Button>
+            </Link>
+          </div>
+        )}
+
+        {!profileComplete && (
+          <div className="mb-8 rounded-2xl border border-sky-500/25 bg-sky-500/10 px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold text-sky-300">Complete your profile to unlock resume generation</p>
+              <p className="text-xs text-sky-100/80 mt-1">You can browse the dashboard now, but generation stays locked until profile details are filled.</p>
+            </div>
+            <Link href="/onboarding">
+              <Button className="bg-sky-500/20 hover:bg-sky-500/30 border border-sky-400/30 text-sky-200">
+                Complete Profile
               </Button>
             </Link>
           </div>
