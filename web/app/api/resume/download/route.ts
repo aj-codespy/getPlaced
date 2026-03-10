@@ -3,7 +3,16 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { db } from "@/lib/firebase/config";
-import { doc, getDoc, setDoc, updateDoc, serverTimestamp, increment } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  serverTimestamp,
+  increment,
+} from "firebase/firestore";
 import crypto from "crypto";
 import { RESUME_TEMPLATES } from "@/lib/templates";
 import { selectDisplayLinks } from "@/lib/profile-links";
@@ -24,15 +33,45 @@ export async function POST(req: Request) {
     }
 
     const { resumeId, resumeData, templateId } = await req.json();
-    const userEmail = session.user.email;
-    const userRef = doc(db, "users", userEmail);
+    const userEmailRaw = session.user.email;
+    const userEmailLower = userEmailRaw.toLowerCase();
+    let userRef = doc(db, "users", userEmailLower);
 
     // 2. Auth checks
-    const userSnap = await getDoc(userRef);
+    let userSnap = await getDoc(userRef);
+    if (!userSnap.exists() && userEmailRaw !== userEmailLower) {
+      userRef = doc(db, "users", userEmailRaw);
+      userSnap = await getDoc(userRef);
+    }
     if (!userSnap.exists()) {
       return NextResponse.json({ error: "User record not found" }, { status: 403 });
     }
     const userData = userSnap.data();
+    const todayStr = new Date().toISOString().split("T")[0];
+
+    const dailyPdfGenerationsFromDb = userData.dailyPdfGenerations || 0;
+    const lastPdfGenerationDate = userData.lastPdfGenerationDate || "";
+    const dailyPdfGenerations = lastPdfGenerationDate !== todayStr ? 0 : dailyPdfGenerationsFromDb;
+
+    const trackDownload = async () => {
+      try {
+        await updateDoc(userRef, {
+          dailyPdfGenerations: dailyPdfGenerations + 1,
+          lastPdfGenerationDate: todayStr,
+          totalDownloads: increment(1),
+        });
+
+        await addDoc(collection(db, "download_history"), {
+          userId: userEmailLower,
+          resumeId: resumeId || null,
+          templateId: templateToRender,
+          filename,
+          createdAt: serverTimestamp(),
+        });
+      } catch (err) {
+        console.error("Failed to track PDF download:", err);
+      }
+    };
 
     // 3. Resolve resume data
     let dataToRender: Record<string, unknown>;
@@ -86,6 +125,10 @@ export async function POST(req: Request) {
       // Cache hit
       const base64Data = cacheSnap.data().pdfBase64;
       const buffer = Buffer.from(base64Data, "base64");
+
+      // Track download usage even for cache hits.
+      await trackDownload();
+
       return new NextResponse(buffer, {
         headers: {
           "Content-Type": "application/pdf",
@@ -105,14 +148,6 @@ export async function POST(req: Request) {
             { error: "Access Denied: You must upgrade to Pro to use Premium templates." },
             { status: 403 }
         );
-    }
-
-    const todayStr = new Date().toISOString().split('T')[0];
-    let dailyPdfGenerations = userData.dailyPdfGenerations || 0;
-    const lastPdfGenerationDate = userData.lastPdfGenerationDate || '';
-
-    if (lastPdfGenerationDate !== todayStr) {
-        dailyPdfGenerations = 0; // Reset for a new day
     }
 
     if (!isPremium && dailyPdfGenerations >= 3) {
@@ -164,16 +199,12 @@ export async function POST(req: Request) {
     // 7. Stream PDF back to client
     const pdfBuffer = await pdfRes.arrayBuffer();
 
-    // 8. Cache the generated PDF and Update User Limits asynchronously
+    // 8. Track limits/download entry before returning response.
+    await trackDownload();
+
+    // 9. Cache the generated PDF asynchronously
     (async () => {
         try {
-            // Update user daily limits and total downloads
-            await updateDoc(userRef, {
-                dailyPdfGenerations: dailyPdfGenerations + 1,
-                lastPdfGenerationDate: todayStr,
-                totalDownloads: increment(1)
-            });
-
             // Cache the PDF if it's within Firestore size limits (< 900KB to be safe)
             const base64Pdf = Buffer.from(pdfBuffer).toString("base64");
             if (base64Pdf.length < 900000) {

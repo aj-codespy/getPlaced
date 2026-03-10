@@ -5,8 +5,16 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { MessageBox, type MessageBoxVariant } from "@/components/ui/message-box";
 import { ChevronRight, ChevronLeft, Save, Loader2, Sparkles, X, Plus, UploadCloud } from "lucide-react";
 // pdfjs-dist is imported dynamically in handleResumeParse to avoid SSR issues
+
+type MessageBoxState = {
+  open: boolean;
+  title: string;
+  message: string;
+  variant: MessageBoxVariant;
+};
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -15,6 +23,12 @@ export default function OnboardingPage() {
   const [saving, setSaving] = useState(false);
   const [parsing, setParsing] = useState(false);
   const [referralCode, setReferralCode] = useState("");
+  const [messageBox, setMessageBox] = useState<MessageBoxState>({
+    open: false,
+    title: "",
+    message: "",
+    variant: "info",
+  });
 
   const [profile, setProfile] = useState({
      personalInfo: { fullName: "", email: "", phone: "", location: "", headline: "", linkedin: "", github: "", portfolio: "", summary: "", intent: "", additionalLinks: [{ platform: "", url: "" }] },
@@ -27,6 +41,10 @@ export default function OnboardingPage() {
      publications: [{ title: "", journal: "", date: "" }],
      courses: [{ name: "", institution: "", date: "" }]
   });
+
+  const showMessage = (title: string, message: string, variant: MessageBoxVariant = "info") => {
+    setMessageBox({ open: true, title, message, variant });
+  };
 
   const handleResumeParse = async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
@@ -93,11 +111,15 @@ export default function OnboardingPage() {
               return newState;
           });
           
-          alert("Resume Auto-filled! Please review the details.");
+          showMessage("Resume Auto-filled", "Your details were extracted successfully. Please review and edit before continuing.", "success");
 
       } catch(e: unknown) {
           console.error(e);
-          alert("Failed to parse resume: " + (e instanceof Error ? e.message : "Unknown error"));
+          showMessage(
+            "Resume Parsing Failed",
+            "We couldn't parse the uploaded resume. " + (e instanceof Error ? e.message : "Unknown error"),
+            "error",
+          );
       } finally {
           setParsing(false);
       }
@@ -135,19 +157,24 @@ export default function OnboardingPage() {
           });
           
           if(!res.ok) throw new Error("Failed to save");
-          if (!silent) alert("Progress Saved!");
+          if (!silent) showMessage("Saved", "Your progress has been saved.", "success");
       } catch (e) {
           console.error(e);
-          if (!silent) alert("Error saving profile");
+          if (!silent) showMessage("Save Failed", "Unable to save your profile right now. Please try again.", "error");
       } finally {
           setSaving(false);
       }
   };
 
+  const handleAddLater = async () => {
+      await handleSave(true);
+      router.push("/dashboard");
+  };
+
   const handleNext = async () => {
       if(step === 1) {
           if(!profile.personalInfo.fullName || !profile.personalInfo.email || !profile.personalInfo.location) {
-              alert("Please fill in all mandatory fields (*)");
+              showMessage("Missing Required Fields", "Please fill all mandatory fields marked with * before moving ahead.", "warning");
               return;
           }
 
@@ -161,14 +188,14 @@ export default function OnboardingPage() {
                   const refData = await refRes.json();
                   
                   if(!refRes.ok) {
-                      alert("Referral Error: " + (refData.error || "Invalid Code"));
+                      showMessage("Referral Error", refData.error || "Invalid referral code.", "error");
                       return; 
                   } else {
-                      alert("Referral Applied Successuflly! Welcome!");
+                      showMessage("Referral Applied", "Referral code applied successfully. Welcome!", "success");
                       setReferralCode(""); 
                   }
               } catch {
-                  alert("Network Error checking referral code");
+                  showMessage("Network Error", "Could not validate referral code. Please try again.", "error");
                   return;
               }
           }
@@ -554,10 +581,10 @@ export default function OnboardingPage() {
                 <div className="flex gap-4 items-center">
                     <Button 
                         variant="ghost" 
-                        onClick={() => router.push("/dashboard")} 
+                        onClick={step === 1 ? handleAddLater : () => router.push("/dashboard")} 
                         className="text-slate-400 hover:text-white hover:bg-white/5"
                     >
-                        Skip for now
+                        {step === 1 ? "Add Later" : "Skip for now"}
                     </Button>
                     <Button onClick={handleNext} className="bg-indigo-600 hover:bg-indigo-500 text-white px-8 shadow-lg shadow-indigo-500/25">
                         {step === 6 ? "Finish Profile" : "Next Step"} <ChevronRight className="ml-2 h-4 w-4"/>
@@ -565,6 +592,14 @@ export default function OnboardingPage() {
                 </div>
             </div>
         </div>
+
+        <MessageBox
+          open={messageBox.open}
+          title={messageBox.title}
+          message={messageBox.message}
+          variant={messageBox.variant}
+          onClose={() => setMessageBox((prev) => ({ ...prev, open: false }))}
+        />
     </div>
   );
 }

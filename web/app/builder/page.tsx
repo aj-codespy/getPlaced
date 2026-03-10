@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { MessageBox, type MessageBoxVariant } from "@/components/ui/message-box";
 import {
   Sparkles,
   Download,
@@ -22,6 +23,15 @@ import { useRouter } from "next/navigation";
 import { ResumePreview } from "@/components/ResumePreview";
 
 type Phase = "setup" | "generating" | "result";
+type MessageBoxState = {
+  open: boolean;
+  title: string;
+  message: string;
+  variant: MessageBoxVariant;
+  confirmText?: string;
+  cancelText?: string;
+  onConfirm?: () => void;
+};
 
 export default function BuilderPage() {
   const router = useRouter();
@@ -45,12 +55,40 @@ export default function BuilderPage() {
   const [jobDescription, setJobDescription] = useState("");
   const [generatedData, setGeneratedData] = useState<Record<string, unknown> | null>(null);
   const [resumeId, setResumeId] = useState<string | null>(null);
+  const [messageBox, setMessageBox] = useState<MessageBoxState>({
+    open: false,
+    title: "",
+    message: "",
+    variant: "info",
+  });
 
   // Skill chips state (post-generation)
   const [skills, setSkills] = useState<string[]>([]);
   const [newSkill, setNewSkill] = useState("");
 
   const previewRef = useRef<HTMLDivElement>(null);
+
+  const showMessage = (title: string, message: string, variant: MessageBoxVariant = "info") => {
+    setMessageBox({ open: true, title, message, variant });
+  };
+
+  const showConfirm = (
+    title: string,
+    message: string,
+    onConfirm: () => void,
+    confirmText = "Continue",
+    cancelText = "Cancel",
+  ) => {
+    setMessageBox({
+      open: true,
+      title,
+      message,
+      variant: "warning",
+      confirmText,
+      cancelText,
+      onConfirm,
+    });
+  };
 
   // ── Missing section detection ──────────────────────────────────────────────
   const SECTION_LABELS: Record<string, string> = {
@@ -100,8 +138,12 @@ export default function BuilderPage() {
           if (local) p = JSON.parse(local);
         }
         if (!p) {
-          alert("Please complete your profile first.");
-          router.push("/profile");
+          showConfirm(
+            "Profile Incomplete",
+            "Please complete your profile before generating a resume.",
+            () => router.push("/profile"),
+            "Go to Profile",
+          );
           return;
         }
         setProfile(p);
@@ -120,9 +162,12 @@ export default function BuilderPage() {
   const pickTemplate = (id: string) => {
     const template = RESUME_TEMPLATES.find((t) => t.id === id);
     if (template?.type === "premium" && !isPremium) {
-      if (confirm("This is a Premium template. Upgrade to Pro to use it?")) {
-        router.push("/pricing");
-      }
+      showConfirm(
+        "Premium Template",
+        "This template is only available on paid plans. Upgrade to use it.",
+        () => router.push("/pricing"),
+        "Upgrade",
+      );
       return;
     }
     setSelectedTemplate(id);
@@ -143,13 +188,12 @@ export default function BuilderPage() {
   // ── Generate ───────────────────────────────────────────────────────────────
   const handleGenerate = async () => {
     if (credits < 100) {
-      if (
-        confirm(
-          "Insufficient credits (100 required). Go to pricing to upgrade?"
-        )
-      ) {
-        router.push("/pricing");
-      }
+      showConfirm(
+        "Insufficient Credits",
+        "You need at least 100 credits to generate a resume. Open pricing now?",
+        () => router.push("/pricing"),
+        "Open Pricing",
+      );
       return;
     }
 
@@ -199,12 +243,12 @@ export default function BuilderPage() {
           100
         );
       } else {
-        alert("Generation failed: " + data.error);
+        showMessage("Generation Failed", data.error || "Unable to generate resume.", "error");
         setPhase("setup");
       }
     } catch (e) {
       console.error(e);
-      alert("Error generating resume. Please try again.");
+      showMessage("Generation Error", "Error generating resume. Please try again.", "error");
       setPhase("setup");
     }
   };
@@ -241,7 +285,7 @@ export default function BuilderPage() {
       window.URL.revokeObjectURL(url);
     } catch (e) {
       console.error(e);
-      alert("Failed to download PDF. Please try again.");
+      showMessage("Download Failed", "Failed to download PDF. Please try again.", "error");
     } finally {
       setDownloading(false);
     }
@@ -588,6 +632,17 @@ export default function BuilderPage() {
           )}
         </div>
       </div>
+
+      <MessageBox
+        open={messageBox.open}
+        title={messageBox.title}
+        message={messageBox.message}
+        variant={messageBox.variant}
+        confirmText={messageBox.confirmText}
+        cancelText={messageBox.cancelText}
+        onConfirm={messageBox.onConfirm}
+        onClose={() => setMessageBox((prev) => ({ ...prev, open: false, onConfirm: undefined }))}
+      />
     </div>
   );
 }

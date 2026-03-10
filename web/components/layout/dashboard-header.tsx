@@ -4,18 +4,18 @@ import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { isAdmin } from "@/lib/admin";
-import { Sparkles, User, LogOut, Crown, ChevronDown } from "lucide-react";
+import { Sparkles, User, LogOut, Crown, ChevronDown, ArrowUpRight } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 
-const NAV_ITEMS = [
+const BASE_NAV_ITEMS = [
   { label: "Dashboard", href: "/dashboard" },
   { label: "Builder", href: "/builder" },
   { label: "Resume Score", href: "/resume-score" },
   { label: "LinkedIn Audit", href: "/linkedin-audit" },
 ];
 
-export function DashboardHeader({ credits }: { credits?: number }) {
+export function DashboardHeader({ credits, isPremium }: { credits?: number; isPremium?: boolean }) {
   const { data: session } = useSession();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -33,6 +33,11 @@ export function DashboardHeader({ credits }: { credits?: number }) {
 
   const displayCredits = credits ?? 0;
   const isLowCredits = displayCredits < 100;
+  const navItems = [
+    ...BASE_NAV_ITEMS,
+    ...(isPremium === false ? [{ label: "Upgrade", href: "/pricing" }] : []),
+    ...(isAdmin(session?.user?.email) ? [{ label: "Admin", href: "/admin" }] : []),
+  ];
 
   return (
     <header className="border-b border-white/[0.04] sticky top-0 bg-[#030712]/70 backdrop-blur-xl z-50 w-full">
@@ -56,7 +61,7 @@ export function DashboardHeader({ credits }: { credits?: number }) {
 
         {/* Center Nav */}
         <nav className="hidden md:flex items-center gap-1 bg-white/[0.03] border border-white/[0.05] rounded-full px-1.5 py-1">
-          {[...NAV_ITEMS, ...(isAdmin(session?.user?.email) ? [{ label: "Admin", href: "/admin" }] : [])].map((item) => {
+          {navItems.map((item) => {
             const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
             return (
               <Link
@@ -70,7 +75,12 @@ export function DashboardHeader({ credits }: { credits?: number }) {
                   }
                 `}
               >
-                {item.label}
+                <span className="inline-flex items-center gap-1.5">
+                  {item.label}
+                  {item.label === "Upgrade" && (
+                    <ArrowUpRight size={12} className="text-amber-300" />
+                  )}
+                </span>
                 {isActive && (
                   <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-[2px] bg-gradient-to-r from-slate-400 to-slate-300 rounded-full" />
                 )}
@@ -81,6 +91,15 @@ export function DashboardHeader({ credits }: { credits?: number }) {
 
         {/* Right Side */}
         <div className="flex items-center gap-3">
+          {/* Quick Home (Top-right logo link) */}
+          <Link
+            href="/"
+            aria-label="Go to landing page"
+            className="flex items-center justify-center h-8 w-8 rounded-full border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.08] transition-all"
+          >
+            <Image src="/logo.png" alt="Landing page" width={16} height={16} />
+          </Link>
+
           {/* Credit Pill */}
           <Link href="/pricing" className="hidden sm:flex items-center gap-2 bg-white/[0.04] border border-white/[0.06] rounded-full px-3.5 py-1.5 hover:bg-white/[0.07] transition-all group">
             <Crown size={13} className="text-slate-400" />
