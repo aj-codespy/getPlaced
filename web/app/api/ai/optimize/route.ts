@@ -117,8 +117,15 @@ Return ONLY valid JSON:
     try {
       aiOutput = safeJsonParse(text);
     } catch {
-      console.error("AI JSON Parse Error:", text.slice(0, 300));
-      return NextResponse.json({ error: "AI failed to produce valid JSON" }, { status: 500 });
+      console.error("AI JSON Parse Error. Attempting repair:", text.slice(0, 300));
+      const repaired = await model.generateContent(`Fix this malformed JSON so it becomes valid strict JSON.
+Return ONLY JSON.
+
+MALFORMED JSON:
+"""
+${text.substring(0, 7000)}
+"""`);
+      aiOutput = safeJsonParse(repaired.response.text());
     }
 
     // ── Post-Generation Validation ────────────────────────────────────────────

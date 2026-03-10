@@ -107,12 +107,36 @@ export async function POST(req: Request) {
         }
       });
       const result = await visionModel.generateContent(parts);
-      analysisData = safeJsonParse(result.response.text());
+      const raw = result.response.text();
+      try {
+        analysisData = safeJsonParse(raw);
+      } catch {
+        const repaired = await visionModel.generateContent(`Fix this malformed JSON so it becomes valid strict JSON.
+Return ONLY JSON.
+
+MALFORMED JSON:
+"""
+${raw.substring(0, 7000)}
+"""`);
+        analysisData = safeJsonParse(repaired.response.text());
+      }
     } else {
       // Text-only path — cheaper model, cap input at 4000 chars
       const prompt = buildPrompt(profileText.substring(0, 4000));
       const result = await textModel.generateContent(prompt);
-      analysisData = safeJsonParse(result.response.text());
+      const raw = result.response.text();
+      try {
+        analysisData = safeJsonParse(raw);
+      } catch {
+        const repaired = await textModel.generateContent(`Fix this malformed JSON so it becomes valid strict JSON.
+Return ONLY JSON.
+
+MALFORMED JSON:
+"""
+${raw.substring(0, 7000)}
+"""`);
+        analysisData = safeJsonParse(repaired.response.text());
+      }
     }
 
     // 4. Increment audit count

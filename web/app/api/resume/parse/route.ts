@@ -65,7 +65,22 @@ JSON SCHEMA:
 
     const result = await model.generateContent(prompt);
     const text = result.response.text();
-    const parsedData = safeJsonParse(text);
+
+    let parsedData: Record<string, unknown>;
+    try {
+      parsedData = safeJsonParse(text);
+    } catch {
+      // Rare fallback: ask model to repair its own malformed JSON output.
+      const repairPrompt = `Fix this malformed JSON so it is valid strict JSON.
+Return ONLY the repaired JSON object and nothing else.
+
+MALFORMED JSON:
+"""
+${text.substring(0, 7000)}
+"""`;
+      const repairedResult = await model.generateContent(repairPrompt);
+      parsedData = safeJsonParse(repairedResult.response.text());
+    }
 
     return NextResponse.json({ success: true, data: parsedData });
 
