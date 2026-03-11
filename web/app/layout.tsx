@@ -16,12 +16,12 @@ export const metadata: Metadata = {
     default: "getPlaced — AI Resume Builder | ATS-Optimized Resumes",
     template: "%s | getPlaced",
   },
-  description: "Build tailored, ATS-optimized resumes in under 30 seconds with Google Gemini AI. 12 premium LaTeX templates, LinkedIn audit, resume scoring — trusted by 50,000+ job seekers.",
+  description: "Build tailored, ATS-optimized resumes in under 30 seconds. Premium LaTeX templates, LinkedIn audit, resume scoring, and role-specific optimization for every application.",
   keywords: ["resume builder", "AI resume", "ATS optimized", "job application", "career tools", "LinkedIn audit", "resume score", "getPlaced"],
   authors: [{ name: "getPlaced" }],
   openGraph: {
     title: "getPlaced — AI Resume Builder",
-    description: "AI-powered resume builder that reads the job description and rewrites your resume to match it perfectly. ATS-optimized, recruiter-approved.",
+    description: "Build role-specific, ATS-optimized resumes in seconds with premium templates, LinkedIn audit, and resume scoring.",
     url: "https://getplaced.in",
     siteName: "getPlaced",
     type: "website",
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "getPlaced — AI Resume Builder",
-    description: "Build tailored, ATS-optimized resumes in under 30 seconds with Google Gemini AI.",
+    description: "Build role-specific, ATS-optimized resumes in seconds with premium templates, LinkedIn audit, and resume scoring.",
     images: ["https://getplaced.in/og-image.png"],
   },
   icons: {
