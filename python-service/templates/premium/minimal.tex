@@ -82,7 +82,9 @@
 \section{Experience}
 \BLOCK{for exp in data.experience}
     \noindent
-    \textbf{\Large \VAR{exp.role}} \hfill {\color{darkgray} \VAR{exp.startDate} -- \VAR{exp.endDate}} \\
+    \BLOCK{if exp.role or exp.dateRange}
+    \textbf{\Large \VAR{exp.role}}\BLOCK{if exp.dateRange} \hfill {\color{darkgray} \VAR{exp.dateRange}}\BLOCK{endif} \\
+    \BLOCK{endif}
     {\large \color{darkgray} \VAR{exp.company}, \VAR{exp.location}}
     \vspace{4pt}
     \begin{itemize}[leftmargin=*, label={}, itemsep=4pt]
@@ -102,12 +104,12 @@
     \textbf{\Large \VAR{proj.title}}
     \BLOCK{if proj.link} \href{\VAR{proj.link}}{\color{blue} \textit{[Link]}} \BLOCK{endif}
     \BLOCK{if proj.role} \\[-1pt] {\small \color{darkgray} \VAR{proj.role}} \BLOCK{endif} \\
-    {\color{darkgray} \textit{\VAR{proj.techStack|join(', ')}}}
+    \BLOCK{if proj.techStack}{\color{darkgray} \textit{\VAR{proj.techStack|join(', ')}}}\BLOCK{endif}
     \vspace{4pt}
     \noindent
-    {\large \color{darkgray} \VAR{proj.description}}
+    \BLOCK{if proj.description}{\large \color{darkgray} \VAR{proj.description}}\BLOCK{endif}
     \BLOCK{if proj.bullets}
-    \begin{itemize}[leftmargin=0.7em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
+    \begin{itemize}[leftmargin=0.45em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
         \BLOCK{for bullet in proj.bullets}
         \item \small \VAR{bullet}
         \BLOCK{endfor}
@@ -122,7 +124,7 @@
 \section{Education}
 \BLOCK{for edu in data.education}
     \noindent
-    \textbf{\Large \VAR{edu.institution}} \hfill {\color{darkgray} \VAR{edu.startDate} -- \VAR{edu.endDate}} \\
+    \textbf{\Large \VAR{edu.institution}}\BLOCK{if edu.dateRange} \hfill {\color{darkgray} \VAR{edu.dateRange}}\BLOCK{endif} \\
     {\large \VAR{edu.degree}} 
     \BLOCK{if edu.score} \quad \textbullet \quad GPA: \VAR{edu.score} \BLOCK{endif}
     \vspace{4pt}

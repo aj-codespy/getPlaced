@@ -71,6 +71,14 @@ def normalize_education(edu_list: list) -> list:
     for edu in edu_list:
         if not isinstance(edu, dict):
             continue
+        start_date = str(edu.get("startDate") or "").strip()
+        end_date = str(edu.get("endDate") or edu.get("graduationDate") or "").strip()
+        if start_date and end_date:
+            date_range = f"{start_date} -- {end_date}"
+        elif start_date:
+            date_range = start_date
+        else:
+            date_range = end_date
         normalized.append({
             # institution: accept 'institution', 'school', 'name'
             "institution": edu.get("institution") or edu.get("school") or edu.get("name") or "",
@@ -78,8 +86,9 @@ def normalize_education(edu_list: list) -> list:
             "degree": _build_degree(edu),
             # score: accept 'score', 'grade', 'gpa'
             "score": edu.get("score") or edu.get("grade") or edu.get("gpa") or "",
-            "startDate": edu.get("startDate") or "",
-            "endDate": edu.get("endDate") or edu.get("graduationDate") or "",
+            "startDate": start_date,
+            "endDate": end_date,
+            "dateRange": date_range,
             "coursework": edu.get("coursework") or "",
         })
     return normalized
@@ -101,17 +110,31 @@ def normalize_experience(exp_list: list) -> list:
             continue
         # bullets may be a list already, or a raw description string
         bullets = exp.get("bullets") or []
+        if isinstance(bullets, list):
+            bullets = [str(b).strip().lstrip("•-* ") for b in bullets if str(b).strip()]
         if not bullets:
             desc = exp.get("description") or exp.get("summary") or ""
             if desc:
                 # Split on newlines or bullet markers
                 import re
                 bullets = [b.strip().lstrip("•-* ") for b in re.split(r'[\n•\-\*]+', desc) if b.strip()]
+        start_date = str(exp.get("startDate") or "").strip()
+        end_date_raw = str(exp.get("endDate") or "").strip()
+        end_date = end_date_raw or ("Present" if start_date else "")
+        if start_date and end_date:
+            date_range = f"{start_date} -- {end_date}"
+        elif start_date:
+            date_range = start_date
+        elif end_date:
+            date_range = end_date
+        else:
+            date_range = ""
         normalized.append({
             "company":   exp.get("company") or "",
-            "role":      exp.get("role") or exp.get("position") or exp.get("title") or "",
-            "startDate": exp.get("startDate") or "",
-            "endDate":   exp.get("endDate") or "Present",
+            "role":      exp.get("role") or exp.get("jobTitle") or exp.get("position") or exp.get("title") or "",
+            "startDate": start_date,
+            "endDate":   end_date,
+            "dateRange": date_range,
             "location":  exp.get("location") or "",
             "bullets":   bullets,
         })
@@ -126,17 +149,33 @@ def normalize_projects(proj_list: list) -> list:
         tech = proj.get("techStack") or proj.get("technologies") or proj.get("tech") or []
         if isinstance(tech, str):
             tech = [t.strip() for t in tech.split(",") if t.strip()]
+        elif isinstance(tech, list):
+            tech = [str(t).strip() for t in tech if str(t).strip()]
+        else:
+            tech = []
         # Ensure bullets is always a list
         bullets = proj.get("bullets") or []
         if isinstance(bullets, str):
             import re
             bullets = [b.strip().lstrip("•-* ") for b in re.split(r'[\n•\-*]+', bullets) if b.strip()]
+        elif isinstance(bullets, list):
+            bullets = [str(b).strip().lstrip("•-* ") for b in bullets if str(b).strip()]
+        else:
+            bullets = []
+        # Deduplicate tech entries while preserving order
+        seen = set()
+        deduped_tech = []
+        for t in tech:
+            key = t.lower()
+            if key not in seen:
+                seen.add(key)
+                deduped_tech.append(t)
         normalized.append({
             "title":       proj.get("title") or proj.get("name") or "",
             "role":        proj.get("role") or "",
             "link":        proj.get("link") or proj.get("url") or "",
-            "techStack":   tech,
-            "description": proj.get("description") or "",
+            "techStack":   deduped_tech,
+            "description": str(proj.get("description") or "").strip(),
             "bullets":     bullets,
         })
     return normalized
@@ -165,6 +204,62 @@ def normalize_achievements(ach_list: list) -> list:
             if combined.strip():
                 result.append(combined)
     return result
+
+
+def normalize_certifications(cert_list: list) -> list:
+    """
+    Normalize certifications to plain display strings.
+    Accepts both legacy string[] and structured object[].
+    """
+    result = []
+    for cert in cert_list:
+        if isinstance(cert, str) and cert.strip():
+            result.append(cert.strip())
+            continue
+        if isinstance(cert, dict):
+            name = str(cert.get("name") or cert.get("title") or "").strip()
+            org = str(cert.get("organization") or cert.get("issuer") or "").strip()
+            date = str(cert.get("issueDate") or cert.get("date") or "").strip()
+            if not name:
+                continue
+            suffix = ", ".join([x for x in [org, date] if x])
+            result.append(f"{name} ({suffix})" if suffix else name)
+    return result
+
+
+def normalize_skills(skills_raw) -> list:
+    """
+    Normalize skills into a flat list of strings.
+    Handles:
+    - list[str]
+    - comma-separated string
+    - object shape used by profile page: { technical: [], tools: [], soft: [] }
+    """
+    if isinstance(skills_raw, list):
+        return [str(s).strip() for s in skills_raw if isinstance(s, str) and s.strip()]
+
+    if isinstance(skills_raw, str):
+        return [s.strip() for s in skills_raw.split(",") if s.strip()]
+
+    if isinstance(skills_raw, dict):
+        flattened = []
+        for bucket in ("technical", "tools", "soft"):
+            val = skills_raw.get(bucket)
+            if isinstance(val, list):
+                flattened.extend([str(s).strip() for s in val if isinstance(s, str) and s.strip()])
+            elif isinstance(val, str):
+                flattened.extend([s.strip() for s in val.split(",") if s.strip()])
+        # Deduplicate while preserving order
+        deduped = []
+        seen = set()
+        for s in flattened:
+            key = s.lower()
+            if key not in seen:
+                seen.add(key)
+                deduped.append(s)
+        return deduped
+
+    return []
 
 
 def normalize_links(personal_info: dict) -> list:
@@ -252,18 +347,12 @@ async def generate_pdf(req: ResumeRequest):
         "education":  prune_empty_records(normalize_education(raw.get("education") or []), ["institution", "degree", "score", "coursework"]),
         "experience": prune_empty_records(normalize_experience(raw.get("experience") or []), ["company", "role", "location", "bullets"]),
         "projects":   prune_empty_records(normalize_projects(raw.get("projects") or []), ["title", "role", "link", "description", "bullets", "techStack"]),
-        # Ensure skills is always a list of strings
-        "skills": (
-            raw.get("skills") if isinstance(raw.get("skills"), list)
-            else [s.strip() for s in (raw.get("skills") or "").split(",") if s.strip()]
-        ),
+        # Ensure skills is always a list of strings (supports object/list/string shapes)
+        "skills": normalize_skills(raw.get("skills")),
         # Normalize achievements: always a list of plain strings
         "achievements": normalize_achievements(raw.get("achievements") or []),
-        # Certifications: list of strings
-        "certifications": [
-            c for c in (raw.get("certifications") or [])
-            if isinstance(c, str) and c.strip()
-        ],
+        # Certifications: always normalized to plain display strings
+        "certifications": normalize_certifications(raw.get("certifications") or []),
         # Publications: list of dicts
         "publications": [
             p for p in (raw.get("publications") or [])

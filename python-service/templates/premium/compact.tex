@@ -73,10 +73,12 @@
 \section{Experience}
 \BLOCK{for exp in data.experience}
     \noindent
-    \textbf{\VAR{exp.role}} \hfill \textbf{\VAR{exp.startDate} -- \VAR{exp.endDate}} \\
+    \BLOCK{if exp.role or exp.dateRange}
+    \textbf{\VAR{exp.role}}\BLOCK{if exp.dateRange} \hfill \textbf{\VAR{exp.dateRange}}\BLOCK{endif} \\
+    \BLOCK{endif}
     \textit{\VAR{exp.company}} \hfill \textit{\VAR{exp.location}}
     \vspace{-2pt}
-    \begin{itemize}[leftmargin=0.7em, itemsep=1pt, parsep=0pt]
+    \begin{itemize}[leftmargin=0.45em, itemsep=1pt, parsep=0pt]
         \BLOCK{for bullet in exp.bullets}
         \item \small \VAR{bullet}
         \BLOCK{endfor}
@@ -90,10 +92,10 @@
 \section{Projects}
 \BLOCK{for proj in data.projects}
     \noindent
-    \textbf{\VAR{proj.title}} \BLOCK{if proj.link} \href{\VAR{proj.link}}{[Link]} \BLOCK{endif} \hfill \textit{\VAR{proj.techStack|join(', ')}} \\
-    \small \VAR{proj.description}
+    \textbf{\VAR{proj.title}} \BLOCK{if proj.link} \href{\VAR{proj.link}}{[Link]} \BLOCK{endif}\BLOCK{if proj.techStack} \hfill \textit{\VAR{proj.techStack|join(', ')}}\BLOCK{endif} \\
+    \BLOCK{if proj.description}\small \VAR{proj.description}\BLOCK{endif}
     \BLOCK{if proj.bullets}
-    \begin{itemize}[leftmargin=0.7em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
+    \begin{itemize}[leftmargin=0.45em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
         \BLOCK{for bullet in proj.bullets}
         \item \small \VAR{bullet}
         \BLOCK{endfor}
@@ -108,7 +110,7 @@
 \section{Education}
 \BLOCK{for edu in data.education}
     \noindent
-    \textbf{\VAR{edu.institution}} \hfill \VAR{edu.startDate} -- \VAR{edu.endDate} \\
+    \textbf{\VAR{edu.institution}}\BLOCK{if edu.dateRange} \hfill \VAR{edu.dateRange}\BLOCK{endif} \\
     \textit{\VAR{edu.degree}} \hfill \BLOCK{if edu.score} GPA: \VAR{edu.score} \BLOCK{endif}
     \BLOCK{if edu.coursework} \\ \footnotesize Relevant Coursework: \VAR{edu.coursework} \BLOCK{endif}
     \vspace{2pt}
@@ -118,7 +120,7 @@
 % --- ACHIEVEMENTS ---
 \BLOCK{if data.achievements}
 \section{Achievements}
-\begin{itemize}[leftmargin=0.7em, itemsep=1pt]
+\begin{itemize}[leftmargin=0.45em, itemsep=1pt]
 \BLOCK{for ach in data.achievements}
     \item \small \VAR{ach}
 \BLOCK{endfor}
@@ -128,7 +130,7 @@
 % --- CERTIFICATIONS ---
 \BLOCK{if data.certifications}
 \section{Certifications}
-\begin{itemize}[leftmargin=0.7em, itemsep=1pt]
+\begin{itemize}[leftmargin=0.45em, itemsep=1pt]
 \BLOCK{for cert in data.certifications}
     \item \small \VAR{cert}
 \BLOCK{endfor}

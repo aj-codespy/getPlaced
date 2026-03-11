@@ -122,10 +122,10 @@
 \section{Experience}
 \BLOCK{for exp in data.experience}
     \noindent
-    \textbf{\large \color{black} \VAR{exp.company}} \hfill {\small \color{purple600} \textbf{\VAR{exp.startDate} -- \VAR{exp.endDate}}} \\
-    {\small \textit{\color{textgray} \VAR{exp.role}}}
+    \textbf{\large \color{black} \VAR{exp.company}}\BLOCK{if exp.dateRange} \hfill {\small \color{purple600} \textbf{\VAR{exp.dateRange}}}\BLOCK{endif} \\
+    \BLOCK{if exp.role}{\small \textit{\color{textgray} \VAR{exp.role}}}\BLOCK{endif}
     
-    \begin{itemize}[leftmargin=0.7em, nosep, label={\color{purple600}\small\textbullet}]
+    \begin{itemize}[leftmargin=0.45em, nosep, label={\color{purple600}\small\textbullet}]
         \BLOCK{for bullet in exp.bullets}
         \item \small \color{textgray} \VAR{bullet}
         \BLOCK{endfor}
@@ -139,11 +139,11 @@
 \section{Projects}
 \BLOCK{for proj in data.projects}
     \noindent
-    \textbf{\color{black} \VAR{proj.title}} \BLOCK{if proj.link} \href{\VAR{proj.link}}{\color{purple600} \footnotesize [Link]} \BLOCK{endif} \hfill {\small \color{purple600} \VAR{proj.role}} \\
-    {\small \color{textgray} \textit{\VAR{proj.techStack|join(', ')}}} \\
-    {\small \color{textgray} \VAR{proj.description}}
+    \textbf{\color{black} \VAR{proj.title}} \BLOCK{if proj.link} \href{\VAR{proj.link}}{\color{purple600} \footnotesize [Link]} \BLOCK{endif}\BLOCK{if proj.role} \hfill {\small \color{purple600} \VAR{proj.role}}\BLOCK{endif} \\
+    \BLOCK{if proj.techStack}{\small \color{textgray} \textit{\VAR{proj.techStack|join(', ')}}} \\ \BLOCK{endif}
+    \BLOCK{if proj.description}{\small \color{textgray} \VAR{proj.description}}\BLOCK{endif}
     \BLOCK{if proj.bullets}
-    \begin{itemize}[leftmargin=0.7em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
+    \begin{itemize}[leftmargin=0.45em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
         \BLOCK{for bullet in proj.bullets}
         \item \small \VAR{bullet}
         \BLOCK{endfor}
@@ -156,7 +156,7 @@
 % Achievements
 \BLOCK{if data.achievements}
 \section{Achievements}
-\begin{itemize}[leftmargin=0.7em, nosep, label={\color{purple600}\small\textbullet}]
+\begin{itemize}[leftmargin=0.45em, nosep, label={\color{purple600}\small\textbullet}]
     \BLOCK{for ach in data.achievements}
     \item \small \color{textgray} \VAR{ach}
     \BLOCK{endfor}
@@ -166,7 +166,7 @@
 % Certifications
 \BLOCK{if data.certifications}
 \section{Certifications}
-\begin{itemize}[leftmargin=0.7em, nosep, label={\color{purple600}\small\textbullet}]
+\begin{itemize}[leftmargin=0.45em, nosep, label={\color{purple600}\small\textbullet}]
     \BLOCK{for cert in data.certifications}
     \item \small \color{textgray} \VAR{cert}
     \BLOCK{endfor}

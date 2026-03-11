@@ -130,10 +130,10 @@
 \section{Professional Experience}
 \BLOCK{for exp in data.experience}
     \begin{mdframed}[style=card]
-        \textbf{\large \color{blue900} \VAR{exp.company}} \hfill {\scriptsize \bfseries \colorbox{sidebarbg}{\color{slate600} \VAR{exp.startDate} -- \VAR{exp.endDate}}} \\
-        {\small \textbf{\color{slate600} \VAR{exp.role}}}
+        \textbf{\large \color{blue900} \VAR{exp.company}}\BLOCK{if exp.dateRange} \hfill {\scriptsize \bfseries \colorbox{sidebarbg}{\color{slate600} \VAR{exp.dateRange}}}\BLOCK{endif} \\
+        \BLOCK{if exp.role}{\small \textbf{\color{slate600} \VAR{exp.role}}}\BLOCK{endif}
         \vspace{4pt}
-        \begin{itemize}[leftmargin=0.7em, nosep, label={\color{slate600}\small\textbullet}]
+        \begin{itemize}[leftmargin=0.45em, nosep, label={\color{slate600}\small\textbullet}]
             \BLOCK{for bullet in exp.bullets}
             \item \small \color{slate900} \VAR{bullet}
             \BLOCK{endfor}
@@ -147,14 +147,16 @@
 \section{Projects}
 \BLOCK{for proj in data.projects}
     \begin{mdframed}[style=card]
-        \textbf{\large \color{blue900} \VAR{proj.title}} \BLOCK{if proj.link} \href{\VAR{proj.link}}{[Link]} \BLOCK{endif} \hfill {\scriptsize \bfseries \colorbox{sidebarbg}{\color{slate600} \VAR{proj.role}}} \\
-        {\small \textit{\color{slate600} \VAR{proj.techStack|join(', ')}}}
+        \textbf{\large \color{blue900} \VAR{proj.title}} \BLOCK{if proj.link} \href{\VAR{proj.link}}{[Link]} \BLOCK{endif}\BLOCK{if proj.role} \hfill {\scriptsize \bfseries \colorbox{sidebarbg}{\color{slate600} \VAR{proj.role}}}\BLOCK{endif} \\
+        \BLOCK{if proj.techStack}{\small \textit{\color{slate600} \VAR{proj.techStack|join(', ')}}}\BLOCK{endif}
         \vspace{4pt}
-        \begin{itemize}[leftmargin=0.7em, nosep, label={\color{slate600}\small\textbullet}]
+        \BLOCK{if proj.description}
+        \begin{itemize}[leftmargin=0.45em, nosep, label={\color{slate600}\small\textbullet}]
             \item \small \color{slate900} \VAR{proj.description}
         \end{itemize}
+        \BLOCK{endif}
         \BLOCK{if proj.bullets}
-        \begin{itemize}[leftmargin=0.7em, nosep, label={\color{slate600}\small\textbullet}]
+        \begin{itemize}[leftmargin=0.45em, nosep, label={\color{slate600}\small\textbullet}]
             \BLOCK{for bullet in proj.bullets}
             \item \small \color{slate900} \VAR{bullet}
             \BLOCK{endfor}
@@ -168,7 +170,7 @@
 \BLOCK{if data.achievements}
 \section{Achievements}
 \begin{mdframed}[style=card]
-    \begin{itemize}[leftmargin=0.7em, nosep, label={\color{slate600}\small\textbullet}]
+    \begin{itemize}[leftmargin=0.45em, nosep, label={\color{slate600}\small\textbullet}]
         \BLOCK{for ach in data.achievements}
         \item \small \color{slate900} \VAR{ach}
         \BLOCK{endfor}
@@ -180,7 +182,7 @@
 \BLOCK{if data.certifications}
 \section{Certifications}
 \begin{mdframed}[style=card]
-    \begin{itemize}[leftmargin=0.7em, nosep, label={\color{slate600}\small\textbullet}]
+    \begin{itemize}[leftmargin=0.45em, nosep, label={\color{slate600}\small\textbullet}]
         \BLOCK{for cert in data.certifications}
         \item \small \color{slate900} \VAR{cert}
         \BLOCK{endfor}

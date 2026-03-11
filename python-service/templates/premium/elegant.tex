@@ -83,7 +83,9 @@
 \section{Professional Experience}
 \BLOCK{for exp in data.experience}
     \noindent
-    \textbf{\large \VAR{exp.role}} \hfill {\small \VAR{exp.startDate} -- \VAR{exp.endDate}} \\
+    \BLOCK{if exp.role or exp.dateRange}
+    \textbf{\large \VAR{exp.role}}\BLOCK{if exp.dateRange} \hfill {\small \VAR{exp.dateRange}}\BLOCK{endif} \\
+    \BLOCK{endif}
     {\small \color{accent} \uppercase{\VAR{exp.company}}} \hfill {\small \color{textgray} \VAR{exp.location}}
     \vspace{4pt}
     \begin{itemize}[leftmargin=*, label={\color{accent}\small\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
@@ -100,7 +102,7 @@
 \section{Education}
 \BLOCK{for edu in data.education}
     \noindent
-    \textbf{\VAR{edu.institution}} \hfill \VAR{edu.startDate} -- \VAR{edu.endDate} \\
+    \textbf{\VAR{edu.institution}}\BLOCK{if edu.dateRange} \hfill \VAR{edu.dateRange}\BLOCK{endif} \\
     {\small \textit{\VAR{edu.degree}}}
     \BLOCK{if edu.score} \hfill {\small GPA: \VAR{edu.score}} \BLOCK{endif}
     \vspace{3pt}
@@ -114,8 +116,8 @@
 \BLOCK{for proj in data.projects}
     \item 
     \textbf{\VAR{proj.title}} \BLOCK{if proj.link} \href{\VAR{proj.link}}{\footnotesize [Link]} \BLOCK{endif}
-    \quad \textemdash \quad {\small \color{textgray} \textit{\VAR{proj.techStack|join(', ')}}} \\
-    {\small \VAR{proj.description}}
+    \BLOCK{if proj.techStack}\quad \textemdash \quad {\small \color{textgray} \textit{\VAR{proj.techStack|join(', ')}}}\BLOCK{endif} \\
+    \BLOCK{if proj.description}{\small \VAR{proj.description}}\BLOCK{endif}
     \BLOCK{if proj.bullets}
     \begin{itemize}[leftmargin=0.5em, label={\color{accent}\small\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
         \BLOCK{for bullet in proj.bullets}

@@ -41,7 +41,7 @@
 
 % Section formatting
 \titleformat{\section}{
-  \vspace{-8pt}\color{darkblue}\raggedright\large\bfseries\uppercase
+  \vspace{-2pt}\color{darkblue}\raggedright\large\bfseries\uppercase
 }{}{0em}{}[\color{darkblue}\titlerule \vspace{2pt}]
 
 \titlespacing{\section}{0pt}{6pt}{3pt}
@@ -93,9 +93,9 @@
     \section{Work History}
     \BLOCK{for exp in data.experience}
         \smallskip
-        \textbf{\large \VAR{exp.company}} \hfill \textit{\small \VAR{exp.startDate} -- \VAR{exp.endDate}} \\
-        {\color{darkblue}\textbf{\small \VAR{exp.role}}}
-        \begin{itemize}[leftmargin=0.7em, topsep=2pt, itemsep=1pt]
+        \textbf{\large \VAR{exp.company}}\BLOCK{if exp.dateRange} \hfill \textit{\small \VAR{exp.dateRange}}\BLOCK{endif} \\
+        \BLOCK{if exp.role}{\color{darkblue}\textbf{\small \VAR{exp.role}}}\BLOCK{endif}
+        \begin{itemize}[leftmargin=0.45em, topsep=2pt, itemsep=1pt]
              \BLOCK{for bullet in exp.bullets}
              \item \small \VAR{bullet}
              \BLOCK{endfor}
@@ -110,10 +110,10 @@
     \BLOCK{for proj in data.projects}
         \smallskip
         \textbf{\VAR{proj.title}} \BLOCK{if proj.link} \href{\VAR{proj.link}}{[Link]} \BLOCK{endif} \\
-        {\small \color{darkblue} \textit{\VAR{proj.techStack|join(', ')}}} \\
-        {\small \VAR{proj.description}}
+        \BLOCK{if proj.techStack}{\small \color{darkblue} \textit{\VAR{proj.techStack|join(', ')}}} \\ \BLOCK{endif}
+        \BLOCK{if proj.description}{\small \VAR{proj.description}}\BLOCK{endif}
         \BLOCK{if proj.bullets}
-        \begin{itemize}[leftmargin=0.7em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
+        \begin{itemize}[leftmargin=0.45em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
             \BLOCK{for bullet in proj.bullets}
             \item \small \VAR{bullet}
             \BLOCK{endfor}
@@ -148,7 +148,7 @@
     % SKILLS
     \BLOCK{if data.skills}
     \section{Expertise}
-    \begin{itemize}[leftmargin=0.7em, label={$\bullet$}, itemsep=1pt, parsep=0pt, topsep=2pt]
+    \begin{itemize}[leftmargin=0.45em, label={$\bullet$}, itemsep=1pt, parsep=0pt, topsep=2pt]
        \BLOCK{for skill in data.skills}
        \item \small \VAR{skill}
        \BLOCK{endfor}
@@ -173,7 +173,7 @@
 % --- ACHIEVEMENTS (Full width below columns) ---
 \BLOCK{if data.achievements}
 \section{Achievements}
-\begin{itemize}[leftmargin=0.7em, label={$\bullet$}, itemsep=1pt, parsep=0pt, topsep=2pt]
+\begin{itemize}[leftmargin=0.45em, label={$\bullet$}, itemsep=1pt, parsep=0pt, topsep=2pt]
     \BLOCK{for ach in data.achievements}
     \item \small \VAR{ach}
     \BLOCK{endfor}
@@ -183,7 +183,7 @@
 % --- PUBLICATIONS ---
 \BLOCK{if data.publications}
 \section{Publications}
-\begin{itemize}[leftmargin=0.7em, label={--}, itemsep=1pt, parsep=0pt, topsep=2pt]
+\begin{itemize}[leftmargin=0.45em, label={--}, itemsep=1pt, parsep=0pt, topsep=2pt]
     \BLOCK{for pub in data.publications}
     \item \small \textbf{\VAR{pub.title}}. \textit{\VAR{pub.journal}}. \VAR{pub.date}.
     \BLOCK{endfor}

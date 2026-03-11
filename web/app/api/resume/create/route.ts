@@ -5,6 +5,43 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { db } from "@/lib/firebase/config";
 import { collection, addDoc, serverTimestamp, doc, getDoc, updateDoc, increment } from "firebase/firestore";
 
+function normalizeSkills(skillsRaw: unknown): string[] {
+  if (Array.isArray(skillsRaw)) {
+    return skillsRaw.filter((s): s is string => typeof s === "string" && s.trim().length > 0).map((s) => s.trim());
+  }
+  if (typeof skillsRaw === "string") {
+    return skillsRaw.split(",").map((s) => s.trim()).filter(Boolean);
+  }
+  if (skillsRaw && typeof skillsRaw === "object") {
+    const obj = skillsRaw as Record<string, unknown>;
+    const merged: string[] = [];
+    for (const bucket of ["technical", "tools", "soft"]) {
+      const v = obj[bucket];
+      if (Array.isArray(v)) merged.push(...v.filter((s): s is string => typeof s === "string"));
+      else if (typeof v === "string") merged.push(...v.split(",").map((s) => s.trim()).filter(Boolean));
+    }
+    return Array.from(new Set(merged.map((s) => s.trim()).filter(Boolean)));
+  }
+  return [];
+}
+
+function normalizeExperienceShape(rawExp: unknown): unknown[] {
+  if (!Array.isArray(rawExp)) return [];
+  return rawExp.map((item) => {
+    if (!item || typeof item !== "object") return item;
+    const exp = item as Record<string, unknown>;
+    return {
+      ...exp,
+      role:
+        (typeof exp.role === "string" && exp.role.trim()) ||
+        (typeof exp.jobTitle === "string" && exp.jobTitle.trim()) ||
+        (typeof exp.position === "string" && exp.position.trim()) ||
+        (typeof exp.title === "string" && exp.title.trim()) ||
+        "",
+    };
+  });
+}
+
 export async function POST() {
   try {
     const session = await getServerSession(authOptions);
@@ -12,7 +49,8 @@ export async function POST() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const email = session.user.email.toLowerCase();
+    const emailRaw = session.user.email;
+    const email = emailRaw.toLowerCase();
 
     // 1. Check for Master Profile
     const profileDocRef = doc(db, "profiles", email);
@@ -25,8 +63,12 @@ export async function POST() {
     const profileData = profileSnap.data();
 
     // 2. Check Credits
-    const userRef = doc(db, "users", email);
-    const userSnap = await getDoc(userRef);
+    let userRef = doc(db, "users", email);
+    let userSnap = await getDoc(userRef);
+    if (!userSnap.exists() && emailRaw !== email) {
+      userRef = doc(db, "users", emailRaw);
+      userSnap = await getDoc(userRef);
+    }
 
     if (!userSnap.exists()) {
       return NextResponse.json({ error: "User not found." }, { status: 404 });
@@ -49,9 +91,9 @@ export async function POST() {
         content: {
             personalInfo: profileData.personalInfo || {},
             education: profileData.education || [],
-            experience: profileData.experience || [],
+            experience: normalizeExperienceShape(profileData.experience),
             projects: profileData.projects || [],
-            skills: profileData.skills || [], // Ensure array vs string handling
+            skills: normalizeSkills(profileData.skills),
             certifications: profileData.certifications || [],
             publications: profileData.publications || [],
             achievements: profileData.achievements || []

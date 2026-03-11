@@ -60,7 +60,7 @@
 \BLOCK{for exp in data.experience}
     \noindent
     \textbf{\VAR{exp.company}} \hfill \VAR{exp.location} \\
-    \textit{\VAR{exp.role}} \hfill \VAR{exp.startDate} -- \VAR{exp.endDate}
+    \BLOCK{if exp.role or exp.dateRange}\textit{\VAR{exp.role}}\BLOCK{if exp.dateRange} \hfill \VAR{exp.dateRange}\BLOCK{endif}\BLOCK{endif}
     \begin{itemize}[leftmargin=*, label={--}, itemsep=0pt]
         \BLOCK{for bullet in exp.bullets}
         \item \VAR{bullet}
@@ -75,10 +75,10 @@
 \section{Leadership \& Projects}
 \BLOCK{for proj in data.projects}
     \noindent
-    \textbf{\VAR{proj.title}} \BLOCK{if proj.link} \href{\VAR{proj.link}}{[Link]} \BLOCK{endif} \hfill \textit{\VAR{proj.techStack|join(', ')}} \\
-    \small \VAR{proj.description}
+    \textbf{\VAR{proj.title}} \BLOCK{if proj.link} \href{\VAR{proj.link}}{[Link]} \BLOCK{endif}\BLOCK{if proj.techStack} \hfill \textit{\VAR{proj.techStack|join(', ')}}\BLOCK{endif} \\
+    \BLOCK{if proj.description}\small \VAR{proj.description}\BLOCK{endif}
     \BLOCK{if proj.bullets}
-    \begin{itemize}[leftmargin=0.7em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
+    \begin{itemize}[leftmargin=0.45em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
         \BLOCK{for bullet in proj.bullets}
         \item \small \VAR{bullet}
         \BLOCK{endfor}
@@ -93,7 +93,7 @@
 \section{Education}
 \BLOCK{for edu in data.education}
     \noindent
-    \textbf{\VAR{edu.institution}} \hfill \VAR{edu.startDate} -- \VAR{edu.endDate} \\
+    \textbf{\VAR{edu.institution}}\BLOCK{if edu.dateRange} \hfill \VAR{edu.dateRange}\BLOCK{endif} \\
     \VAR{edu.degree} \hfill \BLOCK{if edu.score} GPA: \VAR{edu.score} \BLOCK{endif}
     \vspace{3pt}
 \BLOCK{endfor}

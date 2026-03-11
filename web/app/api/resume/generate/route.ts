@@ -12,6 +12,46 @@ import { RESUME_TEMPLATES } from "@/lib/templates";
 // The Python optimizer runs 4 parallel Gemini calls and may need 15-30s.
 export const maxDuration = 60;
 
+function normalizeSkills(skillsRaw: unknown): string[] {
+  if (Array.isArray(skillsRaw)) {
+    return skillsRaw.filter((s): s is string => typeof s === "string" && s.trim().length > 0).map((s) => s.trim());
+  }
+  if (typeof skillsRaw === "string") {
+    return skillsRaw.split(",").map((s) => s.trim()).filter(Boolean);
+  }
+  if (skillsRaw && typeof skillsRaw === "object") {
+    const obj = skillsRaw as Record<string, unknown>;
+    const merged: string[] = [];
+    for (const bucket of ["technical", "tools", "soft"]) {
+      const val = obj[bucket];
+      if (Array.isArray(val)) {
+        merged.push(...val.filter((s): s is string => typeof s === "string"));
+      } else if (typeof val === "string") {
+        merged.push(...val.split(",").map((s) => s.trim()).filter(Boolean));
+      }
+    }
+    return Array.from(new Set(merged.map((s) => s.trim()).filter(Boolean)));
+  }
+  return [];
+}
+
+function normalizeExperienceShape(experienceRaw: unknown): unknown[] {
+  if (!Array.isArray(experienceRaw)) return [];
+  return experienceRaw.map((exp) => {
+    if (!exp || typeof exp !== "object") return exp;
+    const e = exp as Record<string, unknown>;
+    return {
+      ...e,
+      role:
+        (typeof e.role === "string" && e.role.trim()) ||
+        (typeof e.jobTitle === "string" && e.jobTitle.trim()) ||
+        (typeof e.position === "string" && e.position.trim()) ||
+        (typeof e.title === "string" && e.title.trim()) ||
+        "",
+    };
+  });
+}
+
 function isProfileComplete(profile: Record<string, unknown>): boolean {
   const personalInfo = (profile.personalInfo || {}) as Record<string, unknown>;
   const hasCorePersonalInfo =
@@ -26,7 +66,7 @@ function isProfileComplete(profile: Record<string, unknown>): boolean {
     (Array.isArray(profile.experience) && profile.experience.length > 0) ||
     (Array.isArray(profile.projects) && profile.projects.length > 0) ||
     (Array.isArray(profile.education) && profile.education.length > 0) ||
-    (Array.isArray(profile.skills) && profile.skills.length > 0);
+    normalizeSkills(profile.skills).length > 0;
 
   return hasCorePersonalInfo && hasSomeResumeData;
 }
@@ -50,9 +90,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userEmail = session.user.email.toLowerCase();
-    const userRef = doc(db, "users", userEmail);
-    const userSnap = await getDoc(userRef);
+    const userEmailRaw = session.user.email;
+    const userEmail = userEmailRaw.toLowerCase();
+    let userRef = doc(db, "users", userEmail);
+    let userSnap = await getDoc(userRef);
+    if (!userSnap.exists() && userEmailRaw !== userEmail) {
+      userRef = doc(db, "users", userEmailRaw);
+      userSnap = await getDoc(userRef);
+    }
 
     if (!userSnap.exists()) {
       return NextResponse.json({ error: "User not found" }, { status: 403 });
@@ -79,6 +124,8 @@ export async function POST(req: Request) {
     const templateSections = getTemplateSections(resolvedTemplateId);
 
     const { personalInfo, education, achievements, certifications, publications } = profile;
+    const normalizedSkills = normalizeSkills(profile.skills);
+    const normalizedExperience = normalizeExperienceShape(profile.experience);
     const targetRole = targetJob || personalInfo?.headline || "General Professional";
 
     // Send the FULL profile to the optimizer so it has complete candidate context
@@ -96,7 +143,12 @@ export async function POST(req: Request) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          profile: profile,
+          // normalize mixed profile shapes before sending to Python optimizer
+          profile: {
+            ...profile,
+            skills: normalizedSkills,
+            experience: normalizedExperience,
+          },
           target_role: targetRole,
           template_sections: templateSections,
         }),
@@ -150,7 +202,7 @@ export async function POST(req: Request) {
       projects:         aiOutput.projects   || [],
       skills:           (Array.isArray(aiOutput.skills) && aiOutput.skills.length > 0)
                           ? aiOutput.skills
-                          : (Array.isArray(profile.skills) ? profile.skills : []),
+                          : normalizedSkills,
     };
 
     // ── Filter to only sections the template renders ────────────────────────

@@ -87,7 +87,9 @@
     \noindent
     {\color{blue600}\vrule width 2pt}\hspace{6pt}%
     \begin{minipage}[t]{\dimexpr\textwidth-10pt\relax}
-        \textbf{\large \color{gray600} \VAR{exp.role}} \hfill {\footnotesize \color{blue600} \textbf{\VAR{exp.startDate} -- \VAR{exp.endDate}}} \\
+        \BLOCK{if exp.role or exp.dateRange}
+        \textbf{\large \color{gray600} \VAR{exp.role}}\BLOCK{if exp.dateRange} \hfill {\footnotesize \color{blue600} \textbf{\VAR{exp.dateRange}}}\BLOCK{endif} \\
+        \BLOCK{endif}
         {\small \textbf{\VAR{exp.company}}}
         \begin{itemize}[leftmargin=0.5em, nosep, label={\color{gray600}\small\textbullet}]
             \BLOCK{for bullet in exp.bullets}
@@ -108,8 +110,8 @@
     \begin{minipage}[t]{\dimexpr\textwidth-10pt\relax}
         \textbf{\large \color{gray600} \VAR{proj.title}} \BLOCK{if proj.link} \href{\VAR{proj.link}}{\footnotesize \color{blue600} [Link]} \BLOCK{endif} \\
         \BLOCK{if proj.role}{\footnotesize \color{blue600} \textbf{\VAR{proj.role}}} \\ \BLOCK{endif}
-        {\small \textit{\VAR{proj.techStack|join(', ')}}} \\
-        {\small \color{gray600} \VAR{proj.description}}
+        \BLOCK{if proj.techStack}{\small \textit{\VAR{proj.techStack|join(', ')}}} \\ \BLOCK{endif}
+        \BLOCK{if proj.description}{\small \color{gray600} \VAR{proj.description}}\BLOCK{endif}
     \end{minipage}
     \BLOCK{if proj.bullets}
     \begin{itemize}[leftmargin=0.5em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
@@ -130,7 +132,7 @@
     \BLOCK{for edu in data.education}
         \textbf{\color{gray600}\VAR{edu.institution}} \\
         {\small \color{blue600} \VAR{edu.degree}} \\
-        {\footnotesize \color{gray600} \VAR{edu.startDate} -- \VAR{edu.endDate}} \\
+        \BLOCK{if edu.dateRange}{\footnotesize \color{gray600} \VAR{edu.dateRange}} \\ \BLOCK{endif}
         \vspace{0.2cm}
     \BLOCK{endfor}
     \BLOCK{endif}
@@ -152,7 +154,7 @@
 % ACHIEVEMENTS
 \BLOCK{if data.achievements}
 \section{Achievements}
-\begin{itemize}[leftmargin=0.7em, nosep, label={\color{blue600}\small\textbullet}]
+\begin{itemize}[leftmargin=0.45em, nosep, label={\color{blue600}\small\textbullet}]
     \BLOCK{for ach in data.achievements}
     \item \small \color{gray600} \VAR{ach}
     \BLOCK{endfor}
@@ -162,7 +164,7 @@
 % CERTIFICATIONS
 \BLOCK{if data.certifications}
 \section{Certifications}
-\begin{itemize}[leftmargin=0.7em, nosep, label={\color{blue600}\small\textbullet}]
+\begin{itemize}[leftmargin=0.45em, nosep, label={\color{blue600}\small\textbullet}]
     \BLOCK{for cert in data.certifications}
     \item \small \color{gray600} \VAR{cert}
     \BLOCK{endfor}

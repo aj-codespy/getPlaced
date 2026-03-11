@@ -82,9 +82,9 @@
 \section{Experience}
 \BLOCK{for exp in data.experience}
     \noindent
-    \textbf{\VAR{exp.company}} \hfill \VAR{exp.startDate} -- \VAR{exp.endDate} \\
-    \textit{\VAR{exp.role}}
-    \begin{itemize}[leftmargin=0.7em, itemsep=1pt, parsep=0pt, topsep=2pt]
+    \textbf{\VAR{exp.company}}\BLOCK{if exp.dateRange} \hfill \VAR{exp.dateRange}\BLOCK{endif} \\
+    \BLOCK{if exp.role}\textit{\VAR{exp.role}}\BLOCK{endif}
+    \begin{itemize}[leftmargin=0.45em, itemsep=1pt, parsep=0pt, topsep=2pt]
         \BLOCK{for bullet in exp.bullets}
         \item \small \VAR{bullet}
         \BLOCK{endfor}
@@ -99,12 +99,14 @@
 \BLOCK{for proj in data.projects}
     \noindent
     \textbf{\VAR{proj.title}} \BLOCK{if proj.link} \href{\VAR{proj.link}}{[Link]} \BLOCK{endif} \\
-    {\small \textit{\VAR{proj.techStack|join(', ')}}}
-    \begin{itemize}[leftmargin=0.7em, itemsep=1pt]
+    \BLOCK{if proj.techStack}{\small \textit{\VAR{proj.techStack|join(', ')}}}\BLOCK{endif}
+    \BLOCK{if proj.description}
+    \begin{itemize}[leftmargin=0.45em, itemsep=1pt]
         \item \small \VAR{proj.description}
     \end{itemize}
+    \BLOCK{endif}
     \BLOCK{if proj.bullets}
-    \begin{itemize}[leftmargin=0.7em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
+    \begin{itemize}[leftmargin=0.45em, label={\textbullet}, itemsep=1pt, parsep=0pt, topsep=2pt]
         \BLOCK{for bullet in proj.bullets}
         \item \small \VAR{bullet}
         \BLOCK{endfor}
@@ -126,7 +128,7 @@
 % --- ACHIEVEMENTS ---
 \BLOCK{if data.achievements}
 \section{Honors \& Awards}
-\begin{itemize}[leftmargin=0.7em, itemsep=1pt, parsep=0pt, topsep=2pt]
+\begin{itemize}[leftmargin=0.45em, itemsep=1pt, parsep=0pt, topsep=2pt]
 \BLOCK{for ach in data.achievements}
     \item \small \VAR{ach}
 \BLOCK{endfor}
@@ -136,7 +138,7 @@
 % --- CERTIFICATIONS ---
 \BLOCK{if data.certifications}
 \section{Certifications}
-\begin{itemize}[leftmargin=0.7em, itemsep=1pt, parsep=0pt, topsep=2pt]
+\begin{itemize}[leftmargin=0.45em, itemsep=1pt, parsep=0pt, topsep=2pt]
 \BLOCK{for cert in data.certifications}
     \item \small \VAR{cert}
 \BLOCK{endfor}
