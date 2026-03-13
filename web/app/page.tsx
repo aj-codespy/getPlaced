@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import {
   ArrowRight,
   Zap,
@@ -113,25 +112,6 @@ export default function LandingPage() {
             ))}
           </div>
 
-          <div className="mt-6 flex flex-col items-center gap-2 animate-in fade-in duration-700 delay-500">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-              Featured on Product Hunt
-            </p>
-            <a
-              href="https://www.producthunt.com/products/getplaced?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-getplaced"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="getPlaced on Product Hunt"
-            >
-              <Image
-                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1095203&theme=neutral&t=1773231686280"
-                alt="getPlaced - Generate Resumes that get you hired | Product Hunt"
-                width={250}
-                height={54}
-                className="h-auto w-[220px] sm:w-[250px] rounded-md transition-opacity hover:opacity-90"
-              />
-            </a>
-          </div>
         </section>
 
         {/* ── Hero visual: floating resume mockup ────────────────────────────── */}

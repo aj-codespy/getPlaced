@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Loader2, Eye, EyeOff, AlertCircle, CheckCircle2, Zap, TrendingUp, FileText } from "lucide-react";
+import { evaluateEmailForAuth, getAuthErrorMessage } from "@/lib/email-policy";
 
 const PERKS = [
   { icon: Zap, text: "AI resume in under 30 seconds" },
@@ -16,6 +17,7 @@ const PERKS = [
 
 export default function SignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { status } = useSession();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -26,12 +28,26 @@ export default function SignupPage() {
     if (status === "authenticated") router.push("/dashboard");
   }, [status, router]);
 
+  useEffect(() => {
+    const authErrorCode = searchParams.get("error");
+    if (authErrorCode) {
+      setError(getAuthErrorMessage(authErrorCode));
+    }
+  }, [searchParams]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     try {
+      const emailCheck = evaluateEmailForAuth(form.email);
+      if (!emailCheck.ok) {
+        setError(emailCheck.message);
+        setLoading(false);
+        return;
+      }
+
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -193,6 +209,9 @@ export default function SignupPage() {
                 required
                 className="bg-white/5 border-white/10 text-white placeholder:text-slate-600 focus-visible:border-indigo-500/60 focus-visible:ring-indigo-500/20 h-11 rounded-xl"
               />
+              <p className="text-[11px] text-slate-500">
+                Allowed: Gmail, major personal providers, and academic (.edu/.ac) emails.
+              </p>
             </div>
 
             <div className="space-y-1.5">

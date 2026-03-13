@@ -53,6 +53,7 @@ export default function LinkedInAuditPage() {
       if (!file) return;
       if (file.type !== 'application/pdf') {
           showMessage("Unsupported File", "Please upload a PDF file.", "warning");
+          e.target.value = "";
           return;
       }
 
@@ -77,33 +78,54 @@ export default function LinkedInAuditPage() {
           showMessage("Read Failed", "Failed to read PDF. Please copy-paste text instead.", "error");
       } finally {
           setExtracting(false);
+          e.target.value = "";
       }
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
-      if (!files) return;
-
-      if (files.length > 2) {
-          showMessage("Too Many Images", "You can only upload a maximum of 2 images.", "warning");
+      if (!files) {
+          e.target.value = "";
           return;
       }
 
-      const newImages: string[] = [];
-      Array.from(files).slice(0, 2).forEach(file => {
-          if (!file.type.startsWith('image/')) return;
-          
-          const reader = new FileReader();
-          reader.onload = (ev) => {
-              if (ev.target?.result) {
-                  newImages.push(ev.target.result as string);
-                  if (newImages.length === Math.min(files.length, 2)) {
-                       setImages(newImages);
-                  }
-              }
-          };
-          reader.readAsDataURL(file);
-      });
+      if (files.length > 2) {
+          showMessage("Too Many Images", "You can only upload a maximum of 2 images.", "warning");
+          e.target.value = "";
+          return;
+      }
+
+      const imageFiles = Array.from(files).slice(0, 2).filter((file) => file.type.startsWith("image/"));
+      if (imageFiles.length === 0) {
+          showMessage("Unsupported Files", "Please upload valid image files.", "warning");
+          e.target.value = "";
+          return;
+      }
+
+      try {
+          const encodedImages = await Promise.all(
+              imageFiles.map(
+                  (file) =>
+                      new Promise<string>((resolve, reject) => {
+                          const reader = new FileReader();
+                          reader.onload = (ev) => {
+                              if (typeof ev.target?.result === "string") {
+                                  resolve(ev.target.result);
+                              } else {
+                                  reject(new Error("Unable to read image"));
+                              }
+                          };
+                          reader.onerror = () => reject(new Error("Unable to read image"));
+                          reader.readAsDataURL(file);
+                      }),
+              ),
+          );
+          setImages(encodedImages);
+      } catch {
+          showMessage("Image Read Failed", "Unable to read one or more selected images.", "error");
+      } finally {
+          e.target.value = "";
+      }
   };
 
   const handleAudit = async () => {
@@ -119,7 +141,7 @@ export default function LinkedInAuditPage() {
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ profileText, images })
           });
-          const data = await res.json();
+          const data = await res.json().catch(() => ({}));
           
           if(!res.ok) throw new Error(data.error);
           

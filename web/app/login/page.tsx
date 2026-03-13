@@ -2,14 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { signIn, useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Loader2, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { getAuthErrorMessage } from "@/lib/email-policy";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { status } = useSession();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ email: "", password: "" });
@@ -19,6 +21,13 @@ export default function LoginPage() {
   useEffect(() => {
     if (status === "authenticated") router.push("/dashboard");
   }, [status, router]);
+
+  useEffect(() => {
+    const authErrorCode = searchParams.get("error");
+    if (authErrorCode) {
+      setError(getAuthErrorMessage(authErrorCode));
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,11 +41,25 @@ export default function LoginPage() {
         password: form.password,
       });
 
-      if (res?.error) {
-        setError("Invalid email or password. Please try again.");
-      } else {
-        router.push("/dashboard");
+      if (res?.url) {
+        try {
+          const url = new URL(res.url, window.location.origin);
+          const errorCode = url.searchParams.get("error");
+          if (errorCode) {
+            setError(getAuthErrorMessage(errorCode));
+            return;
+          }
+        } catch {
+          // Ignore malformed callback URL; fallback to generic handling below.
+        }
       }
+
+      if (res?.error || !res?.ok) {
+        setError(getAuthErrorMessage(res?.error));
+        return;
+      }
+
+      router.push("/dashboard");
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {

@@ -5,6 +5,7 @@ import GoogleProvider from "next-auth/providers/google";
 import { db } from "@/lib/firebase/config";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import bcrypt from "bcryptjs";
+import { evaluateEmailForAuth } from "@/lib/email-policy";
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -22,7 +23,7 @@ export const authOptions: AuthOptions = {
         if (!credentials?.email || !credentials?.password) return null;
         
         try {
-          const emailLower = credentials.email.toLowerCase();
+          const emailLower = credentials.email.toLowerCase().trim();
           const userRef = doc(db, "users", emailLower);
           const userSnap = await getDoc(userRef);
 
@@ -59,17 +60,23 @@ export const authOptions: AuthOptions = {
   },
   callbacks: {
     async signIn({ user, account }) {
+      const emailCheck = evaluateEmailForAuth(user.email || "");
+      if (!emailCheck.ok) {
+        return `/login?error=${emailCheck.code}`;
+      }
+
       if (account?.provider === "google") {
         try {
            if (!user.email) return false;
            
            // Sync Google User to Firestore "users" collection
-           const userRef = doc(db, "users", user.email);
+           const userEmail = emailCheck.normalizedEmail;
+           const userRef = doc(db, "users", userEmail);
            const userSnap = await getDoc(userRef);
 
            if (!userSnap.exists()) {
              await setDoc(userRef, {
-                 email: user.email,
+                 email: userEmail,
                  name: user.name,
                  image: user.image,
                  createdAt: serverTimestamp(),

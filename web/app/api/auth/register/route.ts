@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/firebase/config";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import bcrypt from "bcryptjs";
+import { evaluateEmailForAuth } from "@/lib/email-policy";
 
 export async function POST(req: Request) {
   try {
@@ -15,7 +16,12 @@ export async function POST(req: Request) {
       );
     }
 
-    const emailLower = email.toLowerCase();
+    const emailCheck = evaluateEmailForAuth(email);
+    if (!emailCheck.ok) {
+      return NextResponse.json({ message: emailCheck.message, code: emailCheck.code }, { status: 400 });
+    }
+
+    const emailLower = emailCheck.normalizedEmail;
     const userRef = doc(db, "users", emailLower);
     const existingUser = await getDoc(userRef);
 
