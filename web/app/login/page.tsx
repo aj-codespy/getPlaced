@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { signIn, useSession } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import Image from "next/image";
@@ -11,7 +11,6 @@ import { getAuthErrorMessage } from "@/lib/email-policy";
 
 export default function LoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { status } = useSession();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ email: "", password: "" });
@@ -23,11 +22,11 @@ export default function LoginPage() {
   }, [status, router]);
 
   useEffect(() => {
-    const authErrorCode = searchParams.get("error");
+    const authErrorCode = new URLSearchParams(window.location.search).get("error");
     if (authErrorCode) {
       setError(getAuthErrorMessage(authErrorCode));
     }
-  }, [searchParams]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

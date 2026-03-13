@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
@@ -17,7 +17,6 @@ const PERKS = [
 
 export default function SignupPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { status } = useSession();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -29,11 +28,11 @@ export default function SignupPage() {
   }, [status, router]);
 
   useEffect(() => {
-    const authErrorCode = searchParams.get("error");
+    const authErrorCode = new URLSearchParams(window.location.search).get("error");
     if (authErrorCode) {
       setError(getAuthErrorMessage(authErrorCode));
     }
-  }, [searchParams]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
