@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { Sparkles, ArrowRight, Loader2, Eye, EyeOff, AlertCircle, CheckCircle2, Zap, TrendingUp, FileText } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight, Loader2, Eye, EyeOff, AlertCircle, CheckCircle2, Zap, TrendingUp, FileText } from "lucide-react";
 
 const PERKS = [
   { icon: Zap, text: "AI resume in under 30 seconds" },
@@ -15,10 +16,15 @@ const PERKS = [
 
 export default function SignupPage() {
   const router = useRouter();
+  const { status } = useSession();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", password: "", contact: "" });
+
+  useEffect(() => {
+    if (status === "authenticated") router.push("/dashboard");
+  }, [status, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,8 +69,8 @@ export default function SignupPage() {
 
         <div className="relative z-10">
           <Link href="/" className="flex items-center gap-2.5 font-bold text-xl text-white">
-            <div className="h-9 w-9 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
-              <Sparkles size={18} fill="white" className="text-white" />
+            <div className="h-9 w-9 rounded-xl border border-white/15 bg-white/5 p-1.5 shadow-lg shadow-indigo-500/20">
+              <Image src="/logo.png" alt="getPlaced" width={36} height={36} className="h-full w-full object-contain" />
             </div>
             getPlaced
           </Link>
@@ -118,8 +124,8 @@ export default function SignupPage() {
         {/* Mobile logo */}
         <div className="absolute top-6 left-6 lg:hidden">
           <Link href="/" className="flex items-center gap-2 font-bold text-white">
-            <div className="h-8 w-8 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-lg flex items-center justify-center">
-              <Sparkles size={15} fill="white" className="text-white" />
+            <div className="h-8 w-8 rounded-lg border border-white/15 bg-white/5 p-1.5">
+              <Image src="/logo.png" alt="getPlaced" width={32} height={32} className="h-full w-full object-contain" />
             </div>
             getPlaced
           </Link>

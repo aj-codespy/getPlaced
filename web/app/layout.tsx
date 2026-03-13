@@ -34,8 +34,9 @@ export const metadata: Metadata = {
     images: ["https://getplaced.in/og-image.png"],
   },
   icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
   },
   robots: { index: true, follow: true },
 };
