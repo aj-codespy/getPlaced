@@ -50,27 +50,68 @@ export default function OnboardingPage() {
       const file = e.target.files?.[0];
       if (!file) return;
 
+      const lowerName = file.name.toLowerCase();
+      const isPdf = file.type === "application/pdf" || lowerName.endsWith(".pdf");
+      const isDocx =
+        file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+        lowerName.endsWith(".docx");
+
+      if (!isPdf && !isDocx) {
+          showMessage("Unsupported File", "Please upload a PDF or DOCX resume file.", "warning");
+          e.target.value = "";
+          return;
+      }
+
+      if (file.size > 8 * 1024 * 1024) {
+          showMessage("File Too Large", "Please upload a file under 8MB for reliable parsing.", "warning");
+          e.target.value = "";
+          return;
+      }
+
       setParsing(true);
       try {
-          // 1. Extract Text locally
-          const pdfjsLib = await import("pdfjs-dist");
-          pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
-          const arrayBuffer = await file.arrayBuffer();
-          const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-          let fullText = "";
-          for (let i = 1; i <= pdf.numPages; i++) {
-              const page = await pdf.getPage(i);
-              const textContent = await page.getTextContent();
-              const pageText = textContent.items.map((item) => ('str' in item ? item.str : "")).join(" ");
-              fullText += pageText + "\n";
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 35_000);
+          let res: Response;
+          try {
+              if (isDocx) {
+                  const formData = new FormData();
+                  formData.append("file", file);
+                  res = await fetch("/api/resume/parse", {
+                      method: "POST",
+                      body: formData,
+                      signal: controller.signal,
+                  });
+              } else {
+                  // Extract PDF text locally, then send structured extraction request.
+                  const pdfjsLib = await import("pdfjs-dist");
+                  pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+                  const arrayBuffer = await file.arrayBuffer();
+                  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                  let fullText = "";
+                  for (let i = 1; i <= pdf.numPages; i++) {
+                      const page = await pdf.getPage(i);
+                      const textContent = await page.getTextContent();
+                      const pageText = textContent.items.map((item) => ('str' in item ? item.str : "")).join(" ");
+                      fullText += pageText + "\n";
+                  }
+
+                  const normalizedText = fullText.replace(/[ \t]{2,}/g, " ").trim();
+                  if (normalizedText.length < 80) {
+                      throw new Error("This PDF appears image-based or unreadable. Please upload a text-based PDF, DOCX, or enter details manually.");
+                  }
+
+                  res = await fetch("/api/resume/parse", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ resumeText: normalizedText }),
+                      signal: controller.signal,
+                  });
+              }
+          } finally {
+              clearTimeout(timeoutId);
           }
 
-          // 2. Send to API for intelligent parsing
-          const res = await fetch("/api/resume/parse", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ resumeText: fullText })
-          });
           const data = await res.json();
           
           if(!res.ok) throw new Error(data.error);
@@ -115,6 +156,10 @@ export default function OnboardingPage() {
 
       } catch(e: unknown) {
           console.error(e);
+          if (e instanceof DOMException && e.name === "AbortError") {
+              showMessage("Resume Parsing Timed Out", "The parser took too long to respond. Please try again.", "error");
+              return;
+          }
           showMessage(
             "Resume Parsing Failed",
             "We couldn't parse the uploaded resume. " + (e instanceof Error ? e.message : "Unknown error"),
@@ -122,6 +167,7 @@ export default function OnboardingPage() {
           );
       } finally {
           setParsing(false);
+          e.target.value = "";
       }
   };
 
@@ -327,7 +373,7 @@ export default function OnboardingPage() {
                              <input 
                                  type="file" 
                                  id="resume-upload" 
-                                 accept="application/pdf" 
+                                 accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" 
                                  className="hidden" 
                                  onChange={handleResumeParse}
                              />
@@ -346,9 +392,9 @@ export default function OnboardingPage() {
                                             <UploadCloud className="text-slate-400" size={24} />
                                        </div>
                                        <h3 className="text-white font-bold text-lg">Already have a resume?</h3>
-                                       <p className="text-slate-400 text-sm">Upload your PDF and let AI auto-fill your profile instantly.</p>
+                                       <p className="text-slate-400 text-sm">Upload your PDF or DOCX and let AI auto-fill your profile instantly.</p>
                                        <Button size="sm" variant="outline" className="mt-2 border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/10 hover:text-indigo-200 pointer-events-none">
-                                           Select Resume PDF
+                                           Select Resume (PDF/DOCX)
                                        </Button>
                                     </>
                                  )}

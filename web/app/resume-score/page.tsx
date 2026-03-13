@@ -2,6 +2,7 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { MessageBox, type MessageBoxVariant } from "@/components/ui/message-box";
 import { Loader2, UploadCloud, CheckCircle2, AlertCircle, BarChart3 } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 // pdfjs-dist imported dynamically to avoid SSR issues
@@ -24,6 +25,21 @@ interface ScoreData {
 export default function CheckScorePage() {
     const [scoreData, setScoreData] = useState<ScoreData | null>(null);
     const [loading, setLoading] = useState(false);
+    const [messageBox, setMessageBox] = useState<{
+        open: boolean;
+        title: string;
+        message: string;
+        variant: MessageBoxVariant;
+    }>({
+        open: false,
+        title: "",
+        message: "",
+        variant: "info",
+    });
+
+    const showMessage = (title: string, message: string, variant: MessageBoxVariant = "info") => {
+        setMessageBox({ open: true, title, message, variant });
+    };
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -125,12 +141,12 @@ export default function CheckScorePage() {
             if (data.success) {
                 setScoreData(data.scoreData);
             } else {
-                alert("Failed to calculate score");
+                showMessage("Scoring Failed", "Failed to calculate score.", "error");
             }
 
         } catch (e) {
             console.error(e);
-            alert("Error reading file.");
+            showMessage("Read Failed", "Error reading file.", "error");
         } finally {
             setLoading(false);
         }
@@ -265,6 +281,13 @@ export default function CheckScorePage() {
                     </div>
                 )}
              </div>
+             <MessageBox
+                open={messageBox.open}
+                title={messageBox.title}
+                message={messageBox.message}
+                variant={messageBox.variant}
+                onClose={() => setMessageBox((prev) => ({ ...prev, open: false }))}
+             />
         </div>
     );
 }

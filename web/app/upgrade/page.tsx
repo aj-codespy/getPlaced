@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Script from "next/script";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { MessageBox, type MessageBoxVariant } from "@/components/ui/message-box";
 import Link from "next/link";
 import { Check, Star, Zap, Shield, Crown, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -17,6 +18,21 @@ export default function UpgradePage() {
   const router = useRouter();
   const [currency, setCurrency] = useState<"INR" | "USD" | null>(null);
   const [loading, setLoading] = useState(false);
+  const [messageBox, setMessageBox] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    variant: MessageBoxVariant;
+  }>({
+    open: false,
+    title: "",
+    message: "",
+    variant: "info",
+  });
+
+  const showMessage = (title: string, message: string, variant: MessageBoxVariant = "info") => {
+    setMessageBox({ open: true, title, message, variant });
+  };
 
   useEffect(() => {
     fetch("https://ipapi.co/json/")
@@ -70,10 +86,10 @@ export default function UpgradePage() {
           });
           
           if (verifyRes.ok) {
-              alert("Subscription Activated! Welcome to Pro.");
-              router.push("/dashboard");
+              showMessage("Subscription Activated", "Welcome to Pro.", "success");
+              setTimeout(() => router.push("/dashboard"), 700);
           } else {
-              alert("Payment Verification Failed");
+              showMessage("Verification Failed", "Payment verification failed.", "error");
           }
         },
         prefill: {
@@ -94,7 +110,7 @@ export default function UpgradePage() {
       rzp.open();
 
     } catch (e: unknown) {
-      alert("Payment Failed: " + (e instanceof Error ? e.message : "Unknown error"));
+      showMessage("Payment Failed", e instanceof Error ? e.message : "Unknown error", "error");
     } finally {
       setLoading(false);
     }
@@ -265,6 +281,13 @@ export default function UpgradePage() {
         </section>
       </main>
       {status !== "authenticated" && <PublicFooter />}
+      <MessageBox
+        open={messageBox.open}
+        title={messageBox.title}
+        message={messageBox.message}
+        variant={messageBox.variant}
+        onClose={() => setMessageBox((prev) => ({ ...prev, open: false }))}
+      />
     </div>
   );
 }

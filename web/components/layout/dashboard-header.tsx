@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { isAdmin } from "@/lib/admin";
-import { Sparkles, User, LogOut, Crown, ChevronDown, ArrowUpRight } from "lucide-react";
+import { Sparkles, User, LogOut, Crown, ChevronDown, ArrowUpRight, Menu, X } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 
@@ -19,12 +19,17 @@ export function DashboardHeader({ credits, isPremium }: { credits?: number; isPr
   const { data: session } = useSession();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const mobileNavRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setMenuOpen(false);
+      }
+      if (mobileNavRef.current && !mobileNavRef.current.contains(e.target as Node)) {
+        setMobileNavOpen(false);
       }
     };
     document.addEventListener("mousedown", handler);
@@ -44,7 +49,7 @@ export function DashboardHeader({ credits, isPremium }: { credits?: number; isPr
   };
 
   return (
-    <header className="border-b border-white/[0.04] sticky top-0 bg-[#030712]/70 backdrop-blur-xl z-50 w-full">
+    <header className="border-b border-white/[0.04] sticky top-0 bg-[#030712]/70 backdrop-blur-xl z-50 w-full relative">
       <div className="container mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
         <button
@@ -97,6 +102,19 @@ export function DashboardHeader({ credits, isPremium }: { credits?: number; isPr
 
         {/* Right Side */}
         <div className="flex items-center gap-3">
+          {/* Mobile Navigation Toggle */}
+          <button
+            type="button"
+            onClick={() => {
+              setMobileNavOpen((prev) => !prev);
+              setMenuOpen(false);
+            }}
+            aria-label={mobileNavOpen ? "Close menu" : "Open menu"}
+            className="md:hidden flex items-center justify-center h-8 w-8 rounded-full border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.08] transition-all"
+          >
+            {mobileNavOpen ? <X size={15} className="text-slate-200" /> : <Menu size={15} className="text-slate-200" />}
+          </button>
+
           {/* Quick Home (Top-right logo link) */}
           <button
             type="button"
@@ -119,7 +137,10 @@ export function DashboardHeader({ credits, isPremium }: { credits?: number; isPr
           {/* Avatar Menu */}
           <div className="relative" ref={menuRef}>
             <button
-              onClick={() => setMenuOpen(!menuOpen)}
+              onClick={() => {
+                setMenuOpen(!menuOpen);
+                setMobileNavOpen(false);
+              }}
               className="flex items-center gap-2 group"
             >
               <div className="h-8 w-8 rounded-full bg-white/[0.08] border border-white/[0.10] flex items-center justify-center text-white text-xs font-bold group-hover:bg-white/[0.12] transition-all">
@@ -162,6 +183,67 @@ export function DashboardHeader({ credits, isPremium }: { credits?: number; isPr
           </div>
         </div>
       </div>
+
+      {mobileNavOpen && (
+        <div
+          ref={mobileNavRef}
+          className="md:hidden border-t border-white/[0.06] bg-[#081022]/95 backdrop-blur-xl"
+        >
+          <div className="container mx-auto px-6 py-4 space-y-3">
+            <nav className="grid gap-1">
+              {navItems.map((item) => {
+                const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
+                return (
+                  <Link
+                    key={`mobile-${item.href}`}
+                    href={item.href}
+                    onClick={() => setMobileNavOpen(false)}
+                    className={`flex items-center justify-between rounded-lg px-3 py-2.5 text-sm transition-colors ${
+                      isActive
+                        ? "bg-white/[0.08] text-white"
+                        : "text-slate-300 hover:bg-white/[0.06] hover:text-white"
+                    }`}
+                  >
+                    <span>{item.label}</span>
+                    {item.label === "Upgrade" && <ArrowUpRight size={13} className="text-amber-300" />}
+                  </Link>
+                );
+              })}
+            </nav>
+
+            <div className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-xs text-slate-300 flex items-center justify-between">
+              <span className="inline-flex items-center gap-1.5">
+                <Crown size={12} className="text-slate-400" />
+                Credits
+              </span>
+              <span className={`font-bold tabular-nums ${isLowCredits ? "text-amber-400" : "text-white"}`}>{displayCredits}</span>
+            </div>
+
+            <div className="grid gap-1">
+              <Link
+                href="/profile"
+                onClick={() => setMobileNavOpen(false)}
+                className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-slate-300 hover:bg-white/[0.06] hover:text-white transition-colors"
+              >
+                <User size={14} /> Profile
+              </Link>
+              <Link
+                href="/referrals"
+                onClick={() => setMobileNavOpen(false)}
+                className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-slate-300 hover:bg-white/[0.06] hover:text-white transition-colors"
+              >
+                <Sparkles size={14} /> Referrals
+              </Link>
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm text-slate-300 hover:bg-white/[0.06] hover:text-white transition-colors"
+              >
+                <LogOut size={14} /> Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

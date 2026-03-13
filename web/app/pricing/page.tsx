@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { PRICING_PLANS } from "@/lib/razorpay/pricing";
 import { Button } from "@/components/ui/button";
+import { MessageBox, type MessageBoxVariant } from "@/components/ui/message-box";
 import { Check, Loader2, Zap, FileText, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { DashboardHeader } from "@/components/layout/dashboard-header";
@@ -18,6 +19,21 @@ export default function PricingPage() {
   const router = useRouter();
   const [currency, setCurrency] = useState<"INR" | "USD" | null>(null);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [messageBox, setMessageBox] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    variant: MessageBoxVariant;
+  }>({
+    open: false,
+    title: "",
+    message: "",
+    variant: "info",
+  });
+
+  const showMessage = (title: string, message: string, variant: MessageBoxVariant = "info") => {
+    setMessageBox({ open: true, title, message, variant });
+  };
 
   useEffect(() => {
     fetch("https://ipapi.co/json/")
@@ -78,10 +94,10 @@ export default function PricingPage() {
           });
           
           if (verifyRes.ok) {
-              alert("Subscription Activated! Credits Added.");
-              router.push("/dashboard");
+              showMessage("Subscription Activated", "Credits were added successfully.", "success");
+              setTimeout(() => router.push("/dashboard"), 700);
           } else {
-              alert("Payment Verification Failed");
+              showMessage("Verification Failed", "Payment verification failed.", "error");
           }
         },
         prefill: {
@@ -102,7 +118,7 @@ export default function PricingPage() {
       rzp.open();
 
     } catch (e: unknown) {
-      alert("Payment Failed: " + (e instanceof Error ? e.message : "Unknown error"));
+      showMessage("Payment Failed", e instanceof Error ? e.message : "Unknown error", "error");
     } finally {
       setLoadingPlan(null);
     }
@@ -328,6 +344,13 @@ export default function PricingPage() {
 
       </div>
       {status !== "authenticated" && <PublicFooter />}
+      <MessageBox
+        open={messageBox.open}
+        title={messageBox.title}
+        message={messageBox.message}
+        variant={messageBox.variant}
+        onClose={() => setMessageBox((prev) => ({ ...prev, open: false }))}
+      />
     </div>
   );
 }

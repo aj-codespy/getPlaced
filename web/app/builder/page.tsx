@@ -155,7 +155,13 @@ export default function BuilderPage() {
         let p = profileData.profile;
         if (!p) {
           const local = localStorage.getItem("userProfile");
-          if (local) p = JSON.parse(local);
+          if (local) {
+            try {
+              p = JSON.parse(local);
+            } catch {
+              localStorage.removeItem("userProfile");
+            }
+          }
         }
         if (!p) {
           showConfirm(

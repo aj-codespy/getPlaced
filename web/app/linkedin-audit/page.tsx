@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { MessageBox, type MessageBoxVariant } from "@/components/ui/message-box";
 import { Loader2, CheckCircle2, Trophy, Target, BookOpen, Sparkles, UploadCloud, FileText as FileIcon, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { Progress } from "@/components/ui/progress";
@@ -31,12 +32,27 @@ export default function LinkedInAuditPage() {
   const [report, setReport] = useState<AuditReport | null>(null);
   const [extracting, setExtracting] = useState(false);
   const [images, setImages] = useState<string[]>([]);
+  const [messageBox, setMessageBox] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    variant: MessageBoxVariant;
+  }>({
+    open: false,
+    title: "",
+    message: "",
+    variant: "info",
+  });
+
+  const showMessage = (title: string, message: string, variant: MessageBoxVariant = "info") => {
+      setMessageBox({ open: true, title, message, variant });
+  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
       if (file.type !== 'application/pdf') {
-          alert("Please upload a PDF file.");
+          showMessage("Unsupported File", "Please upload a PDF file.", "warning");
           return;
       }
 
@@ -58,7 +74,7 @@ export default function LinkedInAuditPage() {
           setProfileText(fullText);
       } catch (err) {
           console.error("PDF Extraction Error", err);
-          alert("Failed to read PDF. Please copy-paste text instead.");
+          showMessage("Read Failed", "Failed to read PDF. Please copy-paste text instead.", "error");
       } finally {
           setExtracting(false);
       }
@@ -69,7 +85,7 @@ export default function LinkedInAuditPage() {
       if (!files) return;
 
       if (files.length > 2) {
-          alert("You can only upload a maximum of 2 images.");
+          showMessage("Too Many Images", "You can only upload a maximum of 2 images.", "warning");
           return;
       }
 
@@ -92,7 +108,7 @@ export default function LinkedInAuditPage() {
 
   const handleAudit = async () => {
       if((!profileText || profileText.length < 50) && images.length === 0) {
-          alert("Please provide either text content or upload screenshots.");
+          showMessage("Missing Input", "Please provide either text content or upload screenshots.", "warning");
           return;
       }
       
@@ -109,7 +125,7 @@ export default function LinkedInAuditPage() {
           
           setReport(data.analysis);
       } catch(e: unknown) {
-          alert("Audit Failed: " + (e instanceof Error ? e.message : "Unknown error"));
+          showMessage("Audit Failed", e instanceof Error ? e.message : "Unknown error", "error");
       } finally {
           setLoading(false);
       }
@@ -227,11 +243,11 @@ export default function LinkedInAuditPage() {
                               disabled={loading}
                               className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white px-8 py-6 text-lg shadow-lg shadow-indigo-500/20 rounded-xl w-full md:w-auto transition-all hover:scale-[1.02]"
                           >
-                              {loading ? <><Loader2 className="animate-spin mr-2"/> Analyzing...</> : <><Target className="mr-2"/> Audit My Profile</>}
+                              {loading ? <><Loader2 className="animate-spin mr-2"/> Analyzing...</> : <><Target className="mr-2"/> Audit My Profile (Pro Feature)</>}
                           </Button>
                       </div>
                       <p className="text-center text-xs text-slate-600 mt-4">
-                          Costs 200 Credits (or free with Premium Plan quota).
+                          Exclusive feature available on Standard and Pro plans.
                       </p>
                   </div>
                </div>
@@ -331,6 +347,13 @@ export default function LinkedInAuditPage() {
               </div>
           )}
         </div>
+        <MessageBox
+          open={messageBox.open}
+          title={messageBox.title}
+          message={messageBox.message}
+          variant={messageBox.variant}
+          onClose={() => setMessageBox((prev) => ({ ...prev, open: false }))}
+        />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { MessageBox, type MessageBoxVariant } from "@/components/ui/message-box";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Sparkles, Download, ChevronLeft, Save, Wand2, User, Briefcase, GraduationCap, Code2 } from "lucide-react";
 import { ResumePreview } from "@/components/ResumePreview";
@@ -19,6 +20,21 @@ export default function ResumeEditor() {
     const [downloading, setDownloading] = useState(false);
     const [resumeData, setResumeData] = useState<Record<string, unknown> | null>(null);
     const [targetJob, setTargetJob] = useState("");
+    const [messageBox, setMessageBox] = useState<{
+        open: boolean;
+        title: string;
+        message: string;
+        variant: MessageBoxVariant;
+    }>({
+        open: false,
+        title: "",
+        message: "",
+        variant: "info",
+    });
+
+    const showMessage = (title: string, message: string, variant: MessageBoxVariant = "info") => {
+        setMessageBox({ open: true, title, message, variant });
+    };
 
     useEffect(() => {
         if (!resumeId) return;
@@ -29,7 +45,7 @@ export default function ResumeEditor() {
                     const data = await res.json();
                     setResumeData(data);
                 } else {
-                    alert("Could not load resume data");
+                    showMessage("Load Failed", "Could not load resume data.", "error");
                 }
             } catch (e) {
                 console.error("Error loading resume:", e);
@@ -41,7 +57,10 @@ export default function ResumeEditor() {
     }, [resumeId]);
 
     const handleOptimize = async () => {
-        if (!targetJob) { alert("Please enter a Target Job Description first!"); return; }
+        if (!targetJob) {
+            showMessage("Missing Job Description", "Please enter a target job description first.", "warning");
+            return;
+        }
         setOptimizing(true);
         try {
             const res = await fetch("/api/ai/optimize", {
@@ -53,11 +72,11 @@ export default function ResumeEditor() {
             if (data.success) {
                 setResumeData(data.data);
             } else {
-                alert("Optimization Failed: " + data.error);
+                showMessage("Optimization Failed", data.error || "Unable to optimize this resume.", "error");
             }
         } catch (e) {
             console.error(e);
-            alert("Error optimizing resume");
+            showMessage("Optimization Error", "Error optimizing resume.", "error");
         } finally {
             setOptimizing(false);
         }
@@ -81,7 +100,7 @@ export default function ResumeEditor() {
             a.click();
             window.URL.revokeObjectURL(url);
         } catch {
-            alert("Failed to download. Please try again.");
+            showMessage("Download Failed", "Failed to download. Please try again.", "error");
         } finally {
             setDownloading(false);
         }
@@ -275,6 +294,14 @@ export default function ResumeEditor() {
                     )}
                 </div>
             </div>
+
+            <MessageBox
+                open={messageBox.open}
+                title={messageBox.title}
+                message={messageBox.message}
+                variant={messageBox.variant}
+                onClose={() => setMessageBox((prev) => ({ ...prev, open: false }))}
+            />
         </div>
     );
 }
