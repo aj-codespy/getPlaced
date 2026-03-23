@@ -1,9 +1,11 @@
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import Image from "next/image";
+"use client";
 
-const ALL_LINKS = [
-  { label: "Home", href: "/" },
+import Link from "next/link";
+import { ArrowRight, Menu, X } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
+
+const NAV_LINKS = [
   { label: "Features", href: "/features" },
   { label: "Pricing", href: "/pricing" },
   { label: "FAQ", href: "/faq" },
@@ -14,48 +16,91 @@ interface PublicNavbarProps {
 }
 
 export function PublicNavbar({ currentPath }: PublicNavbarProps) {
-  const links = ALL_LINKS.filter((l) => l.href !== currentPath);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <nav className="relative z-50 flex items-center justify-between px-6 py-5 max-w-7xl mx-auto w-full">
-      <Link href="/" className="flex items-center gap-2.5 font-bold text-xl tracking-tight group">
-        <div className="relative h-9 w-9 shrink-0">
-          <Image
-            src="/logo.png"
-            alt="getPlaced"
-            width={36}
-            height={36}
-            className="drop-shadow-[0_0_10px_rgba(99,102,241,0.4)] group-hover:drop-shadow-[0_0_16px_rgba(99,102,241,0.6)] transition-all duration-300"
-          />
-        </div>
-        <span className="bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-          getPlaced
-        </span>
-      </Link>
+    <header className="relative z-50 border-b border-white/[0.08] bg-[#080f21]/80 backdrop-blur-2xl">
+      <div className="mx-auto flex h-20 w-full max-w-[1240px] items-center justify-between px-4 sm:px-6 lg:px-8">
+        <Link href="/" className="flex items-center gap-2.5 font-bold tracking-tight">
+          <div className="relative h-9 w-9 shrink-0">
+            <Image src="/logo.png" alt="getPlaced" width={36} height={36} className="drop-shadow-[0_0_14px_rgba(117,120,255,0.45)]" />
+          </div>
+          <span className="bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-3xl text-transparent md:text-[2rem]">
+            getPlaced
+          </span>
+        </Link>
 
-      <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
-        {links.map((l) => (
+        <nav className="hidden items-center gap-12 text-xl font-medium text-slate-300 lg:flex">
+          {NAV_LINKS.map((item) => {
+            const active = currentPath === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={active ? "text-white" : "text-slate-300 transition-colors hover:text-white"}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="hidden items-center gap-4 lg:flex">
           <Link
-            key={l.label}
-            href={l.href}
-            className="hover:text-white transition-colors duration-200"
+            href="/login"
+            className="rounded-xl border border-white/20 px-6 py-2.5 text-lg font-medium text-slate-100 transition-colors hover:bg-white/[0.06]"
           >
-            {l.label}
+            Log in
           </Link>
-        ))}
+          <Link href="/signup">
+            <span className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#6958ff] to-[#8a41ff] px-7 py-2.5 text-lg font-semibold text-white shadow-[0_12px_35px_rgba(112,70,255,0.45)] transition-transform hover:scale-[1.02]">
+              Get started free
+              <ArrowRight size={18} />
+            </span>
+          </Link>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setMobileOpen((v) => !v)}
+          className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/15 bg-white/[0.03] text-slate-100 lg:hidden"
+          aria-label={mobileOpen ? "Close menu" : "Open menu"}
+        >
+          {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+        </button>
       </div>
 
-      <div className="flex items-center gap-3">
-        <Link href="/login" className="hidden sm:block text-sm font-medium text-slate-400 hover:text-white transition-colors">
-          Log in
-        </Link>
-        <Link href="/signup">
-          <button className="group flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-500/25 border border-indigo-500/50 transition-all duration-200 hover:shadow-indigo-500/40 hover:shadow-xl">
-            Get started free
-            <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
-          </button>
-        </Link>
-      </div>
-    </nav>
+      {mobileOpen && (
+        <div className="border-t border-white/[0.08] bg-[#080f21]/95 px-4 py-4 sm:px-6 lg:hidden">
+          <nav className="grid gap-2 text-sm text-slate-200">
+            {NAV_LINKS.map((item) => (
+              <Link
+                key={`mobile-${item.href}`}
+                href={item.href}
+                onClick={() => setMobileOpen(false)}
+                className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 hover:bg-white/[0.08]"
+              >
+                {item.label}
+              </Link>
+            ))}
+            <Link
+              href="/login"
+              onClick={() => setMobileOpen(false)}
+              className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 hover:bg-white/[0.08]"
+            >
+              Log in
+            </Link>
+            <Link
+              href="/signup"
+              onClick={() => setMobileOpen(false)}
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#6958ff] to-[#8a41ff] px-3 py-2.5 font-semibold text-white"
+            >
+              Get started free
+              <ArrowRight size={15} />
+            </Link>
+          </nav>
+        </div>
+      )}
+    </header>
   );
 }

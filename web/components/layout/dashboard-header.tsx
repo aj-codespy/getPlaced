@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { isAdmin } from "@/lib/admin";
-import { Sparkles, User, LogOut, Crown, ChevronDown, ArrowUpRight, Menu, X } from "lucide-react";
+import { User, LogOut, Sparkles, Menu, X, Bell, ArrowUpRight } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 
@@ -15,9 +15,10 @@ const BASE_NAV_ITEMS = [
   { label: "LinkedIn Audit", href: "/linkedin-audit" },
 ];
 
-export function DashboardHeader({ credits, isPremium }: { credits?: number; isPremium?: boolean }) {
+export function DashboardHeader({ isPremium }: { credits?: number; isPremium?: boolean }) {
   const { data: session } = useSession();
   const pathname = usePathname();
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -36,212 +37,143 @@ export function DashboardHeader({ credits, isPremium }: { credits?: number; isPr
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const displayCredits = credits ?? 0;
-  const isLowCredits = displayCredits < 100;
   const navItems = [
     ...BASE_NAV_ITEMS,
     ...(isPremium === false ? [{ label: "Upgrade", href: "/pricing" }] : []),
     ...(isAdmin(session?.user?.email) ? [{ label: "Admin", href: "/admin" }] : []),
   ];
-  const goHome = () => {
-    // Use hard navigation to avoid any stale client router/session edge-case.
-    window.location.href = "/";
-  };
 
   return (
-    <header className="border-b border-white/[0.04] sticky top-0 bg-[#030712]/70 backdrop-blur-xl z-50 w-full relative">
-      <div className="container mx-auto px-6 h-16 flex items-center justify-between">
-        {/* Logo */}
-        <button
-          type="button"
-          onClick={goHome}
-          className="font-bold text-lg hover:opacity-80 transition-opacity flex items-center gap-2.5 text-white group"
-          aria-label="Go to landing page"
-        >
-          <div className="relative h-8 w-8 shrink-0">
-            <Image
-              src="/logo.png"
-              alt="getPlaced"
-              width={32}
-              height={32}
-              className="drop-shadow-[0_0_8px_rgba(99,102,241,0.35)] group-hover:drop-shadow-[0_0_14px_rgba(99,102,241,0.55)] transition-all duration-300"
-            />
-          </div>
-          <span className="hidden sm:inline">getPlaced</span>
-        </button>
-
-        {/* Center Nav */}
-        <nav className="hidden md:flex items-center gap-1 bg-white/[0.03] border border-white/[0.05] rounded-full px-1.5 py-1">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`
-                  relative px-4 py-1.5 rounded-full text-[13px] font-medium transition-all duration-300
-                  ${isActive
-                    ? "text-white bg-white/[0.08] shadow-sm"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]"
-                  }
-                `}
-              >
-                <span className="inline-flex items-center gap-1.5">
-                  {item.label}
-                  {item.label === "Upgrade" && (
-                    <ArrowUpRight size={12} className="text-amber-300" />
-                  )}
-                </span>
-                {isActive && (
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-[2px] bg-gradient-to-r from-slate-400 to-slate-300 rounded-full" />
-                )}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Right Side */}
-        <div className="flex items-center gap-3">
-          {/* Mobile Navigation Toggle */}
-          <button
-            type="button"
-            onClick={() => {
-              setMobileNavOpen((prev) => !prev);
-              setMenuOpen(false);
-            }}
-            aria-label={mobileNavOpen ? "Close menu" : "Open menu"}
-            className="md:hidden flex items-center justify-center h-8 w-8 rounded-full border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.08] transition-all"
-          >
-            {mobileNavOpen ? <X size={15} className="text-slate-200" /> : <Menu size={15} className="text-slate-200" />}
-          </button>
-
-          {/* Quick Home (Top-right logo link) */}
-          <button
-            type="button"
-            onClick={goHome}
-            aria-label="Go to landing page"
-            className="flex items-center justify-center h-8 w-8 rounded-full border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.08] transition-all"
-          >
-            <Image src="/logo.png" alt="Landing page" width={16} height={16} />
-          </button>
-
-          {/* Credit Pill */}
-          <Link href="/pricing" className="hidden sm:flex items-center gap-2 bg-white/[0.04] border border-white/[0.06] rounded-full px-3.5 py-1.5 hover:bg-white/[0.07] transition-all group">
-            <Crown size={13} className="text-slate-400" />
-            <span className={`text-xs font-bold tabular-nums ${isLowCredits ? "text-amber-400 animate-pulse" : "text-white"}`}>
-              {displayCredits}
-            </span>
-            <span className="text-[10px] text-slate-500 font-medium">CR</span>
+    <header className="sticky top-0 z-50 border-b border-white/[0.08] bg-[#070e1d]/88 backdrop-blur-2xl">
+      <div className="mx-auto flex h-20 w-full max-w-[1360px] items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-8">
+          <Link href="/" className="flex items-center gap-2.5 font-bold text-white">
+            <div className="relative h-8 w-8 shrink-0">
+              <Image
+                src="/logo.png"
+                alt="getPlaced"
+                width={32}
+                height={32}
+                className="drop-shadow-[0_0_10px_rgba(99,102,241,0.45)]"
+              />
+            </div>
+            <span className="text-2xl tracking-tight">getPlaced</span>
           </Link>
 
-          {/* Avatar Menu */}
+          <nav className="hidden items-center gap-8 text-lg text-slate-300 lg:flex">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={
+                    isActive
+                      ? "font-semibold text-white"
+                      : "font-medium text-slate-300 transition-colors hover:text-white"
+                  }
+                >
+                  <span className="inline-flex items-center gap-1.5">
+                    {item.label}
+                    {item.label === "Upgrade" && <ArrowUpRight size={14} className="text-amber-300" />}
+                  </span>
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+
+        <div className="flex items-center gap-2 sm:gap-3">
+          <button
+            type="button"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.1] bg-white/[0.03] text-slate-300 hover:bg-white/[0.08] hover:text-white"
+            aria-label="Notifications"
+          >
+            <Bell size={17} />
+          </button>
+
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => {
-                setMenuOpen(!menuOpen);
+                setMenuOpen((prev) => !prev);
                 setMobileNavOpen(false);
               }}
-              className="flex items-center gap-2 group"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.1] bg-white/[0.03] text-slate-200 hover:bg-white/[0.08]"
+              aria-label="Account menu"
             >
-              <div className="h-8 w-8 rounded-full bg-white/[0.08] border border-white/[0.10] flex items-center justify-center text-white text-xs font-bold group-hover:bg-white/[0.12] transition-all">
+              <span className="text-sm font-semibold">
                 {session?.user?.name?.[0]?.toUpperCase() || "U"}
-              </div>
-              <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${menuOpen ? "rotate-180" : ""}`} />
+              </span>
             </button>
 
             {menuOpen && (
-              <div className="absolute right-0 mt-3 w-56 bg-[#0f1629]/95 backdrop-blur-xl border border-white/[0.08] rounded-xl shadow-2xl shadow-black/40 py-2 animate-slide-up z-50">
-                {/* User info */}
-                <div className="px-4 py-3 border-b border-white/[0.05]">
-                  <p className="text-sm font-semibold text-white truncate">{session?.user?.name || "User"}</p>
-                  <p className="text-xs text-slate-500 truncate mt-0.5">{session?.user?.email}</p>
+              <div className="absolute right-0 mt-3 w-56 rounded-xl border border-white/[0.1] bg-[#0d1528]/96 py-2 shadow-2xl shadow-black/45">
+                <div className="border-b border-white/[0.08] px-4 py-3">
+                  <p className="truncate text-sm font-semibold text-white">{session?.user?.name || "User"}</p>
+                  <p className="mt-0.5 truncate text-xs text-slate-400">{session?.user?.email}</p>
                 </div>
                 <Link
                   href="/profile"
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-300 hover:text-white hover:bg-white/[0.05] transition-colors"
+                  className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-300 transition-colors hover:bg-white/[0.05] hover:text-white"
                 >
                   <User size={15} /> Profile
                 </Link>
                 <Link
                   href="/referrals"
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-300 hover:text-white hover:bg-white/[0.05] transition-colors"
+                  className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-300 transition-colors hover:bg-white/[0.05] hover:text-white"
                 >
                   <Sparkles size={15} /> Referrals
                 </Link>
-                <div className="border-t border-white/[0.05] mt-1 pt-1">
-                  <button
-                    onClick={() => signOut({ callbackUrl: "/" })}
-                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-400 hover:text-white hover:bg-white/[0.05] transition-colors w-full"
-                  >
-                    <LogOut size={15} /> Sign Out
-                  </button>
-                </div>
+                <button
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                  className="mt-1 flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-slate-300 transition-colors hover:bg-white/[0.05] hover:text-white"
+                >
+                  <LogOut size={15} /> Sign Out
+                </button>
               </div>
             )}
           </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              setMobileNavOpen((prev) => !prev);
+              setMenuOpen(false);
+            }}
+            aria-label={mobileNavOpen ? "Close navigation" : "Open navigation"}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.1] bg-white/[0.03] text-slate-300 hover:bg-white/[0.08] hover:text-white lg:hidden"
+          >
+            {mobileNavOpen ? <X size={17} /> : <Menu size={17} />}
+          </button>
         </div>
       </div>
 
       {mobileNavOpen && (
-        <div
-          ref={mobileNavRef}
-          className="md:hidden border-t border-white/[0.06] bg-[#081022]/95 backdrop-blur-xl"
-        >
-          <div className="container mx-auto px-6 py-4 space-y-3">
-            <nav className="grid gap-1">
-              {navItems.map((item) => {
-                const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
-                return (
-                  <Link
-                    key={`mobile-${item.href}`}
-                    href={item.href}
-                    onClick={() => setMobileNavOpen(false)}
-                    className={`flex items-center justify-between rounded-lg px-3 py-2.5 text-sm transition-colors ${
-                      isActive
-                        ? "bg-white/[0.08] text-white"
-                        : "text-slate-300 hover:bg-white/[0.06] hover:text-white"
-                    }`}
-                  >
-                    <span>{item.label}</span>
+        <div ref={mobileNavRef} className="border-t border-white/[0.08] bg-[#070e1d]/95 px-4 py-4 sm:px-6 lg:hidden">
+          <nav className="grid gap-2">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
+              return (
+                <Link
+                  key={`mobile-${item.href}`}
+                  href={item.href}
+                  onClick={() => setMobileNavOpen(false)}
+                  className={
+                    isActive
+                      ? "rounded-lg border border-white/[0.15] bg-white/[0.08] px-3 py-2.5 text-sm font-semibold text-white"
+                      : "rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-slate-300 hover:bg-white/[0.07] hover:text-white"
+                  }
+                >
+                  <span className="inline-flex items-center gap-1.5">
+                    {item.label}
                     {item.label === "Upgrade" && <ArrowUpRight size={13} className="text-amber-300" />}
-                  </Link>
-                );
-              })}
-            </nav>
-
-            <div className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-xs text-slate-300 flex items-center justify-between">
-              <span className="inline-flex items-center gap-1.5">
-                <Crown size={12} className="text-slate-400" />
-                Credits
-              </span>
-              <span className={`font-bold tabular-nums ${isLowCredits ? "text-amber-400" : "text-white"}`}>{displayCredits}</span>
-            </div>
-
-            <div className="grid gap-1">
-              <Link
-                href="/profile"
-                onClick={() => setMobileNavOpen(false)}
-                className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-slate-300 hover:bg-white/[0.06] hover:text-white transition-colors"
-              >
-                <User size={14} /> Profile
-              </Link>
-              <Link
-                href="/referrals"
-                onClick={() => setMobileNavOpen(false)}
-                className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-slate-300 hover:bg-white/[0.06] hover:text-white transition-colors"
-              >
-                <Sparkles size={14} /> Referrals
-              </Link>
-              <button
-                onClick={() => signOut({ callbackUrl: "/" })}
-                className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm text-slate-300 hover:bg-white/[0.06] hover:text-white transition-colors"
-              >
-                <LogOut size={14} /> Sign Out
-              </button>
-            </div>
-          </div>
+                  </span>
+                </Link>
+              );
+            })}
+          </nav>
         </div>
       )}
     </header>

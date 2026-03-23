@@ -5,21 +5,15 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { DashboardHeader } from "@/components/layout/dashboard-header";
 import {
-  Plus,
-  CreditCard,
   Loader2,
-  Sparkles,
+  Coins,
+  WalletCards,
   FileText,
-  Target,
+  Linkedin,
   BarChart3,
   ArrowRight,
-  Zap,
-  Crown,
-  Gift,
-  Download,
 } from "lucide-react";
 
 type TimestampLike = {
@@ -70,6 +64,11 @@ function isProfileComplete(profile: Record<string, unknown> | null): boolean {
   return hasCorePersonalInfo && hasSomeResumeData;
 }
 
+function formatTimestamp(ts?: TimestampLike): string {
+  if (ts?.toDate) return ts.toDate().toLocaleDateString();
+  return "Recently";
+}
+
 export default function Dashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -112,24 +111,22 @@ export default function Dashboard() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-transparent">
+      <div className="flex h-screen items-center justify-center bg-[#040a17]">
         <div className="flex flex-col items-center gap-4">
           <div className="relative">
             <Loader2 className="animate-spin text-slate-400" size={32} />
-            <div className="absolute inset-0 rounded-full animate-ping opacity-20 bg-indigo-400" />
+            <div className="absolute inset-0 rounded-full bg-indigo-400/20 animate-ping" />
           </div>
-          <span className="text-sm text-slate-500 font-medium animate-pulse">Loading dashboard...</span>
+          <span className="text-sm font-medium text-slate-500 animate-pulse">Loading dashboard...</span>
         </div>
       </div>
     );
   }
 
   const credits = (userData?.credits as number) || 0;
-  const isLowCredits = credits < 100;
   const planType = ((userData?.planType as string) || "free").toLowerCase();
   const isPremium =
     Number(userData?.isPremium || 0) > 0 || ["standard", "premium", "pro"].includes(planType);
-  const totalDownloads = (userData?.totalDownloads as number) || downloads.length || 0;
 
   const firstName = session?.user?.name?.split(" ")[0] || "there";
   const hour = new Date().getHours();
@@ -137,255 +134,207 @@ export default function Dashboard() {
 
   const historyRows =
     activeHistoryTab === "generated"
-      ? resumes.slice(0, 6).map((resume) => ({
+      ? resumes.slice(0, 8).map((resume) => ({
           id: resume.id,
           primary: resume.targetRole || resume.title || "Generated Resume",
           secondary: resume.templateId ? `Template: ${resume.templateId}` : "AI generated",
-          when: resume.createdAt?.toDate ? new Date(resume.createdAt.toDate()).toLocaleDateString() : "Recently",
+          when: formatTimestamp(resume.createdAt),
           href: `/editor/${resume.id}`,
-          icon: <FileText size={14} className="text-indigo-400 shrink-0" />,
         }))
-      : downloads.slice(0, 6).map((item) => ({
+      : downloads.slice(0, 8).map((item) => ({
           id: item.id,
           primary: item.filename || "Resume Download",
           secondary: item.templateId ? `Template: ${item.templateId}` : "PDF download",
-          when: item.createdAt?.toDate ? new Date(item.createdAt.toDate()).toLocaleDateString() : "Recently",
+          when: formatTimestamp(item.createdAt),
           href: item.resumeId ? `/editor/${item.resumeId}` : "/dashboard",
-          icon: <Download size={14} className="text-emerald-400 shrink-0" />,
         }));
 
   return (
-    <div className="flex min-h-screen flex-col font-sans text-slate-200">
-      <DashboardHeader credits={credits} isPremium={isPremium} />
+    <div className="relative min-h-screen overflow-x-hidden bg-[#030814] text-slate-100">
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(81,127,255,0.25),transparent_33%),radial-gradient(circle_at_85%_32%,rgba(144,66,255,0.2),transparent_40%),radial-gradient(circle_at_75%_82%,rgba(57,133,255,0.18),transparent_42%)]" />
+      </div>
 
-      <main className="container mx-auto px-6 py-10 flex-1">
-        <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-10 gap-4 animate-slide-up">
+      <DashboardHeader isPremium={isPremium} />
+
+      <main className="relative z-10 mx-auto w-full max-w-[1080px] px-4 pb-12 pt-12 sm:px-6">
+        <section className="mb-7 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm text-indigo-400 font-medium mb-1">{greeting}, {firstName} ✦</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">Dashboard</h2>
-            <p className="text-slate-500 mt-1 text-sm">Create, optimize, and track your resumes.</p>
+            <p className="text-4xl text-slate-300">{greeting}, {firstName}.</p>
+            <h1 className="mt-1 text-7xl font-bold tracking-tight text-white">Dashboard</h1>
           </div>
-          <Link href="/builder">
-            <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-lg shadow-indigo-500/20 border-0 h-11 px-6 rounded-xl group transition-all hover:shadow-indigo-500/30 hover:scale-[1.02]">
-              <Plus className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-300" /> Create New Resume
-              <ArrowRight className="ml-2 h-4 w-4 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300" />
-            </Button>
-          </Link>
-        </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <MiniStat label="Credits" value={credits} icon={<Coins size={18} />} />
+            <MiniStat label="Plan" value={planType === "free" ? "Free" : "Pro"} icon={<WalletCards size={18} />} />
+            <MiniStat label="Resumes" value={resumes.length} icon={<FileText size={18} />} />
+          </div>
+        </section>
 
         {!isPremium && (
-          <div className="mb-8 rounded-2xl border border-amber-500/25 bg-amber-500/10 px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <p className="text-sm font-semibold text-amber-300">You are on the Free plan</p>
-              <p className="text-xs text-amber-100/80 mt-1">Unlock premium templates, higher limits, and faster workflows.</p>
-            </div>
-            <Link href="/pricing">
-              <Button className="bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/30 text-amber-200">
+          <div className="mb-5 rounded-2xl border border-amber-400/30 bg-amber-500/10 px-5 py-3 text-sm text-amber-100">
+            <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+              <p>Upgrade to unlock premium templates and higher generation limits.</p>
+              <Link href="/pricing" className="rounded-lg bg-amber-400/20 px-3 py-1.5 font-semibold text-amber-100 hover:bg-amber-400/30">
                 Upgrade Plan
-              </Button>
-            </Link>
+              </Link>
+            </div>
           </div>
         )}
 
         {!profileComplete && (
-          <div className="mb-8 rounded-2xl border border-sky-500/25 bg-sky-500/10 px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <p className="text-sm font-semibold text-sky-300">Complete your profile to unlock resume generation</p>
-              <p className="text-xs text-sky-100/80 mt-1">You can browse the dashboard now, but generation stays locked until profile details are filled.</p>
-            </div>
-            <Link href="/onboarding">
-              <Button className="bg-sky-500/20 hover:bg-sky-500/30 border border-sky-400/30 text-sky-200">
+          <div className="mb-5 rounded-2xl border border-sky-400/30 bg-sky-500/10 px-5 py-3 text-sm text-sky-100">
+            <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+              <p>Complete your profile to start resume generation.</p>
+              <Link href="/onboarding" className="rounded-lg bg-sky-400/20 px-3 py-1.5 font-semibold text-sky-100 hover:bg-sky-400/30">
                 Complete Profile
-              </Button>
-            </Link>
+              </Link>
+            </div>
           </div>
         )}
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 stagger-children">
-          <StatCard label="Credits" value={credits} icon={<Crown size={18} />} />
-          <StatCard label="Plan" value={(userData?.planType as string)?.toUpperCase() || "FREE"} icon={<Sparkles size={18} />} />
-          <StatCard label="Resumes" value={resumes.length} icon={<FileText size={18} />} />
-          <StatCard label="Downloads" value={totalDownloads} icon={<Zap size={18} />} />
-        </div>
+        <section className="mb-7 grid gap-4 md:grid-cols-3">
+          <MainStat label="Credits" value={credits} icon={<Coins size={22} />} />
+          <MainStat label="Plan" value={planType === "free" ? "Free" : "Pro"} icon={<WalletCards size={22} />} />
+          <MainStat label="Resumes" value={resumes.length} icon={<FileText size={22} />} />
+        </section>
 
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3 stagger-children">
-          <Link href="/builder" className="group block h-full">
-            <div className="glass-card h-full min-h-[230px] rounded-2xl p-8 flex flex-col items-center justify-center gap-4 text-center cursor-pointer relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-white/[0.01] opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-              <div className="h-14 w-14 rounded-2xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center group-hover:scale-110 group-hover:bg-white/[0.08] group-hover:border-white/[0.12] transition-all duration-500 z-10">
-                <Plus size={26} className="text-slate-400 group-hover:text-white transition-colors duration-300" />
-              </div>
-              <div className="z-10">
-                <h3 className="font-semibold text-lg text-white">Create New Resume</h3>
-                <p className="text-sm text-slate-500 mt-1 group-hover:text-slate-400 transition-colors">AI-powered, ATS-optimized</p>
-              </div>
-            </div>
-          </Link>
+        <section className="mb-7 grid gap-4 md:grid-cols-3">
+          <ActionCard
+            href="/builder"
+            title="Create New Resume"
+            cta="Start Now"
+            icon={<FileText size={28} className="text-[#8db3ff]" />}
+          />
+          <ActionCard
+            href="/linkedin-audit"
+            title="LinkedIn Audit"
+            cta="Analyze Profile"
+            icon={<Linkedin size={28} className="text-[#8db3ff]" />}
+          />
+          <ActionCard
+            href="/resume-score"
+            title="Resume Score"
+            cta="Check Score"
+            icon={<BarChart3 size={28} className="text-[#8db3ff]" />}
+          />
+        </section>
 
-          <Link href="/linkedin-audit" className="group block h-full">
-            <div className="glass-card h-full min-h-[230px] rounded-2xl p-8 flex flex-col items-center justify-center gap-4 text-center cursor-pointer relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-white/[0.01] opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-              <div className="h-14 w-14 rounded-2xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center group-hover:scale-110 group-hover:bg-white/[0.08] group-hover:border-white/[0.12] transition-all duration-500 z-10">
-                <Target size={26} className="text-slate-400 group-hover:text-white transition-colors duration-300" />
-              </div>
-              <div className="z-10">
-                <h3 className="font-semibold text-lg text-white">LinkedIn Audit</h3>
-                <p className="text-sm text-slate-500 mt-1 group-hover:text-slate-400 transition-colors">AI Profile Analysis & Tips</p>
-              </div>
-            </div>
-          </Link>
-
-          <Link href="/resume-score" className="group block h-full">
-            <div className="glass-card h-full min-h-[230px] rounded-2xl p-8 flex flex-col items-center justify-center gap-4 text-center cursor-pointer relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-white/[0.01] opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-              <div className="h-14 w-14 rounded-2xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center group-hover:scale-110 group-hover:bg-white/[0.08] group-hover:border-white/[0.12] transition-all duration-500 z-10">
-                <BarChart3 size={26} className="text-slate-400 group-hover:text-white transition-colors duration-300" />
-              </div>
-              <div className="z-10">
-                <h3 className="font-semibold text-lg text-white">Resume Score</h3>
-                <p className="text-sm text-slate-500 mt-1 group-hover:text-slate-400 transition-colors">Free Rule-Based Analysis</p>
-              </div>
-            </div>
-          </Link>
-
-          <div className="col-span-1 lg:col-span-2 h-full">
-            <div className="glass-card h-full min-h-[230px] rounded-2xl p-8 relative overflow-hidden group">
-              <div className="absolute -top-20 -right-20 w-52 h-52 bg-indigo-500/8 rounded-full blur-3xl group-hover:bg-indigo-500/15 transition-colors duration-700" />
-              <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-purple-500/5 rounded-full blur-3xl group-hover:bg-purple-500/10 transition-colors duration-700" />
-
-              <div className="relative z-10 flex flex-col h-full justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="font-semibold text-lg flex items-center gap-2.5 text-white">
-                      <div className="h-8 w-8 rounded-lg bg-white/[0.06] flex items-center justify-center">
-                        <CreditCard size={16} className="text-slate-400" />
-                      </div>
-                      {(userData?.planType as string)?.toUpperCase() || "FREE PLAN"}
-                    </h3>
-                    <span className="px-2.5 py-1 rounded-full text-[10px] bg-white/[0.06] text-slate-400 font-bold border border-indigo-500/20 tracking-wider">
-                      ACTIVE
-                    </span>
-                  </div>
-
-                  <div className="flex items-baseline gap-2 mb-2">
-                    <span className={`text-4xl font-black tracking-tight ${isLowCredits ? "text-amber-400" : "text-white"}`}>
-                      {credits}
-                    </span>
-                    <span className="text-sm font-medium text-slate-500">credits available</span>
-                  </div>
-
-                  <div className="mt-3 w-full h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-1000 animate-progress-fill ${isLowCredits ? "bg-gradient-to-r from-amber-500 to-red-500" : "bg-gradient-to-r from-indigo-500 to-purple-500"}`}
-                      style={{ width: `${Math.min((credits / 1000) * 100, 100)}%` }}
-                    />
-                  </div>
-
-                  <p className="text-xs text-slate-600 mt-3">
-                    {isLowCredits ? "Running low? 100 credits per generation/download." : `Enough for ${Math.floor(credits / 100)} generations.`}
-                  </p>
-                </div>
-
-                <div className="flex gap-3 mt-6">
-                  <Link href="/pricing" className="flex-1">
-                    <Button
-                      className={`w-full h-10 rounded-xl text-sm font-medium transition-all ${
-                        isLowCredits
-                          ? "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20"
-                          : "bg-white/[0.04] hover:bg-white/[0.08] text-white border border-white/[0.06]"
-                      }`}
-                      variant="outline"
-                    >
-                      {isLowCredits ? "Recharge Now" : isPremium ? "Manage Credits" : "Upgrade Plan"}
-                    </Button>
-                  </Link>
-                  <Link href="/referrals">
-                    <Button variant="outline" className="h-10 rounded-xl text-sm border-white/[0.06] text-slate-400 hover:text-white bg-white/[0.02] hover:bg-white/[0.05]">
-                      <Gift size={15} className="mr-1.5" /> Refer
-                    </Button>
-                  </Link>
-                </div>
-              </div>
+        <section className="rounded-3xl border border-white/[0.14] bg-[linear-gradient(120deg,rgba(24,40,74,0.88),rgba(12,19,42,0.82))] px-6 py-6 shadow-[0_22px_60px_rgba(14,22,44,0.55)]">
+          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-5xl font-semibold text-white">Recent Activity</h2>
+            <div className="inline-flex rounded-xl border border-white/[0.12] bg-white/[0.03] p-1 text-sm">
+              <button
+                className={
+                  activeHistoryTab === "generated"
+                    ? "rounded-lg bg-white/[0.12] px-3 py-1.5 font-semibold text-white"
+                    : "rounded-lg px-3 py-1.5 text-slate-300 hover:text-white"
+                }
+                onClick={() => setActiveHistoryTab("generated")}
+              >
+                Generated
+              </button>
+              <button
+                className={
+                  activeHistoryTab === "downloads"
+                    ? "rounded-lg bg-white/[0.12] px-3 py-1.5 font-semibold text-white"
+                    : "rounded-lg px-3 py-1.5 text-slate-300 hover:text-white"
+                }
+                onClick={() => setActiveHistoryTab("downloads")}
+              >
+                Downloads
+              </button>
             </div>
           </div>
 
-          <div className="glass-card col-span-1 h-full min-h-[230px] rounded-2xl p-6 flex flex-col relative overflow-hidden">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-semibold text-lg text-white">Activity</h3>
-              <div className="inline-flex rounded-lg border border-white/10 bg-white/[0.03] p-1">
-                <button
-                  className={`px-2.5 py-1 text-xs rounded-md transition-colors ${
-                    activeHistoryTab === "generated" ? "bg-white/[0.12] text-white" : "text-slate-400 hover:text-slate-200"
-                  }`}
-                  onClick={() => setActiveHistoryTab("generated")}
+          <div className="divide-y divide-white/[0.1]">
+            {historyRows.length > 0 ? (
+              historyRows.map((row) => (
+                <Link
+                  key={`${activeHistoryTab}-${row.id}`}
+                  href={row.href}
+                  className="group flex items-center justify-between gap-3 py-4"
                 >
-                  Generated
-                </button>
-                <button
-                  className={`px-2.5 py-1 text-xs rounded-md transition-colors ${
-                    activeHistoryTab === "downloads" ? "bg-white/[0.12] text-white" : "text-slate-400 hover:text-slate-200"
-                  }`}
-                  onClick={() => setActiveHistoryTab("downloads")}
-                >
-                  Downloads
-                </button>
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
-              {historyRows.length > 0 ? (
-                historyRows.map((row) => (
-                  <Link key={`${activeHistoryTab}-${row.id}`} href={row.href} className="block group/item">
-                    <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04] group-hover/item:bg-white/[0.06] group-hover/item:border-white/[0.1] transition-all flex items-center justify-between">
-                      <div className="flex flex-col gap-1 min-w-0">
-                        <div className="flex items-center gap-2 min-w-0">
-                          {row.icon}
-                          <p className="text-sm font-medium text-slate-200 group-hover/item:text-white transition-colors line-clamp-1">{row.primary}</p>
-                        </div>
-                        <p className="text-xs text-slate-500 pl-6 line-clamp-1">{row.secondary}</p>
-                        <p className="text-[11px] text-slate-600 pl-6">{row.when}</p>
-                      </div>
-                      <ArrowRight size={14} className="text-slate-600 group-hover/item:text-indigo-400 group-hover/item:translate-x-1 transition-all shrink-0" />
-                    </div>
-                  </Link>
-                ))
-              ) : (
-                <div className="h-full flex flex-col items-center justify-center text-center py-6">
-                  <div className="h-10 w-10 rounded-xl bg-white/[0.03] border border-white/[0.05] flex items-center justify-center mb-3">
-                    {activeHistoryTab === "generated" ? (
-                      <FileText size={16} className="text-slate-600" />
-                    ) : (
-                      <Download size={16} className="text-slate-600" />
-                    )}
+                  <div>
+                    <p className="text-3xl font-medium text-white">{row.primary}</p>
+                    <p className="mt-1 text-2xl text-slate-300">
+                      {row.secondary} <span className="text-slate-500">• {row.when}</span>
+                    </p>
                   </div>
-                  <p className="text-slate-500 text-sm font-medium">No {activeHistoryTab} data yet</p>
-                  <p className="text-slate-600 text-xs mt-0.5">
-                    {activeHistoryTab === "generated"
-                      ? "Generated resumes will appear here"
-                      : "Downloaded PDFs will appear here"}
-                  </p>
-                </div>
-              )}
-            </div>
+                  <ArrowRight size={20} className="text-slate-500 transition group-hover:translate-x-1 group-hover:text-indigo-300" />
+                </Link>
+              ))
+            ) : (
+              <div className="py-10 text-center text-slate-400">
+                <p className="text-xl">
+                  No {activeHistoryTab === "generated" ? "generated resumes" : "download history"} yet.
+                </p>
+                <p className="mt-1 text-sm text-slate-500">
+                  {activeHistoryTab === "generated"
+                    ? "Start by creating your first resume."
+                    : "Downloaded files will appear here."}
+                </p>
+              </div>
+            )}
           </div>
-        </div>
+        </section>
       </main>
     </div>
   );
 }
 
-function StatCard({ label, value, icon }: { label: string; value: string | number; icon: ReactNode }) {
+function MiniStat({ label, value, icon }: { label: string; value: string | number; icon: ReactNode }) {
   return (
-    <div className="glass-card rounded-xl p-4 group">
+    <div className="rounded-2xl border border-white/[0.14] bg-[linear-gradient(130deg,rgba(26,43,80,0.84),rgba(17,28,55,0.84))] px-5 py-4 shadow-[0_14px_40px_rgba(10,16,33,0.45)]">
       <div className="flex items-center gap-3">
-        <div className="h-9 w-9 rounded-lg bg-white/[0.06] flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
-          <span className="text-slate-400">{icon}</span>
-        </div>
+        <span className="text-slate-300">{icon}</span>
         <div>
-          <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">{label}</p>
-          <p className="text-lg font-bold text-white mt-0.5 tabular-nums">{value}</p>
+          <p className="text-xs uppercase tracking-[0.18em] text-slate-400">{label}</p>
+          <p className="text-4xl font-bold text-white">{value}</p>
         </div>
       </div>
     </div>
+  );
+}
+
+function MainStat({ label, value, icon }: { label: string; value: string | number; icon: ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-white/[0.14] bg-[linear-gradient(130deg,rgba(26,43,80,0.84),rgba(17,28,55,0.84))] px-6 py-5 shadow-[0_14px_40px_rgba(10,16,33,0.45)]">
+      <div className="flex items-center gap-4">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#2d3d73]">
+          <span className="text-slate-200">{icon}</span>
+        </div>
+        <div>
+          <p className="text-sm uppercase tracking-[0.12em] text-slate-400">{label}</p>
+          <p className="text-5xl font-bold text-white">{value}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ActionCard({
+  href,
+  title,
+  cta,
+  icon,
+}: {
+  href: string;
+  title: string;
+  cta: string;
+  icon: ReactNode;
+}) {
+  return (
+    <Link href={href} className="group block">
+      <div className="rounded-3xl border border-[#706cff]/75 bg-[linear-gradient(130deg,rgba(28,45,83,0.9),rgba(18,30,57,0.88))] p-8 text-center shadow-[0_0_40px_rgba(126,78,255,0.22)]">
+        <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-[#2b3385]">
+          {icon}
+        </div>
+        <h3 className="text-5xl font-semibold text-white">{title}</h3>
+        <div className="mt-8 rounded-2xl bg-gradient-to-r from-[#7448ff] to-[#a03dff] px-6 py-3 text-3xl font-semibold text-white transition group-hover:brightness-110">
+          {cta}
+        </div>
+      </div>
+    </Link>
   );
 }
