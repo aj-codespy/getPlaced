@@ -9,67 +9,67 @@ export const metadata: Metadata = {
 
 export default function RefundPage() {
   return (
-    <div className="min-h-screen bg-[#030712] text-white font-sans flex flex-col">
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] right-[10%] w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px]" />
-      </div>
-
+    <div className="min-h-screen bg-[#030814] text-slate-100 font-sans flex flex-col">
       <PublicNavbar currentPath="/refund" />
 
-      <main className="relative z-10 flex-1 max-w-3xl mx-auto px-6 py-16 w-full">
-        <h1 className="text-4xl font-extrabold mb-4 bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-          Refund & Cancellation Policy
-        </h1>
-        <p className="text-slate-400 mb-12">
-          Effective Date: January 2026
-        </p>
+      <main className="relative z-10 flex-1 w-full max-w-[1080px] mx-auto px-4 sm:px-6 py-14">
+        <div className="mb-8">
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-b from-white to-slate-300 bg-clip-text text-transparent">
+            Refund & Cancellation Policy
+          </h1>
+          <p className="mt-2 text-sm text-slate-400">Effective Date: January 2026</p>
+        </div>
 
-        <div className="space-y-10 text-slate-300 leading-relaxed text-sm">
+        <div className="glass-card rounded-3xl p-8 sm:p-10 space-y-10 text-slate-200 text-sm leading-relaxed">
           <section>
-            <h3 className="text-white font-bold text-lg mb-4">1. General Refund Policy</h3>
-            <p className="mb-4">
-              At getPlaced, we offer digital services and products (AI-generated resumes, templates, and profile analysis). Because our products are entirely digital and delivered instantly upon generation, <strong>we generally do not offer refunds</strong> once a subscription has been purchased or credits have been utilized.
+            <h3 className="text-white font-bold text-xl mb-3">1. General Refund Policy</h3>
+            <p className="mb-3">
+              getPlaced delivers digital AI services instantly. Because of this, we generally do not offer refunds once a
+              plan is purchased or credits are consumed.
             </p>
-            <p>
-              We highly encourage you to utilize our Free Tier to evaluate the quality of our resume generation before committing to a paid plan.
-            </p>
+            <p>We recommend using the free tier first to evaluate quality before upgrading.</p>
           </section>
 
           <section>
-            <h3 className="text-white font-bold text-lg mb-4">2. Exceptions for Refunds</h3>
-            <p className="mb-4">Refunds will only be considered under the following rare circumstances:</p>
-            <ul className="list-disc list-inside space-y-2 text-slate-400 ml-2">
-              <li><strong>Duplicate billing:</strong> If you were unintentionally charged more than once for the same subscription period.</li>
-              <li><strong>Major service disruption:</strong> If a persistent, documented technical error on our end prevented you from accessing the service entirely for a period of 48 hours or more.</li>
+            <h3 className="text-white font-bold text-xl mb-3">2. Exceptions for Refunds</h3>
+            <p className="mb-3">Refunds are considered only in rare cases such as:</p>
+            <ul className="list-disc list-inside space-y-2 text-slate-300">
+              <li>Duplicate billing for the same subscription period.</li>
+              <li>Major verified service disruption for 48+ hours.</li>
             </ul>
-            <p className="mt-4">
-              To request a refund under these conditions, you must email <a href="mailto:support@getplaced.online" className="text-indigo-400 hover:underline">support@getplaced.online</a> within 7 days of the transaction.
+            <p className="mt-3">
+              For eligible cases, email{" "}
+              <a href="mailto:support@getplaced.online" className="text-blue-300 hover:text-blue-200 underline underline-offset-4">
+                support@getplaced.online
+              </a>{" "}
+              within 7 days of transaction.
             </p>
           </section>
 
           <section>
-            <h3 className="text-white font-bold text-lg mb-4">3. Subscription Cancellation</h3>
-            <p className="mb-4">
-              If you are on an auto-renewing subscription (e.g., Monthly or Annual Pro plan), you can cancel your subscription at any time from your account Dashboard. 
-            </p>
-            <ul className="list-disc list-inside space-y-2 text-slate-400 ml-2">
-              <li>When you cancel, you will not be charged on the next billing date.</li>
-              <li>You will continue to have access to your plan&apos;s premium features and remaining credits until the end of your current billing cycle.</li>
-              <li>We do not offer prorated refunds for mid-cycle cancellations.</li>
+            <h3 className="text-white font-bold text-xl mb-3">3. Subscription Cancellation</h3>
+            <ul className="list-disc list-inside space-y-2 text-slate-300">
+              <li>You can cancel auto-renewal anytime from your account dashboard.</li>
+              <li>Access continues until the current billing cycle ends.</li>
+              <li>No prorated refunds for mid-cycle cancellations.</li>
             </ul>
           </section>
 
           <section>
-            <h3 className="text-white font-bold text-lg mb-4">4. Payment Failures & Disputes</h3>
-            <p className="mb-4">
-              If a payment fails while upgrading, your account will remain on the Free Tier until the transaction succeeds. For issues involving failed transactions where money is debited from your bank but does not reach us, please contact your bank or reach out to us with your transaction ID, and we will liaise with Razorpay to resolve it.
+            <h3 className="text-white font-bold text-xl mb-3">4. Payment Failures & Disputes</h3>
+            <p>
+              If payment fails, your account stays on the free tier. For failed transactions where funds were debited,
+              contact support with your transaction ID and we will coordinate with Razorpay.
             </p>
           </section>
 
           <section>
-            <h3 className="text-white font-bold text-lg mb-4">5. Contact Us</h3>
+            <h3 className="text-white font-bold text-xl mb-3">5. Contact Us</h3>
             <p>
-              For any payment or billing questions, please reach out to our team at <a href="mailto:support@getplaced.online" className="text-indigo-400 hover:underline">support@getplaced.online</a>. We strive to respond within 24-48 hours.
+              For billing questions, contact{" "}
+              <a href="mailto:support@getplaced.online" className="text-blue-300 hover:text-blue-200 underline underline-offset-4">
+                support@getplaced.online
+              </a>. We typically respond within 24-48 hours.
             </p>
           </section>
         </div>

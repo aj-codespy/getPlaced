@@ -117,7 +117,7 @@ export default function UpgradePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-slate-200 bg-[#030712]">
+    <div className="min-h-screen flex flex-col font-sans text-slate-200 bg-[#030814]">
       <Script src="https://checkout.razorpay.com/v1/checkout.js" />
       {/* Ambient background for public view */}
       {status !== "authenticated" && (

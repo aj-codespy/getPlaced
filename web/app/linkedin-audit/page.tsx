@@ -228,7 +228,7 @@ export default function LinkedInAuditPage() {
                                       <div className="flex flex-col items-center gap-2">
                                           <div className="flex -space-x-2">
                                               {images.map((img, i) => (
-                                                  <div key={i} className="h-10 w-10 rounded-full border-2 border-[#030712] bg-cover bg-center" style={{ backgroundImage: `url(${img})` }}></div>
+                                                  <div key={i} className="h-10 w-10 rounded-full border-2 border-[#030814] bg-cover bg-center" style={{ backgroundImage: `url(${img})` }}></div>
                                               ))}
                                           </div>
                                           <span className="text-xs text-emerald-400 font-medium">{images.length} Image(s) Selected</span>

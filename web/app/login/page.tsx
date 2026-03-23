@@ -67,7 +67,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#030712] flex font-sans">
+    <div className="min-h-screen bg-[#030814] flex font-sans">
 
       {/* ── Left panel: branding ─────────────────────────────────────────── */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden flex-col justify-between p-12">

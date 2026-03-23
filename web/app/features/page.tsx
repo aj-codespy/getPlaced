@@ -13,101 +13,83 @@ const FEATURES = [
   {
     icon: Brain,
     title: "AI-Powered Writing",
-    description: "Our advanced Gemini AI rewrites your bullet points to be result-oriented, fixing grammar and tone instantly."
+    description: "Our Gemini-powered engine rewrites bullets to be impact-driven, concise, and role-aligned.",
   },
   {
     icon: Layout,
     title: "ATS-Optimized Templates",
-    description: "Designed by HR experts, our templates are guaranteed to pass Applicant Tracking Systems (ATS) filters."
+    description: "Professional structures designed to pass ATS filters without sacrificing readability.",
   },
   {
     icon: Zap,
     title: "Real-time Tailoring",
-    description: "Paste a job description, and watch as our AI suggests specific keywords to add to your resume for that role."
+    description: "Paste a job description and instantly get keyword, skill, and tone-aligned rewrites.",
   },
   {
     icon: FileText,
     title: "LaTeX Quality PDF",
-    description: "Get the crisp, professional look of LaTeX without writing a single line of code. Perfect alignment, every time."
+    description: "Generate polished, recruiter-ready PDFs with strong hierarchy and layout consistency.",
   },
   {
     icon: Shield,
-    title: "Data Privacy First",
-    description: "Your personal data is locked to your account. We don't sell your data to recruiters. You control your privacy."
+    title: "Privacy First",
+    description: "Your data stays under your account and control. No data selling, no recruiter resale.",
   },
   {
     icon: CheckCircle2,
     title: "Cover Letter Generator",
-    description: "Don't just stop at the resume. Generate a matching cover letter for your dream job in seconds."
-  }
+    description: "Generate matching cover letters aligned with your resume and the target role.",
+  },
 ];
 
 export default function FeaturesPage() {
   return (
-    <div className="min-h-screen bg-[#030712] text-white font-sans">
-
-      {/* ── Ambient ─────────────────────────────────────────────────────── */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-15%] left-[10%] w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[130px]" />
-        <div className="absolute bottom-[-10%] right-[5%] w-[500px] h-[500px] bg-violet-600/8 rounded-full blur-[100px]" />
-      </div>
-
+    <div className="min-h-screen bg-[#030814] text-slate-100 font-sans flex flex-col">
       <PublicNavbar currentPath="/features" />
 
-      {/* ── Hero ───────────────────────────────────────────────────────── */}
-      <main className="relative z-10">
-        <section className="text-center max-w-4xl mx-auto px-6 pt-16 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <div className="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full px-4 py-1.5 text-xs font-medium text-indigo-300 mb-6">
-            <Layers size={12} /> Everything you need
+      <main className="relative z-10 flex-1">
+        <section className="mx-auto max-w-[1080px] px-4 sm:px-6 pt-16 pb-10 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-blue-300/25 bg-blue-500/10 px-4 py-1.5 text-xs font-medium text-blue-200 mb-6">
+            <Layers size={12} /> Built for interview outcomes
           </div>
-          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-6">
-            <span className="bg-gradient-to-b from-white via-white to-slate-400 bg-clip-text text-transparent">Features that</span>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-5">
+            <span className="bg-gradient-to-b from-white to-slate-300 bg-clip-text text-transparent">Features that</span>
             <br />
-            <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-blue-400 bg-clip-text text-transparent">get you hired.</span>
+            <span className="bg-gradient-to-r from-[#8fc9ff] via-[#9aa8ff] to-[#b97bff] bg-clip-text text-transparent">
+              get you hired faster.
+            </span>
           </h1>
-          <p className="text-lg text-slate-400 max-w-xl mx-auto leading-relaxed">
-            Everything you need to build a world-class resume, powered by AI and designed for success.
+          <p className="text-slate-300 text-lg max-w-2xl mx-auto">
+            A unified AI toolkit to build, tailor, score, and improve your resume workflow end-to-end.
           </p>
         </section>
 
-        {/* ── Feature Grid ──────────────────────────────────────────────── */}
-        <section className="max-w-6xl mx-auto px-6 py-12">
+        <section className="mx-auto max-w-[1180px] px-4 sm:px-6 pb-14">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {FEATURES.map((f, i) => (
-              <div
-                key={i}
-                className="group relative bg-white/[0.02] border border-white/[0.06] rounded-3xl p-8 overflow-hidden hover:scale-[1.02] hover:bg-white/[0.04] hover:border-white/[0.10] transition-all duration-300 cursor-default hover:shadow-xl hover:shadow-white/[0.03]"
-                style={{ animationDelay: `${i * 100}ms` }}
-              >
-                <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl bg-white/[0.06] border border-white/[0.08] mb-5 text-slate-400 group-hover:text-white group-hover:bg-white/[0.10] transition-all duration-300">
-                  <f.icon size={22} />
+            {FEATURES.map((item, i) => (
+              <div key={i} className="glass-card rounded-3xl p-8">
+                <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/15 bg-white/[0.05] text-blue-200">
+                  <item.icon size={22} />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">{f.title}</h3>
-                <p className="text-sm text-slate-400 leading-relaxed">{f.description}</p>
+                <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
+                <p className="text-sm leading-relaxed text-slate-300">{item.description}</p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* ── CTA Banner ─────────────────────────────────────────────────── */}
-        <section className="max-w-4xl mx-auto px-6 py-16 pb-32">
-          <div className="relative bg-gradient-to-br from-indigo-600/15 via-violet-600/8 to-blue-600/8 border border-indigo-500/15 rounded-3xl p-12 text-center overflow-hidden">
-            <div className="absolute -top-20 -right-20 w-60 h-60 bg-indigo-500/10 rounded-full blur-3xl" />
-            <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-violet-500/10 rounded-full blur-3xl" />
-            <div className="relative z-10">
-              <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tight">
-                Ready to build your masterpiece?
-              </h2>
-              <p className="text-slate-400 mb-8 max-w-md mx-auto">
-                Join thousands of students and professionals getting placed at top companies.
-              </p>
-              <Link href="/signup">
-                <button className="group inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold px-10 py-4 rounded-2xl shadow-2xl shadow-indigo-500/30 border border-indigo-500/30 transition-all duration-300 hover:scale-[1.02] text-lg">
-                  Start Building Now
-                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                </button>
-              </Link>
-            </div>
+        <section className="mx-auto max-w-[1080px] px-4 sm:px-6 pb-20">
+          <div className="glass-card rounded-3xl p-10 text-center">
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white mb-4">
+              Ready to build your interview-winning resume?
+            </h2>
+            <p className="text-slate-300 mb-8">Start free, then scale with credits and premium workflows as needed.</p>
+            <Link href="/signup">
+              <button className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#7448ff] to-[#9f3bff] px-8 py-3.5 text-lg font-semibold text-white shadow-[0_16px_40px_rgba(116,72,255,0.4)] transition-transform hover:scale-[1.02]">
+                Start Building
+                <ArrowRight size={18} />
+              </button>
+            </Link>
           </div>
         </section>
       </main>

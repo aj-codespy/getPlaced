@@ -9,55 +9,57 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <div className="min-h-screen bg-[#030712] text-white font-sans flex flex-col">
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[20%] w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px]" />
-      </div>
-
+    <div className="min-h-screen bg-[#030814] text-slate-100 font-sans flex flex-col">
       <PublicNavbar currentPath="/contact" />
 
-      <main className="relative z-10 flex-1 max-w-3xl mx-auto px-6 py-16 w-full">
-        <h1 className="text-4xl font-extrabold mb-4 bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-          Contact Us
-        </h1>
-        <p className="text-slate-400 mb-12">
-          Have a question or need help? We&apos;d love to hear from you.
-        </p>
+      <main className="relative z-10 flex-1 w-full max-w-[1080px] mx-auto px-4 sm:px-6 py-14">
+        <div className="mb-8">
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-b from-white to-slate-300 bg-clip-text text-transparent">
+            Contact Us
+          </h1>
+          <p className="mt-3 text-slate-300 max-w-2xl">
+            Have a question, issue, or partnership inquiry? We are here to help.
+          </p>
+        </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="bg-white/[0.02] border border-white/[0.05] rounded-2xl p-8 hover:bg-white/[0.04] transition-colors">
-            <h3 className="text-xl font-bold text-white mb-2">Support & Help</h3>
-            <p className="text-slate-400 text-sm mb-6 leading-relaxed">
-              Facing an issue with generating your resume, payment failure, or credit tracking? Reach out to our support team and we&apos;ll resolve it as soon as possible.
+        <div className="grid md:grid-cols-2 gap-5">
+          <section className="glass-card rounded-3xl p-8">
+            <h2 className="text-2xl font-bold text-white mb-3">Support & Help</h2>
+            <p className="text-slate-300 text-sm leading-relaxed mb-6">
+              Facing an issue with resume generation, payments, or credits? Reach out and we will help quickly.
             </p>
             <div className="space-y-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Email</p>
-                <a href="mailto:support@getplaced.online" className="text-indigo-400 hover:text-indigo-300 font-medium">support@getplaced.online</a>
+                <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-1">Email</p>
+                <a href="mailto:support@getplaced.online" className="text-blue-300 hover:text-blue-200 font-medium">
+                  support@getplaced.online
+                </a>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Response Time</p>
-                <p className="text-slate-300">Within 24-48 hours</p>
+                <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-1">Response Time</p>
+                <p className="text-slate-200">Within 24-48 hours</p>
               </div>
             </div>
-          </div>
+          </section>
 
-          <div className="bg-white/[0.02] border border-white/[0.05] rounded-2xl p-8 hover:bg-white/[0.04] transition-colors">
-            <h3 className="text-xl font-bold text-white mb-2">General Inquiries</h3>
-            <p className="text-slate-400 text-sm mb-6 leading-relaxed">
-              For business partnerships, media relations, or general questions about getPlaced and our mission to simplify job hunting.
+          <section className="glass-card rounded-3xl p-8">
+            <h2 className="text-2xl font-bold text-white mb-3">Business Inquiries</h2>
+            <p className="text-slate-300 text-sm leading-relaxed mb-6">
+              For partnerships, media requests, or organization-level plans, contact our team directly.
             </p>
             <div className="space-y-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Email</p>
-                <a href="mailto:support@getplaced.online" className="text-indigo-400 hover:text-indigo-300 font-medium">support@getplaced.online</a>
+                <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-1">Email</p>
+                <a href="mailto:support@getplaced.online" className="text-blue-300 hover:text-blue-200 font-medium">
+                  support@getplaced.online
+                </a>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Company Info</p>
-                <p className="text-slate-300">getPlaced Technologies Ltd.</p>
+                <p className="text-xs uppercase tracking-[0.16em] text-slate-400 mb-1">Company</p>
+                <p className="text-slate-200">getPlaced Technologies Ltd.</p>
               </div>
             </div>
-          </div>
+          </section>
         </div>
       </main>
 

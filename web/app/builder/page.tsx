@@ -339,7 +339,7 @@ export default function BuilderPage() {
   // ── Loading state ──────────────────────────────────────────────────────────
   if (fetchingProfile) {
     return (
-      <div className="h-screen flex items-center justify-center bg-[#030712]">
+      <div className="h-screen flex items-center justify-center bg-[#030814]">
         <Loader2 className="animate-spin text-slate-400 mr-3" size={28} />
         <span className="text-slate-400 text-sm">Loading your profile…</span>
       </div>
@@ -353,9 +353,9 @@ export default function BuilderPage() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="flex h-screen flex-col bg-[#030712] text-slate-200 font-sans overflow-hidden">
+    <div className="flex h-screen flex-col bg-[#030814] text-slate-200 font-sans overflow-hidden">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <header className="h-14 border-b border-white/5 flex items-center justify-between px-6 bg-[#030712]/90 backdrop-blur-md sticky top-0 z-20 shrink-0">
+      <header className="h-14 border-b border-white/5 flex items-center justify-between px-6 bg-[#030814]/90 backdrop-blur-md sticky top-0 z-20 shrink-0">
         <Link
           href="/dashboard"
           className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm"

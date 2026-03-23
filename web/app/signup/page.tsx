@@ -21,7 +21,7 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", password: "", contact: "" });
+  const [form, setForm] = useState({ name: "", email: "", password: "", contact: "", inviteCode: "" });
 
   useEffect(() => {
     if (status === "authenticated") router.push("/dashboard");
@@ -31,6 +31,13 @@ export default function SignupPage() {
     const authErrorCode = new URLSearchParams(window.location.search).get("error");
     if (authErrorCode) {
       setError(getAuthErrorMessage(authErrorCode));
+    }
+
+    const refCode = (new URLSearchParams(window.location.search).get("ref") || "").trim();
+    if (refCode) {
+      const normalized = refCode.toUpperCase();
+      setForm((prev) => ({ ...prev, inviteCode: normalized }));
+      localStorage.setItem("pendingReferralCode", normalized);
     }
   }, []);
 
@@ -47,10 +54,17 @@ export default function SignupPage() {
         return;
       }
 
+      const invite = form.inviteCode.trim().toUpperCase();
+      if (invite) {
+        localStorage.setItem("pendingReferralCode", invite);
+      } else {
+        localStorage.removeItem("pendingReferralCode");
+      }
+
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, inviteCode: invite }),
       });
       const data = await res.json();
 
@@ -67,7 +81,7 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#030712] flex font-sans">
+    <div className="min-h-screen bg-[#030814] flex font-sans">
 
       {/* ── Left panel: branding ─────────────────────────────────────────── */}
       <div className="hidden lg:flex lg:w-[42%] relative overflow-hidden flex-col justify-between p-12">
@@ -192,7 +206,6 @@ export default function SignupPage() {
                   placeholder="+91 98765 43210"
                   value={form.contact}
                   onChange={(e) => setForm({ ...form, contact: e.target.value })}
-                  required
                   className="bg-white/5 border-white/10 text-white placeholder:text-slate-600 focus-visible:border-indigo-500/60 focus-visible:ring-indigo-500/20 h-11 rounded-xl"
                 />
               </div>
@@ -233,6 +246,19 @@ export default function SignupPage() {
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-slate-300">Referral Code (Optional)</label>
+              <Input
+                placeholder="E.g. AYUSH-AB12"
+                value={form.inviteCode}
+                onChange={(e) => setForm({ ...form, inviteCode: e.target.value.toUpperCase() })}
+                className="bg-white/5 border-white/10 text-white placeholder:text-slate-600 focus-visible:border-indigo-500/60 focus-visible:ring-indigo-500/20 h-11 rounded-xl"
+              />
+              <p className="text-[11px] text-slate-500">
+                Got a referral link? Your code is auto-filled. You can edit it here.
+              </p>
             </div>
 
             {/* Terms notice */}

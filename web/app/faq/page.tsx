@@ -113,29 +113,24 @@ const FAQS = [
 
 export default function FAQPage() {
   return (
-    <div className="min-h-screen bg-[#030712] text-white font-sans flex flex-col">
+    <div className="min-h-screen bg-[#030814] text-slate-100 font-sans flex flex-col">
 
       {/* ── Ambient ──────────────────────────────────────────────── */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-20%] right-[15%] w-[500px] h-[500px] bg-violet-600/10 rounded-full blur-[130px]" />
-        <div className="absolute bottom-[-15%] left-[10%] w-[400px] h-[400px] bg-indigo-600/8 rounded-full blur-[100px]" />
-      </div>
-
       <PublicNavbar currentPath="/faq" />
 
       {/* ── Content ──────────────────────────────────────────────── */}
-      <main className="relative z-10 flex-1 max-w-3xl mx-auto px-6 py-16 w-full">
+      <main className="relative z-10 flex-1 max-w-4xl mx-auto px-4 sm:px-6 py-16 w-full">
 
         <div className="text-center mb-14 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <div className="inline-flex items-center gap-2 bg-violet-500/10 border border-violet-500/20 rounded-full px-4 py-1.5 text-xs font-medium text-violet-300 mb-6">
+          <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-400/25 rounded-full px-4 py-1.5 text-xs font-medium text-blue-200 mb-6">
             <HelpCircle size={12} /> Got questions?
           </div>
-          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
-            <span className="bg-gradient-to-b from-white via-white to-slate-400 bg-clip-text text-transparent">Frequently Asked</span>
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4">
+            <span className="bg-gradient-to-b from-white via-white to-slate-300 bg-clip-text text-transparent">Frequently Asked</span>
             <br />
-            <span className="bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">Questions.</span>
+            <span className="bg-gradient-to-r from-[#8fc9ff] via-[#9aa8ff] to-[#b97bff] bg-clip-text text-transparent">Questions.</span>
           </h1>
-          <p className="text-slate-400 max-w-md mx-auto">
+          <p className="text-slate-300 max-w-md mx-auto">
             Have a different question? Contact our support team.
           </p>
         </div>
@@ -145,12 +140,12 @@ export default function FAQPage() {
             <AccordionItem
               key={i}
               value={`item-${i}`}
-              className="bg-white/[0.02] border border-white/[0.06] rounded-2xl px-6 overflow-hidden hover:border-white/10 transition-colors data-[state=open]:border-indigo-500/20 data-[state=open]:bg-indigo-500/[0.03]"
+              className="glass-card rounded-2xl px-6 overflow-hidden transition-colors data-[state=open]:border-blue-400/30"
             >
-              <AccordionTrigger className="text-left py-5 text-base font-semibold text-white hover:text-indigo-200 transition-colors hover:no-underline">
+              <AccordionTrigger className="text-left py-5 text-base font-semibold text-white hover:text-blue-200 transition-colors hover:no-underline">
                 {faq.q}
               </AccordionTrigger>
-              <AccordionContent className="text-slate-400 text-sm leading-relaxed pb-5">
+              <AccordionContent className="text-slate-300 text-sm leading-relaxed pb-5">
                 {faq.a}
               </AccordionContent>
             </AccordionItem>
@@ -159,9 +154,9 @@ export default function FAQPage() {
 
         {/* mini CTA */}
         <div className="text-center mt-16 animate-in fade-in duration-700 delay-400">
-          <p className="text-sm text-slate-500 mb-4">Still have questions?</p>
+          <p className="text-sm text-slate-400 mb-4">Still have questions?</p>
           <Link href="/signup">
-            <button className="group inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold px-8 py-3 rounded-xl shadow-lg shadow-indigo-500/25 border border-indigo-500/30 transition-all hover:scale-[1.02]">
+            <button className="group inline-flex items-center gap-2 bg-gradient-to-r from-[#7448ff] to-[#9f3bff] hover:brightness-110 text-white font-semibold px-8 py-3 rounded-xl shadow-[0_14px_35px_rgba(116,72,255,0.35)] border border-blue-300/15 transition-all hover:scale-[1.02]">
               Try getPlaced free
               <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
             </button>
