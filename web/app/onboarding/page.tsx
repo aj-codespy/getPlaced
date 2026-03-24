@@ -188,6 +188,16 @@ export default function OnboardingPage() {
         .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+      const queryRef = (new URLSearchParams(window.location.search).get("ref") || "").trim();
+      const storedRef = (localStorage.getItem("pendingReferralCode") || "").trim();
+      const seedRef = (queryRef || storedRef).toUpperCase();
+      if (seedRef) {
+          setReferralCode((prev) => prev || seedRef);
+          localStorage.setItem("pendingReferralCode", seedRef);
+      }
+  }, []);
+
   const handleSave = async (silent = false) => {
       setSaving(true);
       try {
@@ -234,10 +244,17 @@ export default function OnboardingPage() {
                   const refData = await refRes.json();
                   
                   if(!refRes.ok) {
+                      if ((refData.error || "").toLowerCase() === "already referred") {
+                          localStorage.removeItem("pendingReferralCode");
+                          setReferralCode("");
+                          showMessage("Referral Already Applied", "This referral code is already applied on your account.", "info");
+                      } else {
                       showMessage("Referral Error", refData.error || "Invalid referral code.", "error");
                       return; 
+                      }
                   } else {
                       showMessage("Referral Applied", "Referral code applied successfully. Welcome!", "success");
+                      localStorage.removeItem("pendingReferralCode");
                       setReferralCode(""); 
                   }
               } catch {

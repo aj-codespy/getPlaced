@@ -67,28 +67,46 @@ export const authOptions: AuthOptions = {
 
       if (account?.provider === "google") {
         try {
-           if (!user.email) return false;
-           
-           // Sync Google User to Firestore "users" collection
-           const userEmail = emailCheck.normalizedEmail;
-           const userRef = doc(db, "users", userEmail);
-           const userSnap = await getDoc(userRef);
+          if (!user.email) return "/login?error=EMAIL_INVALID_FORMAT";
 
-           if (!userSnap.exists()) {
-             await setDoc(userRef, {
-                 email: userEmail,
-                 name: user.name,
-                 image: user.image,
-                 createdAt: serverTimestamp(),
-                 provider: 'google',
-                 credits: 200, // Welcome Bonus
-                 isPremium: 0 // 0 = Free, 1 = Standard, 2 = Pro
-             });
-           }
+          // Sync Google user to Firestore "users" collection.
+          const userEmail = emailCheck.normalizedEmail;
+          const userRef = doc(db, "users", userEmail);
+          const userSnap = await getDoc(userRef);
+
+          if (!userSnap.exists()) {
+            await setDoc(userRef, {
+              email: userEmail,
+              name: user.name,
+              image: user.image,
+              createdAt: serverTimestamp(),
+              lastLoginAt: serverTimestamp(),
+              provider: "google",
+              credits: 200, // Welcome bonus
+              isPremium: 0, // 0 = Free, 1 = Standard, 2 = Pro
+            });
+          } else {
+            const existingData = userSnap.data();
+            const patch: Record<string, unknown> = {
+              lastLoginAt: serverTimestamp(),
+            };
+
+            if (!existingData.email) patch.email = userEmail;
+            if (!existingData.name && user.name) patch.name = user.name;
+            if (!existingData.provider) patch.provider = "google";
+            if (typeof existingData.credits !== "number") patch.credits = 200;
+            if (typeof existingData.isPremium !== "number") patch.isPremium = 0;
+            if (!existingData.createdAt) patch.createdAt = serverTimestamp();
+
+            await setDoc(userRef, patch, { merge: true });
+          }
         } catch (e) {
-          console.error("Firebase User Sync Failed:", e);
-          // Allow login anyway
-          return true;
+          console.error("Firebase User Sync Failed:", {
+            provider: account.provider,
+            email: emailCheck.normalizedEmail,
+            message: e instanceof Error ? e.message : String(e),
+          });
+          return "/login?error=ACCOUNT_SYNC_FAILED";
         }
       }
       return true;

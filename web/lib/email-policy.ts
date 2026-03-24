@@ -105,6 +105,10 @@ export function getAuthErrorMessage(code?: string | null): string {
       return "Temporary/disposable email addresses are not allowed.";
     case "EMAIL_DOMAIN_NOT_ALLOWED":
       return "Use Gmail, a supported personal provider, or an academic (.edu/.ac) email.";
+    case "ACCOUNT_SYNC_FAILED":
+      return "We could not create your account record. Please try again in a moment.";
+    case "AccessDenied":
+      return "Sign-in was blocked. Please verify your email domain and try again.";
     default:
       return "Invalid email or password. Please try again.";
   }

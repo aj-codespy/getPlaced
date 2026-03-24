@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { isAdmin } from "@/lib/admin";
 import { db } from "@/lib/firebase/config";
-import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 
 export async function GET() {
   try {
@@ -12,7 +12,8 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const usersSnap = await getDocs(query(collection(db, "users"), orderBy("createdAt", "desc"), limit(5000)));
+    // Fetch then sort locally so users missing createdAt are still visible.
+    const usersSnap = await getDocs(collection(db, "users"));
     const users: Record<string, unknown>[] = [];
     
     usersSnap.forEach((doc) => {
@@ -38,7 +39,13 @@ export async function GET() {
         });
     });
 
-    return NextResponse.json({ users });
+    users.sort((a, b) => {
+      const aTime = new Date(String(a.createdAt || 0)).getTime() || 0;
+      const bTime = new Date(String(b.createdAt || 0)).getTime() || 0;
+      return bTime - aTime;
+    });
+
+    return NextResponse.json({ users: users.slice(0, 5000) });
   } catch (error: unknown) {
     console.error("Admin Users Error:", error);
     return NextResponse.json({ error: error instanceof Error ? error.message : "Internal server error" }, { status: 500 });

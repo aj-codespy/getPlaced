@@ -69,6 +69,13 @@ function formatTimestamp(ts?: TimestampLike): string {
   return "Recently";
 }
 
+function cleanDisplayText(value: string | undefined, fallback: string, max = 72): string {
+  const raw = (value || "").replace(/\s+/g, " ").trim();
+  if (!raw) return fallback;
+  if (raw.length <= max) return raw;
+  return `${raw.slice(0, max - 1).trim()}…`;
+}
+
 export default function Dashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -136,14 +143,14 @@ export default function Dashboard() {
     activeHistoryTab === "generated"
       ? resumes.slice(0, 8).map((resume) => ({
           id: resume.id,
-          primary: resume.targetRole || resume.title || "Generated Resume",
+          primary: cleanDisplayText(resume.title || resume.targetRole, "Generated Resume", 78),
           secondary: resume.templateId ? `Template: ${resume.templateId}` : "AI generated",
           when: formatTimestamp(resume.createdAt),
           href: `/editor/${resume.id}`,
         }))
       : downloads.slice(0, 8).map((item) => ({
           id: item.id,
-          primary: item.filename || "Resume Download",
+          primary: cleanDisplayText(item.filename, "Resume Download", 66),
           secondary: item.templateId ? `Template: ${item.templateId}` : "PDF download",
           when: formatTimestamp(item.createdAt),
           href: item.resumeId ? `/editor/${item.resumeId}` : "/dashboard",
@@ -157,14 +164,16 @@ export default function Dashboard() {
 
       <DashboardHeader isPremium={isPremium} />
 
-      <main className="relative z-10 mx-auto w-full max-w-[1080px] px-4 pb-12 pt-12 sm:px-6">
-        <section className="mb-7 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <main className="relative z-10 mx-auto w-full max-w-[1120px] px-4 pb-12 pt-10 sm:px-6 lg:px-8">
+        <section className="mb-6 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-4xl text-slate-300">{greeting}, {firstName}.</p>
-            <h1 className="mt-1 text-7xl font-bold tracking-tight text-white">Dashboard</h1>
+            <p className="text-xl sm:text-2xl text-slate-300">
+              {greeting}, {firstName}.
+            </p>
+            <h1 className="mt-1 text-5xl font-bold tracking-tight text-white sm:text-6xl">Dashboard</h1>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:min-w-[460px]">
             <MiniStat label="Credits" value={credits} icon={<Coins size={18} />} />
             <MiniStat label="Plan" value={planType === "free" ? "Free" : "Pro"} icon={<WalletCards size={18} />} />
             <MiniStat label="Resumes" value={resumes.length} icon={<FileText size={18} />} />
@@ -172,7 +181,7 @@ export default function Dashboard() {
         </section>
 
         {!isPremium && (
-          <div className="mb-5 rounded-2xl border border-amber-400/30 bg-amber-500/10 px-5 py-3 text-sm text-amber-100">
+          <div className="mb-4 rounded-2xl border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
             <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
               <p>Upgrade to unlock premium templates and higher generation limits.</p>
               <Link href="/pricing" className="rounded-lg bg-amber-400/20 px-3 py-1.5 font-semibold text-amber-100 hover:bg-amber-400/30">
@@ -183,7 +192,7 @@ export default function Dashboard() {
         )}
 
         {!profileComplete && (
-          <div className="mb-5 rounded-2xl border border-sky-400/30 bg-sky-500/10 px-5 py-3 text-sm text-sky-100">
+          <div className="mb-4 rounded-2xl border border-sky-400/30 bg-sky-500/10 px-4 py-3 text-sm text-sky-100">
             <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
               <p>Complete your profile to start resume generation.</p>
               <Link href="/onboarding" className="rounded-lg bg-sky-400/20 px-3 py-1.5 font-semibold text-sky-100 hover:bg-sky-400/30">
@@ -193,36 +202,30 @@ export default function Dashboard() {
           </div>
         )}
 
-        <section className="mb-7 grid gap-4 md:grid-cols-3">
-          <MainStat label="Credits" value={credits} icon={<Coins size={22} />} />
-          <MainStat label="Plan" value={planType === "free" ? "Free" : "Pro"} icon={<WalletCards size={22} />} />
-          <MainStat label="Resumes" value={resumes.length} icon={<FileText size={22} />} />
-        </section>
-
-        <section className="mb-7 grid gap-4 md:grid-cols-3">
+        <section className="mb-6 grid gap-4 md:grid-cols-3">
           <ActionCard
             href="/builder"
             title="Create New Resume"
             cta="Start Now"
-            icon={<FileText size={28} className="text-[#8db3ff]" />}
+            icon={<FileText size={24} className="text-[#9bc2ff]" />}
           />
           <ActionCard
             href="/linkedin-audit"
             title="LinkedIn Audit"
             cta="Analyze Profile"
-            icon={<Linkedin size={28} className="text-[#8db3ff]" />}
+            icon={<Linkedin size={24} className="text-[#9bc2ff]" />}
           />
           <ActionCard
             href="/resume-score"
             title="Resume Score"
             cta="Check Score"
-            icon={<BarChart3 size={28} className="text-[#8db3ff]" />}
+            icon={<BarChart3 size={24} className="text-[#9bc2ff]" />}
           />
         </section>
 
-        <section className="rounded-3xl border border-white/[0.14] bg-[linear-gradient(120deg,rgba(24,40,74,0.88),rgba(12,19,42,0.82))] px-6 py-6 shadow-[0_22px_60px_rgba(14,22,44,0.55)]">
-          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-5xl font-semibold text-white">Recent Activity</h2>
+        <section className="glass-card rounded-3xl px-5 py-5 sm:px-6">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-3xl font-semibold text-white sm:text-4xl">Recent Activity</h2>
             <div className="inline-flex rounded-xl border border-white/[0.12] bg-white/[0.03] p-1 text-sm">
               <button
                 className={
@@ -247,21 +250,21 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="divide-y divide-white/[0.1]">
+          <div className="divide-y divide-white/[0.08]">
             {historyRows.length > 0 ? (
               historyRows.map((row) => (
                 <Link
                   key={`${activeHistoryTab}-${row.id}`}
                   href={row.href}
-                  className="group flex items-center justify-between gap-3 py-4"
+                  className="group flex items-center justify-between gap-3 py-3.5"
                 >
-                  <div>
-                    <p className="text-3xl font-medium text-white">{row.primary}</p>
-                    <p className="mt-1 text-2xl text-slate-300">
+                  <div className="min-w-0">
+                    <p className="truncate text-base font-semibold text-white sm:text-lg">{row.primary}</p>
+                    <p className="mt-1 text-xs text-slate-300 sm:text-sm">
                       {row.secondary} <span className="text-slate-500">• {row.when}</span>
                     </p>
                   </div>
-                  <ArrowRight size={20} className="text-slate-500 transition group-hover:translate-x-1 group-hover:text-indigo-300" />
+                  <ArrowRight size={18} className="shrink-0 text-slate-500 transition group-hover:translate-x-1 group-hover:text-indigo-300" />
                 </Link>
               ))
             ) : (
@@ -285,28 +288,12 @@ export default function Dashboard() {
 
 function MiniStat({ label, value, icon }: { label: string; value: string | number; icon: ReactNode }) {
   return (
-    <div className="rounded-2xl border border-white/[0.14] bg-[linear-gradient(130deg,rgba(26,43,80,0.84),rgba(17,28,55,0.84))] px-5 py-4 shadow-[0_14px_40px_rgba(10,16,33,0.45)]">
+    <div className="rounded-2xl border border-white/[0.14] bg-[linear-gradient(130deg,rgba(26,43,80,0.84),rgba(17,28,55,0.84))] px-4 py-3.5 shadow-[0_12px_34px_rgba(10,16,33,0.38)]">
       <div className="flex items-center gap-3">
         <span className="text-slate-300">{icon}</span>
         <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-slate-400">{label}</p>
-          <p className="text-4xl font-bold text-white">{value}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function MainStat({ label, value, icon }: { label: string; value: string | number; icon: ReactNode }) {
-  return (
-    <div className="rounded-2xl border border-white/[0.14] bg-[linear-gradient(130deg,rgba(26,43,80,0.84),rgba(17,28,55,0.84))] px-6 py-5 shadow-[0_14px_40px_rgba(10,16,33,0.45)]">
-      <div className="flex items-center gap-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#2d3d73]">
-          <span className="text-slate-200">{icon}</span>
-        </div>
-        <div>
-          <p className="text-sm uppercase tracking-[0.12em] text-slate-400">{label}</p>
-          <p className="text-5xl font-bold text-white">{value}</p>
+          <p className="text-[11px] uppercase tracking-[0.16em] text-slate-400">{label}</p>
+          <p className="text-3xl font-bold text-white">{value}</p>
         </div>
       </div>
     </div>
@@ -326,12 +313,12 @@ function ActionCard({
 }) {
   return (
     <Link href={href} className="group block">
-      <div className="rounded-3xl border border-[#706cff]/75 bg-[linear-gradient(130deg,rgba(28,45,83,0.9),rgba(18,30,57,0.88))] p-8 text-center shadow-[0_0_40px_rgba(126,78,255,0.22)]">
-        <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-[#2b3385]">
+      <div className="rounded-3xl border border-[#5f74c7]/55 bg-[linear-gradient(130deg,rgba(28,45,83,0.88),rgba(18,30,57,0.84))] p-6 text-center shadow-[0_0_26px_rgba(126,78,255,0.18)] transition-all duration-200 hover:border-[#7d8ce8]/70 hover:shadow-[0_0_34px_rgba(126,78,255,0.22)]">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#293778]">
           {icon}
         </div>
-        <h3 className="text-5xl font-semibold text-white">{title}</h3>
-        <div className="mt-8 rounded-2xl bg-gradient-to-r from-[#7448ff] to-[#a03dff] px-6 py-3 text-3xl font-semibold text-white transition group-hover:brightness-110">
+        <h3 className="text-3xl font-semibold leading-tight text-white">{title}</h3>
+        <div className="mt-6 rounded-xl bg-gradient-to-r from-[#7448ff] to-[#a03dff] px-5 py-2.5 text-xl font-semibold text-white transition group-hover:brightness-110">
           {cta}
         </div>
       </div>

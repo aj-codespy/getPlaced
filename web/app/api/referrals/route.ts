@@ -1,97 +1,149 @@
-import { db } from "@/lib/firebase/config";
-import { doc, getDoc, updateDoc, increment, collection, query, where, getDocs, serverTimestamp } from "firebase/firestore";
-import { nanoid } from "nanoid";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { nanoid } from "nanoid";
+import { db } from "@/lib/firebase/config";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  increment,
+  query,
+  runTransaction,
+  serverTimestamp,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 
-// GET: Fetch Referral Code & Stats
-export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+const REFERRAL_BONUS_CREDITS = 50;
 
-  const userRef = doc(db, "users", session.user.email);
-  const userSnap = await getDoc(userRef);
+async function resolveUserByEmail(emailRaw: string) {
+  const emailLower = emailRaw.toLowerCase();
+  const lowerRef = doc(db, "users", emailLower);
+  const lowerSnap = await getDoc(lowerRef);
+  if (lowerSnap.exists()) return { ref: lowerRef, snap: lowerSnap, emailLower };
 
-  if (!userSnap.exists()) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+  if (emailRaw !== emailLower) {
+    const rawRef = doc(db, "users", emailRaw);
+    const rawSnap = await getDoc(rawRef);
+    if (rawSnap.exists()) return { ref: rawRef, snap: rawSnap, emailLower };
   }
 
-  const userData = userSnap.data();
+  return null;
+}
 
-  // Lazy Gen: If no code, generate one
+// GET: fetch referral code and stats
+export async function GET() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.email) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const userRecord = await resolveUserByEmail(session.user.email);
+  if (!userRecord) {
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  }
+
+  const userData = userRecord.snap.data();
   if (!userData.referralCode) {
-      const code = (session.user.name?.split(" ")[0].toUpperCase() || "USER") + "-" + nanoid(4).toUpperCase();
-      await updateDoc(userRef, { referralCode: code });
-      userData.referralCode = code;
+    const code =
+      (session.user.name?.split(" ")[0].toUpperCase() || "USER") + "-" + nanoid(4).toUpperCase();
+    await updateDoc(userRecord.ref, { referralCode: code });
+    userData.referralCode = code;
   }
 
   return NextResponse.json({
-      code: userData.referralCode,
-      referralCount: userData.referralCount || 0,
-      referralCredits: userData.referralCredits || 0,
-      totalCredits: userData.credits || 0,
-      isPremium: userData.isPremium || 0,
-      planType: userData.planType || "free"
+    code: userData.referralCode,
+    referralCount: userData.referralCount || 0,
+    creditsEarned: userData.referralCredits || 0,
+    rewardPerReferral: REFERRAL_BONUS_CREDITS,
+    totalCredits: userData.credits || 0,
+    isPremium: userData.isPremium || 0,
+    planType: userData.planType || "free",
   });
 }
 
-// POST: Redeem a Code (Logic for the "Referred" user)
+// POST: apply referral code for current user
 export async function POST(req: Request) {
+  try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const { code } = await req.json();
-    if(!code) return NextResponse.json({ error: "Code required" }, { status: 400 });
-
-    const currentUserRef = doc(db, "users", session.user.email);
-    const currentUserSnap = await getDoc(currentUserRef);
-    
-    if(currentUserSnap.data()?.referredBy) {
-        return NextResponse.json({ error: "Already referred" }, { status: 400 });
-    }
-    
-    if(currentUserSnap.data()?.referralCode === code) {
-         return NextResponse.json({ error: "Cannot refer yourself" }, { status: 400 });
+    const normalizedCode = typeof code === "string" ? code.trim().toUpperCase() : "";
+    if (!normalizedCode) {
+      return NextResponse.json({ error: "Code required" }, { status: 400 });
     }
 
-    // Find Owner of Code
+    const currentUserRecord = await resolveUserByEmail(session.user.email);
+    if (!currentUserRecord) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    if (currentUserRecord.snap.data()?.referredBy) {
+      return NextResponse.json({ error: "Already referred" }, { status: 400 });
+    }
+
+    if ((currentUserRecord.snap.data()?.referralCode || "").toUpperCase() === normalizedCode) {
+      return NextResponse.json({ error: "Cannot refer yourself" }, { status: 400 });
+    }
+
     const usersRef = collection(db, "users");
-    const q = query(usersRef, where("referralCode", "==", code));
-    const querySnapshot = await getDocs(q);
-
+    const codeQuery = query(usersRef, where("referralCode", "==", normalizedCode));
+    const querySnapshot = await getDocs(codeQuery);
     if (querySnapshot.empty) {
-        return NextResponse.json({ error: "Invalid Code" }, { status: 404 });
+      return NextResponse.json({ error: "Invalid Code" }, { status: 404 });
     }
 
     const referrerDoc = querySnapshot.docs[0];
     const referrerRef = referrerDoc.ref;
-    const referrerData = referrerDoc.data();
+    const referrerEmail =
+      (typeof referrerDoc.data().email === "string"
+        ? referrerDoc.data().email.toLowerCase()
+        : ""
+      ).trim();
 
-    // Transactional Logic
-    // 1. Mark Current User as Referred
-    await updateDoc(currentUserRef, {
-        referredBy: referrerData.email,
-        referredAt: serverTimestamp()
-    });
-
-    // 2. Increment Referrer Count
-    await updateDoc(referrerRef, {
-        referralCount: increment(1)
-    });
-
-    // 3. Check for Reward Condition (Every 2 referrals)
-    const newCount = (referrerData.referralCount || 0) + 1;
-    let rewardTriggered = false;
-
-    if (newCount % 2 === 0) {
-        // Reward 100 Credits (1 Resume)
-        await updateDoc(referrerRef, {
-            credits: increment(100),
-            referralCredits: increment(100)
-        });
-        rewardTriggered = true;
+    if (!referrerEmail || referrerEmail === currentUserRecord.emailLower) {
+      return NextResponse.json({ error: "Invalid Code" }, { status: 400 });
     }
 
-    return NextResponse.json({ success: true, rewardTriggered });
+    await runTransaction(db, async (tx) => {
+      const freshCurrentSnap = await tx.get(currentUserRecord.ref);
+      if (!freshCurrentSnap.exists()) throw new Error("User not found");
+      if (freshCurrentSnap.data().referredBy) throw new Error("ALREADY_REFERRED");
+
+      const freshReferrerSnap = await tx.get(referrerRef);
+      if (!freshReferrerSnap.exists()) throw new Error("Invalid Code");
+
+      tx.update(currentUserRecord.ref, {
+        referredBy: referrerEmail,
+        referredAt: serverTimestamp(),
+        credits: increment(REFERRAL_BONUS_CREDITS),
+      });
+
+      tx.update(referrerRef, {
+        referralCount: increment(1),
+        credits: increment(REFERRAL_BONUS_CREDITS),
+        referralCredits: increment(REFERRAL_BONUS_CREDITS),
+      });
+    });
+
+    return NextResponse.json({
+      success: true,
+      rewardTriggered: true,
+      creditsAwarded: { referrer: REFERRAL_BONUS_CREDITS, referredUser: REFERRAL_BONUS_CREDITS },
+    });
+  } catch (e: unknown) {
+    if (e instanceof Error && e.message === "ALREADY_REFERRED") {
+      return NextResponse.json({ error: "Already referred" }, { status: 400 });
+    }
+    console.error("Referral Apply Error:", e);
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "Failed to apply referral" },
+      { status: 500 },
+    );
+  }
 }

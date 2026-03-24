@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { PRICING_PLANS } from "@/lib/razorpay/pricing";
 import { Button } from "@/components/ui/button";
 import { MessageBox, type MessageBoxVariant } from "@/components/ui/message-box";
-import { Check, Loader2, Zap, FileText, ArrowRight } from "lucide-react";
+import { Check, Loader2, Zap, FileText, ArrowRight, Gift } from "lucide-react";
 import Link from "next/link";
 import { DashboardHeader } from "@/components/layout/dashboard-header";
 import { PublicNavbar } from "@/components/layout/public-navbar";
@@ -147,6 +147,21 @@ export default function PricingPage() {
             <p className="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
                Every plan gives you AI-tailored resumes that match the job. <br/> The only difference is how many doors you want to open.
             </p>
+          </div>
+
+          <div className="max-w-3xl mx-auto mb-8 rounded-2xl border border-indigo-500/25 bg-indigo-500/10 px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="text-sm text-slate-200">
+              <span className="font-semibold text-indigo-300 inline-flex items-center gap-2">
+                <Gift size={14} />
+                Referral Boost:
+              </span>{" "}
+              You and your friend both earn <span className="font-semibold text-indigo-300">50 credits</span> on successful referral.
+            </div>
+            <Link href={status === "authenticated" ? "/referrals" : "/signup"} className="shrink-0">
+              <Button variant="outline" className="h-9 rounded-xl border-indigo-400/30 text-indigo-200 hover:text-white bg-transparent hover:bg-indigo-500/20">
+                {status === "authenticated" ? "Open Referrals" : "Start Referring"}
+              </Button>
+            </Link>
           </div>
 
           <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-6 items-start stagger-children">
