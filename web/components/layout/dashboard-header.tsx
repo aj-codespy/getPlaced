@@ -45,10 +45,10 @@ export function DashboardHeader({ isPremium }: { credits?: number; isPremium?: b
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/[0.08] bg-[#070e1d]/88 backdrop-blur-2xl">
-      <div className="mx-auto flex h-20 w-full max-w-[1360px] items-center justify-between px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-8">
+      <div className="mx-auto flex h-16 w-full max-w-[1360px] items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-2.5 font-bold text-white">
-            <div className="relative h-8 w-8 shrink-0">
+            <div className="relative h-7 w-7 shrink-0">
               <Image
                 src="/logo.png"
                 alt="getPlaced"
@@ -57,10 +57,10 @@ export function DashboardHeader({ isPremium }: { credits?: number; isPremium?: b
                 className="drop-shadow-[0_0_10px_rgba(99,102,241,0.45)]"
               />
             </div>
-            <span className="text-2xl tracking-tight">getPlaced</span>
+            <span className="text-lg tracking-tight md:text-xl">getPlaced</span>
           </Link>
 
-          <nav className="hidden items-center gap-8 text-lg text-slate-300 lg:flex">
+          <nav className="hidden items-center gap-6 text-sm text-slate-300 lg:flex">
             {navItems.map((item) => {
               const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
               return (
@@ -86,10 +86,10 @@ export function DashboardHeader({ isPremium }: { credits?: number; isPremium?: b
         <div className="flex items-center gap-2 sm:gap-3">
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.1] bg-white/[0.03] text-slate-300 hover:bg-white/[0.08] hover:text-white"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.1] bg-white/[0.03] text-slate-300 hover:bg-white/[0.08] hover:text-white"
             aria-label="Notifications"
           >
-            <Bell size={17} />
+            <Bell size={15} />
           </button>
 
           <div className="relative" ref={menuRef}>
@@ -98,7 +98,7 @@ export function DashboardHeader({ isPremium }: { credits?: number; isPremium?: b
                 setMenuOpen((prev) => !prev);
                 setMobileNavOpen(false);
               }}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.1] bg-white/[0.03] text-slate-200 hover:bg-white/[0.08]"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.1] bg-white/[0.03] text-slate-200 hover:bg-white/[0.08]"
               aria-label="Account menu"
             >
               <span className="text-sm font-semibold">
@@ -143,9 +143,9 @@ export function DashboardHeader({ isPremium }: { credits?: number; isPremium?: b
               setMenuOpen(false);
             }}
             aria-label={mobileNavOpen ? "Close navigation" : "Open navigation"}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.1] bg-white/[0.03] text-slate-300 hover:bg-white/[0.08] hover:text-white lg:hidden"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/[0.1] bg-white/[0.03] text-slate-300 hover:bg-white/[0.08] hover:text-white lg:hidden"
           >
-            {mobileNavOpen ? <X size={17} /> : <Menu size={17} />}
+            {mobileNavOpen ? <X size={15} /> : <Menu size={15} />}
           </button>
         </div>
       </div>

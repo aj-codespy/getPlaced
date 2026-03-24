@@ -20,17 +20,17 @@ export function PublicNavbar({ currentPath }: PublicNavbarProps) {
 
   return (
     <header className="relative z-50 border-b border-white/[0.08] bg-[#080f21]/80 backdrop-blur-2xl">
-      <div className="mx-auto flex h-20 w-full max-w-[1240px] items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-16 w-full max-w-[1240px] items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2.5 font-bold tracking-tight">
-          <div className="relative h-9 w-9 shrink-0">
+          <div className="relative h-8 w-8 shrink-0">
             <Image src="/logo.png" alt="getPlaced" width={36} height={36} className="drop-shadow-[0_0_14px_rgba(117,120,255,0.45)]" />
           </div>
-          <span className="bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-3xl text-transparent md:text-[2rem]">
+          <span className="bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-xl text-transparent md:text-2xl">
             getPlaced
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-12 text-xl font-medium text-slate-300 lg:flex">
+        <nav className="hidden items-center gap-9 text-base font-medium text-slate-300 lg:flex">
           {NAV_LINKS.map((item) => {
             const active = currentPath === item.href;
             return (
@@ -48,14 +48,14 @@ export function PublicNavbar({ currentPath }: PublicNavbarProps) {
         <div className="hidden items-center gap-4 lg:flex">
           <Link
             href="/login"
-            className="rounded-xl border border-white/20 px-6 py-2.5 text-lg font-medium text-slate-100 transition-colors hover:bg-white/[0.06]"
+            className="rounded-xl border border-white/20 px-4 py-2 text-sm font-medium text-slate-100 transition-colors hover:bg-white/[0.06]"
           >
             Log in
           </Link>
           <Link href="/signup">
-            <span className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#6958ff] to-[#8a41ff] px-7 py-2.5 text-lg font-semibold text-white shadow-[0_12px_35px_rgba(112,70,255,0.45)] transition-transform hover:scale-[1.02]">
+            <span className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#6958ff] to-[#8a41ff] px-5 py-2 text-sm font-semibold text-white shadow-[0_10px_26px_rgba(112,70,255,0.4)] transition-transform hover:scale-[1.02]">
               Get started free
-              <ArrowRight size={18} />
+              <ArrowRight size={15} />
             </span>
           </Link>
         </div>
@@ -63,10 +63,10 @@ export function PublicNavbar({ currentPath }: PublicNavbarProps) {
         <button
           type="button"
           onClick={() => setMobileOpen((v) => !v)}
-          className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/15 bg-white/[0.03] text-slate-100 lg:hidden"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/15 bg-white/[0.03] text-slate-100 lg:hidden"
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
         >
-          {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+          {mobileOpen ? <X size={16} /> : <Menu size={16} />}
         </button>
       </div>
 

@@ -164,16 +164,16 @@ export default function Dashboard() {
 
       <DashboardHeader isPremium={isPremium} />
 
-      <main className="relative z-10 mx-auto w-full max-w-[1120px] px-4 pb-12 pt-10 sm:px-6 lg:px-8">
-        <section className="mb-6 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+      <main className="relative z-10 mx-auto w-full max-w-[1040px] px-4 pb-12 pt-8 sm:px-6 lg:px-8">
+        <section className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-xl sm:text-2xl text-slate-300">
+            <p className="text-lg sm:text-xl text-slate-300">
               {greeting}, {firstName}.
             </p>
-            <h1 className="mt-1 text-5xl font-bold tracking-tight text-white sm:text-6xl">Dashboard</h1>
+            <h1 className="mt-1 text-4xl font-bold tracking-tight text-white sm:text-5xl">Dashboard</h1>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:min-w-[460px]">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:min-w-[430px]">
             <MiniStat label="Credits" value={credits} icon={<Coins size={18} />} />
             <MiniStat label="Plan" value={planType === "free" ? "Free" : "Pro"} icon={<WalletCards size={18} />} />
             <MiniStat label="Resumes" value={resumes.length} icon={<FileText size={18} />} />
@@ -225,7 +225,7 @@ export default function Dashboard() {
 
         <section className="glass-card rounded-3xl px-5 py-5 sm:px-6">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-3xl font-semibold text-white sm:text-4xl">Recent Activity</h2>
+            <h2 className="text-2xl font-semibold text-white sm:text-3xl">Recent Activity</h2>
             <div className="inline-flex rounded-xl border border-white/[0.12] bg-white/[0.03] p-1 text-sm">
               <button
                 className={
@@ -288,12 +288,12 @@ export default function Dashboard() {
 
 function MiniStat({ label, value, icon }: { label: string; value: string | number; icon: ReactNode }) {
   return (
-    <div className="rounded-2xl border border-white/[0.14] bg-[linear-gradient(130deg,rgba(26,43,80,0.84),rgba(17,28,55,0.84))] px-4 py-3.5 shadow-[0_12px_34px_rgba(10,16,33,0.38)]">
+    <div className="rounded-2xl border border-white/[0.14] bg-[linear-gradient(130deg,rgba(26,43,80,0.82),rgba(17,28,55,0.82))] px-3.5 py-3 shadow-[0_10px_26px_rgba(10,16,33,0.34)]">
       <div className="flex items-center gap-3">
         <span className="text-slate-300">{icon}</span>
         <div>
           <p className="text-[11px] uppercase tracking-[0.16em] text-slate-400">{label}</p>
-          <p className="text-3xl font-bold text-white">{value}</p>
+          <p className="text-2xl font-bold text-white">{value}</p>
         </div>
       </div>
     </div>
@@ -313,12 +313,12 @@ function ActionCard({
 }) {
   return (
     <Link href={href} className="group block">
-      <div className="rounded-3xl border border-[#5f74c7]/55 bg-[linear-gradient(130deg,rgba(28,45,83,0.88),rgba(18,30,57,0.84))] p-6 text-center shadow-[0_0_26px_rgba(126,78,255,0.18)] transition-all duration-200 hover:border-[#7d8ce8]/70 hover:shadow-[0_0_34px_rgba(126,78,255,0.22)]">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#293778]">
+      <div className="rounded-3xl border border-[#5f74c7]/50 bg-[linear-gradient(130deg,rgba(28,45,83,0.86),rgba(18,30,57,0.82))] p-5 text-center shadow-[0_0_22px_rgba(126,78,255,0.14)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#7d8ce8]/68 hover:shadow-[0_0_30px_rgba(126,78,255,0.2)]">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#293778]">
           {icon}
         </div>
-        <h3 className="text-3xl font-semibold leading-tight text-white">{title}</h3>
-        <div className="mt-6 rounded-xl bg-gradient-to-r from-[#7448ff] to-[#a03dff] px-5 py-2.5 text-xl font-semibold text-white transition group-hover:brightness-110">
+        <h3 className="text-2xl font-semibold leading-tight text-white">{title}</h3>
+        <div className="mt-5 rounded-xl bg-gradient-to-r from-[#7448ff] to-[#a03dff] px-4 py-2 text-base font-semibold text-white transition group-hover:brightness-110">
           {cta}
         </div>
       </div>
