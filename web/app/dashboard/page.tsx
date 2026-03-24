@@ -164,20 +164,21 @@ export default function Dashboard() {
 
       <DashboardHeader isPremium={isPremium} />
 
-      <main className="relative z-10 mx-auto w-full max-w-[1040px] px-4 pb-12 pt-8 sm:px-6 lg:px-8">
-        <section className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <main className="relative z-10 mx-auto w-full max-w-[980px] px-4 pb-12 pt-8 sm:px-6 lg:px-8">
+        <section className="mb-4">
           <div>
             <p className="text-lg sm:text-xl text-slate-300">
               {greeting}, {firstName}.
             </p>
             <h1 className="mt-1 text-4xl font-bold tracking-tight text-white sm:text-5xl">Dashboard</h1>
+            <p className="mt-2 text-sm text-slate-400">Everything you need to build, audit, and ship better applications.</p>
           </div>
+        </section>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:min-w-[430px]">
-            <MiniStat label="Credits" value={credits} icon={<Coins size={18} />} />
-            <MiniStat label="Plan" value={planType === "free" ? "Free" : "Pro"} icon={<WalletCards size={18} />} />
-            <MiniStat label="Resumes" value={resumes.length} icon={<FileText size={18} />} />
-          </div>
+        <section className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <MiniStat label="Credits" value={credits} icon={<Coins size={17} />} />
+          <MiniStat label="Plan" value={planType === "free" ? "Free" : "Pro"} icon={<WalletCards size={17} />} />
+          <MiniStat label="Resumes" value={resumes.length} icon={<FileText size={17} />} />
         </section>
 
         {!isPremium && (
@@ -206,18 +207,21 @@ export default function Dashboard() {
           <ActionCard
             href="/builder"
             title="Create New Resume"
+            desc="Start a role-tailored resume from your profile."
             cta="Start Now"
             icon={<FileText size={24} className="text-[#9bc2ff]" />}
           />
           <ActionCard
             href="/linkedin-audit"
             title="LinkedIn Audit"
+            desc="Get clear profile improvements in one click."
             cta="Analyze Profile"
             icon={<Linkedin size={24} className="text-[#9bc2ff]" />}
           />
           <ActionCard
             href="/resume-score"
             title="Resume Score"
+            desc="Check ATS quality and practical improvement tips."
             cta="Check Score"
             icon={<BarChart3 size={24} className="text-[#9bc2ff]" />}
           />
@@ -253,18 +257,16 @@ export default function Dashboard() {
           <div className="divide-y divide-white/[0.08]">
             {historyRows.length > 0 ? (
               historyRows.map((row) => (
-                <Link
-                  key={`${activeHistoryTab}-${row.id}`}
-                  href={row.href}
-                  className="group flex items-center justify-between gap-3 py-3.5"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate text-base font-semibold text-white sm:text-lg">{row.primary}</p>
-                    <p className="mt-1 text-xs text-slate-300 sm:text-sm">
-                      {row.secondary} <span className="text-slate-500">• {row.when}</span>
-                    </p>
+                <Link key={`${activeHistoryTab}-${row.id}`} href={row.href} className="group block py-3.5">
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-transparent px-2 py-1.5 transition group-hover:border-white/[0.1] group-hover:bg-white/[0.02]">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-white sm:text-base">{row.primary}</p>
+                      <p className="mt-1 text-xs text-slate-300">
+                        {row.secondary} <span className="text-slate-500">• {row.when}</span>
+                      </p>
+                    </div>
+                    <ArrowRight size={16} className="shrink-0 text-slate-500 transition group-hover:translate-x-1 group-hover:text-indigo-300" />
                   </div>
-                  <ArrowRight size={18} className="shrink-0 text-slate-500 transition group-hover:translate-x-1 group-hover:text-indigo-300" />
                 </Link>
               ))
             ) : (
@@ -293,7 +295,7 @@ function MiniStat({ label, value, icon }: { label: string; value: string | numbe
         <span className="text-slate-300">{icon}</span>
         <div>
           <p className="text-[11px] uppercase tracking-[0.16em] text-slate-400">{label}</p>
-          <p className="text-2xl font-bold text-white">{value}</p>
+          <p className="text-xl font-bold text-white">{value}</p>
         </div>
       </div>
     </div>
@@ -303,22 +305,25 @@ function MiniStat({ label, value, icon }: { label: string; value: string | numbe
 function ActionCard({
   href,
   title,
+  desc,
   cta,
   icon,
 }: {
   href: string;
   title: string;
+  desc: string;
   cta: string;
   icon: ReactNode;
 }) {
   return (
     <Link href={href} className="group block">
-      <div className="rounded-3xl border border-[#5f74c7]/50 bg-[linear-gradient(130deg,rgba(28,45,83,0.86),rgba(18,30,57,0.82))] p-5 text-center shadow-[0_0_22px_rgba(126,78,255,0.14)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#7d8ce8]/68 hover:shadow-[0_0_30px_rgba(126,78,255,0.2)]">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#293778]">
+      <div className="rounded-3xl border border-[#5f74c7]/45 bg-[linear-gradient(130deg,rgba(28,45,83,0.82),rgba(18,30,57,0.78))] p-5 shadow-[0_0_18px_rgba(126,78,255,0.1)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#7d8ce8]/65 hover:shadow-[0_0_26px_rgba(126,78,255,0.18)]">
+        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#293778]">
           {icon}
         </div>
-        <h3 className="text-2xl font-semibold leading-tight text-white">{title}</h3>
-        <div className="mt-5 rounded-xl bg-gradient-to-r from-[#7448ff] to-[#a03dff] px-4 py-2 text-base font-semibold text-white transition group-hover:brightness-110">
+        <h3 className="text-xl font-semibold leading-tight text-white">{title}</h3>
+        <p className="mt-2 text-sm leading-relaxed text-slate-300">{desc}</p>
+        <div className="mt-4 inline-flex rounded-lg bg-gradient-to-r from-[#7448ff] to-[#a03dff] px-3.5 py-1.5 text-sm font-semibold text-white transition group-hover:brightness-110">
           {cta}
         </div>
       </div>
