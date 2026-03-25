@@ -107,7 +107,7 @@ async function sendOTPEmail(to: string, otp: string): Promise<boolean> {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "getPlaced <onboarding@resend.dev>",
+        from: "getPlaced <noreply@getplaced.online>",
         to: [to],
         subject: "Your getPlaced Verification Code",
         html: OTP_EMAIL_HTML(otp),
