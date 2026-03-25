@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/firebase/config";
-import { collection, doc, getDoc, getDocs, increment, query, runTransaction, serverTimestamp, setDoc, where } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, increment, query, runTransaction, serverTimestamp, setDoc, where, deleteDoc } from "firebase/firestore";
 import type { DocumentReference } from "firebase/firestore";
 import bcrypt from "bcryptjs";
 import { evaluateEmailForAuth } from "@/lib/email-policy";
@@ -26,6 +26,19 @@ export async function POST(req: Request) {
     }
 
     const emailLower = emailCheck.normalizedEmail;
+
+    // ── Verify OTP was completed ────────────────────────────────────────
+    const otpRef = doc(db, "otp_verifications", emailLower);
+    const otpSnap = await getDoc(otpRef);
+    if (!otpSnap.exists() || !otpSnap.data().verified) {
+      return NextResponse.json(
+        { message: "Please verify your email address first.", code: "EMAIL_NOT_VERIFIED" },
+        { status: 400 }
+      );
+    }
+    // Clean up OTP record after successful verification
+    await deleteDoc(otpRef).catch(() => {});
+
     const userRef = doc(db, "users", emailLower);
     const existingUser = await getDoc(userRef);
 

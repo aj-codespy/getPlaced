@@ -14,15 +14,20 @@ const ALLOWED_EMAIL_DOMAINS = new Set([
 ]);
 
 const DISPOSABLE_EMAIL_DOMAINS = new Set([
+  // Classic temp mail services
   "10minutemail.com",
+  "10minmail.com",
   "mailinator.com",
   "guerrillamail.com",
   "guerrillamailblock.com",
+  "guerrillamail.net",
   "sharklasers.com",
   "grr.la",
   "yopmail.com",
+  "yopmail.fr",
   "tempmail.com",
   "temp-mail.org",
+  "temp-mail.io",
   "throwawaymail.com",
   "dispostable.com",
   "maildrop.cc",
@@ -34,6 +39,43 @@ const DISPOSABLE_EMAIL_DOMAINS = new Set([
   "moakt.com",
   "mytrashmail.com",
   "trashmail.ws",
+  // Additional popular temp/disposable providers
+  "tempinbox.com",
+  "burnermail.io",
+  "mailcatch.com",
+  "emailondeck.com",
+  "throwaway.email",
+  "tempail.com",
+  "tempr.email",
+  "discard.email",
+  "discardmail.com",
+  "mohmal.com",
+  "harakirimail.com",
+  "tmail.ws",
+  "tempmailo.com",
+  "tmpmail.org",
+  "tmpmail.net",
+  "emailfake.com",
+  "crazymailing.com",
+  "mailsac.com",
+  "inboxkitten.com",
+  "33mail.com",
+  "guerrillamail.de",
+  "mailnull.com",
+  "spamgourmet.com",
+  "spamfree24.org",
+  "mytemp.email",
+  "tempmailaddress.com",
+  "fakemail.net",
+  "disposableaddress.com",
+  "dropmail.me",
+  "getairmail.com",
+  "mailscrap.com",
+  "trash-mail.at",
+  "wegwerfmail.net",
+  "wegwerfmail.de",
+  "anonymbox.com",
+  "mailforspam.com",
 ]);
 
 const ALLOWED_ACADEMIC_SUFFIXES = [
@@ -105,6 +147,8 @@ export function getAuthErrorMessage(code?: string | null): string {
       return "Temporary/disposable email addresses are not allowed.";
     case "EMAIL_DOMAIN_NOT_ALLOWED":
       return "Use Gmail, a supported personal provider, or an academic (.edu/.ac) email.";
+    case "EMAIL_NOT_VERIFIED":
+      return "Please verify your email address first.";
     case "ACCOUNT_SYNC_FAILED":
       return "We could not create your account record. Please try again in a moment.";
     case "AccessDenied":
