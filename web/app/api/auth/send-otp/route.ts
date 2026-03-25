@@ -81,12 +81,19 @@ async function sendOTPEmail(to: string, otp: string): Promise<boolean> {
     return true;
   }
 
+  // ── Diagnostic log (safe — never logs the actual password) ──────────
+  console.log(`[OTP Email] Attempting to send to: ${to}`);
+  console.log(`[OTP Email] GMAIL_USER: "${gmailUser}"`);
+  console.log(`[OTP Email] GMAIL_APP_PASSWORD length: ${gmailAppPassword.length}, starts with: "${gmailAppPassword.slice(0, 2)}..."`);
+
   // ── Production: send via Gmail SMTP ─────────────────────────────────
   try {
     const nodemailer = (await import("nodemailer")).default;
 
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
       auth: {
         user: gmailUser,
         pass: gmailAppPassword,
@@ -119,6 +126,7 @@ async function sendOTPEmail(to: string, otp: string): Promise<boolean> {
       `,
     });
 
+    console.log(`[OTP Email] ✅ Sent successfully to ${to}`);
     return true;
   } catch (error) {
     console.error("Email send error:", error);
