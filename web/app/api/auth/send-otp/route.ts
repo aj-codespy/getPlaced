@@ -4,8 +4,6 @@ import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { evaluateEmailForAuth } from "@/lib/email-policy";
 import crypto from "crypto";
 
-// Simple email sender using Gmail SMTP via fetch to a lightweight endpoint
-// We'll use Firebase + a 6-digit OTP stored in Firestore with TTL
 function generateOTP(): string {
   return crypto.randomInt(100000, 999999).toString();
 }
@@ -31,18 +29,25 @@ export async function POST(req: Request) {
     const otp = generateOTP();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    // Store OTP in Firestore under "otp_verifications" collection
-    await setDoc(doc(db, "otp_verifications", normalizedEmail), {
-      otp,
-      email: normalizedEmail,
-      expiresAt: expiresAt.toISOString(),
-      verified: false,
-      attempts: 0,
-      createdAt: serverTimestamp(),
-    });
+    // Store OTP in Firestore
+    try {
+      await setDoc(doc(db, "otp_verifications", normalizedEmail), {
+        otp,
+        email: normalizedEmail,
+        expiresAt: expiresAt.toISOString(),
+        verified: false,
+        attempts: 0,
+        createdAt: serverTimestamp(),
+      });
+    } catch (fsError) {
+      console.error("Firestore OTP write error:", fsError);
+      return NextResponse.json(
+        { message: "Could not initiate verification. Please try again." },
+        { status: 500 }
+      );
+    }
 
-    // Send OTP email using the Gemini/SMTP approach
-    // We use a simple nodemailer-style approach via Google's SMTP
+    // Send OTP email
     const sent = await sendOTPEmail(normalizedEmail, otp);
 
     if (!sent) {
@@ -66,23 +71,19 @@ export async function POST(req: Request) {
 }
 
 async function sendOTPEmail(to: string, otp: string): Promise<boolean> {
+  const gmailUser = process.env.GMAIL_USER || "getplaced.web@gmail.com";
+  const gmailAppPassword = process.env.GMAIL_APP_PASSWORD;
+
+  // ── Dev / no-SMTP fallback: log OTP and let signup continue ─────────
+  if (!gmailAppPassword) {
+    console.warn("⚠️  GMAIL_APP_PASSWORD not set — OTP logged to console only.");
+    console.log(`\n🔑 [DEV OTP] Email: ${to}  |  Code: ${otp}\n`);
+    return true;
+  }
+
+  // ── Production: send via Gmail SMTP ─────────────────────────────────
   try {
-    // Use Gmail SMTP via nodemailer-compatible approach
-    // Since we're in a serverless environment, we'll use a simple fetch-based approach
-    // with the Gmail API or a transactional email service
-
-    const gmailUser = process.env.GMAIL_USER || "getplaced.web@gmail.com";
-    const gmailAppPassword = process.env.GMAIL_APP_PASSWORD;
-
-    if (!gmailAppPassword) {
-      console.error("GMAIL_APP_PASSWORD not configured. OTP email cannot be sent.");
-      // In development, log the OTP to console
-      console.log(`[DEV] OTP for ${to}: ${otp}`);
-      return true; // Return true in dev to not block signup flow
-    }
-
-    // Use dynamic import for nodemailer
-    const nodemailer = await import("nodemailer");
+    const nodemailer = (await import("nodemailer")).default;
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
