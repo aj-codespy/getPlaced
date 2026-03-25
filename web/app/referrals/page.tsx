@@ -41,13 +41,6 @@ The AI tailors your resume to each job description in seconds. Definitely worth 
 
 — ${firstName}`;
 
-  const whatsAppMessage = `Hey! 👋 I use *getPlaced* to build ATS-friendly resumes with AI.
-
-Sign up with my link and we *both* get 50 credits — 2 referrals = 1 free resume! 🎯
-
-Sign up → ${referralLink}
-Code: *${data.code}*`;
-
   const copyText = async (text: string, kind: "code" | "link" | "message" | "whatsapp" | "linkedin") => {
       await navigator.clipboard.writeText(text);
       setCopiedKind(kind);
@@ -59,8 +52,7 @@ Code: *${data.code}*`;
       try {
           await navigator.share({
               title: "Join me on getPlaced — we both earn free credits!",
-              text: `Join me on getPlaced! Sign up with my code ${data.code} and we BOTH get 50 free credits.`,
-              url: referralLink,
+              text: personalMessage,
           });
       } catch {
           // User cancel
@@ -225,7 +217,7 @@ Code: *${data.code}*`;
                 <Button 
                   variant="outline" 
                   className="h-10 rounded-xl border-white/[0.06] text-slate-300 hover:text-white bg-white/[0.02] hover:bg-white/[0.06] text-sm"
-                  onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(whatsAppMessage)}`, "_blank")}
+                  onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(personalMessage)}`, "_blank")}
                 >
                     WhatsApp
                 </Button>
