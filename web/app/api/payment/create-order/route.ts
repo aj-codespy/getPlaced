@@ -1,72 +1,76 @@
-
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import razorpay from "@/lib/razorpay/instance";
-import { PRICING_PLANS } from "@/lib/razorpay/pricing";
+import { dodoApiRequest } from "@/lib/payments/dodo";
+import { BillingCurrency, findPlanById, getDodoProductId } from "@/lib/razorpay/pricing";
 
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || !session.user?.email) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { planId, currency } = await req.json(); // currency: 'INR' or 'USD'
+    const payload = (await req.json().catch(() => ({}))) as { planId?: string; currency?: BillingCurrency };
+    const planId = payload.planId || "";
+    const currency: BillingCurrency = payload.currency === "INR" ? "INR" : "USD";
 
-    // 1. Identify Plan
-    const plan = Object.values(PRICING_PLANS).find((p) => p.id === planId);
+    const plan = findPlanById(planId);
     if (!plan) {
       return NextResponse.json({ error: "Invalid Plan ID" }, { status: 400 });
     }
 
-    // 2. Determine Amount
-    const amount = currency === "USD" ? plan.price.USD : plan.price.INR;
-    // Razorpay accepts amount in smallest currency unit (paise or cents)
-    const amountInSmallestUnit = Math.round(amount * 100);
-
-    // 3. Find or Create a Plan on Razorpay
-    const { items: existingPlans } = await razorpay.plans.all();
-    let rzpPlan = (existingPlans as any[]).find((p) => p.item.name === plan.name && p.item.amount === amountInSmallestUnit && p.item.currency === (currency || "INR") && p.period === "monthly");
-    
-    if (!rzpPlan) {
-        rzpPlan = await razorpay.plans.create({
-            period: "monthly",
-            interval: 1,
-            item: {
-                name: plan.name,
-                amount: amountInSmallestUnit,
-                currency: currency || "INR",
-                description: `${plan.name} Monthly Subscription`
-            }
-        });
+    const productId = getDodoProductId(plan.id, currency);
+    if (!productId) {
+      return NextResponse.json({ error: "Product ID missing for selected plan/currency" }, { status: 500 });
     }
 
-    // 4. Create Subscription on Razorpay
-    const options = {
-      plan_id: rzpPlan.id,
-      customer_notify: 1,
-      total_count: 120, // 10 years duration max
-      notes: {
-        userEmail: session.user.email,
+    const appBaseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+    const returnUrl = `${appBaseUrl}/dashboard?payment=dodo_return`;
+    const cancelUrl = `${appBaseUrl}/pricing?payment=cancelled`;
+    const allowedMethods =
+      currency === "INR" ? ["credit", "debit", "upi_collect", "upi_intent"] : ["credit", "debit"];
+
+    const checkoutPayload = {
+      product_cart: [{ product_id: productId, quantity: 1 }],
+      billing_currency: currency,
+      allowed_payment_method_types: allowedMethods,
+      customer: {
+        email: session.user.email.toLowerCase(),
+        name: session.user.name || undefined,
+      },
+      metadata: {
+        source: "getplaced_web",
+        userEmail: session.user.email.toLowerCase(),
         planId: plan.id,
-        credits: String(plan.credits)
-      }
+        planType: plan.planType,
+        currency,
+      },
+      return_url: returnUrl,
+      cancel_url: cancelUrl,
     };
 
-    const subscription = await razorpay.subscriptions.create(options as any) as any;
+    const dodoResponse = await dodoApiRequest("/checkouts", checkoutPayload);
+    const checkoutUrl = typeof dodoResponse.checkout_url === "string" ? dodoResponse.checkout_url : "";
+    const sessionId = typeof dodoResponse.session_id === "string" ? dodoResponse.session_id : "";
+
+    if (!checkoutUrl) {
+      return NextResponse.json({ error: "Failed to create checkout URL" }, { status: 502 });
+    }
 
     return NextResponse.json({
-        success: true,
-        orderId: subscription.id,
-        isSubscription: true,
-        amount: amountInSmallestUnit,
-        currency: currency || "INR",
-        keyId: process.env.RAZORPAY_KEY_ID
+      success: true,
+      provider: "dodo",
+      checkoutUrl,
+      sessionId,
+      planId: plan.id,
+      currency,
     });
-
   } catch (e: unknown) {
-    console.error("Payment Order Error:", e);
-    return NextResponse.json({ error: e instanceof Error ? e.message : "Internal server error" }, { status: 500 });
+    console.error("Dodo checkout creation failed:", e);
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "Internal server error" },
+      { status: 500 },
+    );
   }
 }

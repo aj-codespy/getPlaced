@@ -31,7 +31,7 @@ export default function PrivacyPage() {
             <ul className="list-disc list-inside space-y-2 text-slate-300">
               <li><strong>Account Information:</strong> Name, email address, and authentication data.</li>
               <li><strong>Resume Content:</strong> Experience, education, skills, projects, and related inputs.</li>
-              <li><strong>Payment Information:</strong> Processed by Razorpay; full card details are not stored by us.</li>
+              <li><strong>Payment Information:</strong> Processed by Dodo Payments; full card details are not stored by us.</li>
               <li><strong>Usage Data:</strong> Session and analytics signals to improve reliability and product quality.</li>
             </ul>
           </section>
@@ -51,7 +51,7 @@ export default function PrivacyPage() {
             <p className="mb-3">We never sell your data to recruiters, advertisers, or brokers.</p>
             <ul className="list-disc list-inside space-y-2 text-slate-300">
               <li><strong>AI Providers (Google Gemini):</strong> Used to process prompts and generate responses.</li>
-              <li><strong>Razorpay:</strong> Used for secure payment processing.</li>
+              <li><strong>Dodo Payments:</strong> Used for secure payment processing.</li>
               <li><strong>Hosting & Database Providers:</strong> Used for account and resume storage.</li>
             </ul>
           </section>

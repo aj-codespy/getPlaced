@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Script from "next/script";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { MessageBox, type MessageBoxVariant } from "@/components/ui/message-box";
@@ -53,61 +52,19 @@ export default function UpgradePage() {
     setLoading(true);
 
     try {
-      // Create Subscription
       const planId = "plan_pro";
       const res = await fetch("/api/payment/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // Passing exact plan details
         body: JSON.stringify({ planId, currency }),
       });
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.error);
-
-      // Initialize Razorpay with subscription parameters
-      const options = {
-        key: data.keyId,
-        subscription_id: data.orderId,
-        name: "getPlaced",
-        description: `Pro Plan — Monthly Subscription`,
-        image: "https://getplaced.in/og-image.png",
-        handler: async function (response: { razorpay_subscription_id: string; razorpay_payment_id: string; razorpay_signature: string }) {
-          const verifyRes = await fetch("/api/payment/verify", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              razorpay_subscription_id: response.razorpay_subscription_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              planId: planId,
-              userEmail: session.user?.email,
-            }),
-          });
-          
-          if (verifyRes.ok) {
-              showMessage("Subscription Activated", "Welcome to Pro.", "success");
-              setTimeout(() => router.push("/dashboard"), 700);
-          } else {
-              showMessage("Verification Failed", "Payment verification failed.", "error");
-          }
-        },
-        prefill: {
-          name: session.user?.name || "",
-          email: session.user?.email || "",
-          contact: "" 
-        },
-        notes: {
-          address: "getPlaced Monthly Subscription"
-        },
-        theme: {
-          color: "#4f46e5",
-        },
-      };
-
-      const RazorpayConstructor = (window as Window & typeof globalThis & { Razorpay: new (options: Record<string, unknown>) => { open: () => void } }).Razorpay;
-      const rzp = new RazorpayConstructor(options as Record<string, unknown>);
-      rzp.open();
+      if (!data.checkoutUrl || typeof data.checkoutUrl !== "string") {
+        throw new Error("Checkout URL missing from payment provider");
+      }
+      window.location.href = data.checkoutUrl;
 
     } catch (e: unknown) {
       showMessage("Payment Failed", e instanceof Error ? e.message : "Unknown error", "error");
@@ -118,7 +75,6 @@ export default function UpgradePage() {
 
   return (
     <div className="min-h-screen flex flex-col font-sans text-slate-200 bg-[#030814]">
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
       {/* Ambient background for public view */}
       {status !== "authenticated" && (
         <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">

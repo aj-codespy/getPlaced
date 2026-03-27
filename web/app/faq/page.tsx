@@ -47,7 +47,7 @@ const FAQS = [
   },
   {
     q: "What payment methods do you accept?",
-    a: "We accept all major credit/debit cards, UPI, net banking, and wallet payments through Razorpay. International cards (Visa, Mastercard) are fully supported."
+    a: "We accept all major credit/debit cards and regional payment methods through Dodo Payments, including UPI for India and international cards (Visa, Mastercard)."
   },
   {
     q: "Do you offer student discounts?",
@@ -103,7 +103,7 @@ const FAQS = [
   },
   {
     q: "Can I get a refund?",
-    a: "If you’re unsatisfied with your purchase, contact us within 7 days and we’ll work with you on a resolution. Refunds are handled on a case-by-case basis and processed through Razorpay."
+    a: "If you’re unsatisfied with your purchase, contact us within 7 days and we’ll work with you on a resolution. Refunds are handled on a case-by-case basis and processed through Dodo Payments."
   },
   {
     q: "I have a question that’s not listed here.",

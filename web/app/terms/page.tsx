@@ -56,7 +56,7 @@ export default function TermsPage() {
           <section>
             <h3 className="text-white font-bold text-xl mb-3">4. Payments, Subscriptions, and Refunds</h3>
             <p className="mb-3">
-              All transactions are securely processed via Razorpay. By purchasing a paid plan, you agree to the pricing
+              All transactions are securely processed via Dodo Payments. By purchasing a paid plan, you agree to the pricing
               and billing frequency presented at checkout.
             </p>
             <p>
